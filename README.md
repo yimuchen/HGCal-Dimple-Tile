@@ -1,6 +1,10 @@
 # HGcal Tile
 GEANT4-based simulation of CE-H HGCal optical tile
 
+Written by Dr. Sarah Eno of the University of Maryland
+
+Tested/Edited by Alan Horst
+
 ## compiling
 
   git clone https://github.com/saraheno/hgcal_tile.git
