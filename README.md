@@ -5,6 +5,13 @@ Written by Dr. Sarah Eno of the University of Maryland
 
 Tested/Edited by Alan Horst
 
+## ADDITIONS ##
+
+1. Added new dimple geometries
+2. Added generalparticlesource support
+3. Wrote python scripts for handling jobs (hadd script not included)
+4. Functions for source position/angle
+
 ## compiling
 
   git clone https://github.com/saraheno/hgcal_tile.git
@@ -42,5 +49,3 @@ condor_q -submitter your-user-name
 
 look at Analysis.root 
 
-# HGCal-Dimple-Tile
-# HGCal-Dimple-Tile
