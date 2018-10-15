@@ -35,7 +35,10 @@ Tested/Edited by Alan Horst
     (if running without -novis
          /run/beamOn 5
   OR
-  python SubmitJobs.py  --- WARNING it's currently set to run 2000 jobs at 31 points, it takes a long time. Use screen or create fewer jobs per point
+  
+     python SubmitJobs.py  
+  
+  --- WARNING it's currently set to run 2000 jobs at 31 points, it takes a long time. Use screen or create fewer jobs per point
 
 ## run the job on condor.
 
