@@ -14,7 +14,7 @@ Tested/Edited by Alan Horst
 
 ## compiling
 
-  git clone https://github.com/saraheno/hgcal_tile.git
+  git clone https://github.com/ahorstt/HGCal-Dimple-Tile.git
 
   cd hgcal_tile
 
