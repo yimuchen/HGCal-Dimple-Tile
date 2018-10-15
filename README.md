@@ -34,11 +34,7 @@ Tested/Edited by Alan Horst
 
     (if running without -novis
          /run/beamOn 5
-  OR
-  
-     python SubmitJobs.py  
-  
-  --- WARNING it's currently set to run 2000 jobs at 31 points, it takes a long time. Use screen or create fewer jobs per point
+
 
 ## run the job on condor.
 
@@ -54,3 +50,11 @@ condor_q -submitter your-user-name
 
 look at Analysis.root 
 
+
+  OR
+  
+     python SubmitJobs.py  
+  
+  --- WARNING it's currently set to run 2000 jobs at 31 points, it takes a long time. Use screen or create fewer jobs per point
+  
+  The results (hits/err) of each point and it's location will be printed in FinalShallow.csv
