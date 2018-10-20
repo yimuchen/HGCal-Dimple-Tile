@@ -57,4 +57,6 @@ look at Analysis.root
   
   --- WARNING it's currently set to run 2000 jobs at 31 points, it takes a long time. Use screen or create fewer jobs per point
   
-  The results (hits/err) of each point and it's location will be printed in FinalShallow.csv
+  The results (hits/err) of each point and it's location will be printed in FinalShallow.csv (add a line that says "end" at the end of the csv after runs are complete)
+  
+  Then to graph, use DatatoRoot.py, which will create TGraphErrors plots for each data set
