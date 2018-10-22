@@ -209,7 +209,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
 	new G4LogicalBorderSurface("WrapAirSurface",
 				   physWrap,
 				   physWorld,
-				   fESROpSurface);
+				   fESROpSurface);//fIdealMirrorOpSurface
 
         //Wrap visualization attributes
       G4VisAttributes * WrapVisAtt = new G4VisAttributes(G4Colour(0.,1.,0.));
@@ -357,6 +357,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
 
     //G4ThreeVector WindowOffset(xdisp2, 0, halfscint-bsize);
     //G4ThreeVector WindowOffset(0, 0, -3.05*mm);
+    /*
     G4ThreeVector WindowOffset(0, 0, -3.10*mm);
     G4VPhysicalVolume* SiPMWindow = 
       new G4PVPlacement(0,
@@ -372,6 +373,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     WindowVisAtt->SetForceWireframe(true);
     WindowVisAtt->SetVisibility(true);
     logicSiPMWindow->SetVisAttributes(WindowVisAtt);
+    */
 
     G4double backthick(0.025*mm);
     G4Box* solidSiPMback =
@@ -401,7 +403,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     CaseVisAtt->SetVisibility(true);
     logicSiPMCase->SetVisAttributes(CaseVisAtt);
     
-    G4LogicalSkinSurface* CaseSurface = new G4LogicalSkinSurface("name",logicSiPMCase,fAbsorbingOpSurface);
+    G4LogicalSkinSurface* CaseSurface = new G4LogicalSkinSurface("name",logicSiPMCase,fIdealMirrorOpSurface);
 
     G4VPhysicalVolume* physSiPM = 
       new G4PVPlacement(rotSiPM,
@@ -422,6 +424,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     G4MaterialPropertiesTable *SiPMOpSurfaceProperty = new G4MaterialPropertiesTable();
 
     //From Meeting on HB SiPM selection (James Hirschauer)
+    
     const G4int SiPMnumentries = 49;
     G4double SiPMenergies[SiPMnumentries] = 
             {3.269640158*eV, 3.191037408*eV, 3.128716912*eV, 3.102662139*eV, 3.069524008*eV, 3.034012326*eV, 3.001068157*eV, 
@@ -446,8 +449,11 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
 		0.205552053, 0.199704762, 0.193696557, 0.187884494, 0.182241421, 0.176095301, 0.168483378, 0.16291645, 0.157493577, 
 		0.152319279, 0.146859841, 0.141516867, 0.135704067, 0.129615124, 0.123742916, 0.11736541, 0.11184209, 0.105217764, 
 		0.097865669, 0.091000102, 0.084681686, 0.080451249};
-
-
+   
+    //const G4int SiPMnumentries = 2;
+    //G4double SiPMenergies[SiPMnumentries] = {1.0*eV,6.0*eV};
+    //G4double SiPMreflectivity[SiPMnumentries] = {0.0,0.0};
+    //G4double quantumefficiency[SiPMnumentries] = {1.0,1.0};
     SiPMOpSurfaceProperty -> AddProperty("REFLECTIVITY",SiPMenergies,SiPMreflectivity,SiPMnumentries);
     SiPMOpSurfaceProperty -> AddProperty("EFFICIENCY",SiPMenergies,quantumefficiency,SiPMnumentries);
 
@@ -1089,7 +1095,11 @@ void LYSimDetectorConstruction::DefineMaterials()
         fEJ200 = new G4Material("EJ200", 1.023*g/cm3, 2, kStateSolid);
         fEJ200->AddElement(C, 91.53*perCent);
         fEJ200->AddElement(H, 8.47*perCent);
-	
+
+
+	//const G4int nEntries = 2;
+        //G4double PhotonEnergy[nEntries] = {1.0*eV, 6.0*eV};
+        //G4double RefractiveIndex[nEntries] = {1.58, 1.58};
        	
         //const G4int nEntries = 41;
         /*G4double PhotonEnergy[nEntries] = 
