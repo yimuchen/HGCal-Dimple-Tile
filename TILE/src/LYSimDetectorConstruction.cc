@@ -118,7 +118,9 @@ void LYSimDetectorConstruction::SetDefaults()
     world_sizeY = 3*(scint_sizeY);
     world_sizeZ = 30*(scint_thickness);
 
-
+    Absmultiple = 1.0; //factor for Abslength manipulation.
+    Din = 1.6*mm;
+    Rad = 3.4409*mm;
 }
 
 G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
@@ -248,8 +250,8 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
 
     //G4SubtractionSolid *ROD = new G4SubtractionSolid("rodsub",solidRod,calicesub,0,G4ThreeVector(10*mm, 0, 0));
 
-    G4double Dsize(4.5*mm);
-    G4double Din(1.6*mm);
+    G4double Dsize = 0.5*((Rad*Rad)/Din + Din);
+
     G4Sphere* solidDimple = new G4Sphere("Dimple",0.,Dsize,0.,2.*pi,pi/2.,pi);
 
     G4double zdisp = 0.5*scint_thickness+Dsize-Din;
@@ -284,7 +286,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     logicCalice->SetVisAttributes(RodVisAtt);
 
     G4double BSiz(10.0*mm);
-    G4double SubDis(2.9*mm);
+    G4double SubDis = Dsize-Din;
     G4double Subsub(0.30*mm);
     G4Box* solidSub =
       new G4Box("SubBox",              //its name
@@ -1150,46 +1152,11 @@ void LYSimDetectorConstruction::DefineMaterials()
   	
 	G4double AbsLength[nEntries] = {absLength, absLength};
 	*/
-		
-	//4 mm irradiated
-	/*
-	const G4int nEntries = 60;
-
-	G4double PhotonEnergy[nEntries] = 	  
-	  {3.542*eV, 3.493*eV, 3.444*eV, 3.397*eV, 3.351*eV, 3.306*eV, 3.263*eV, 3.246*eV, 3.237*eV, 3.229*eV, 
-	  3.220*eV, 3.212*eV, 3.204*eV, 3.195*eV, 3.187*eV, 3.179*eV, 3.171*eV, 3.163*eV, 3.155*eV, 3.147*eV, 
-	  3.139*eV, 3.131*eV, 3.123*eV, 3.115*eV, 3.107*eV, 3.100*eV, 3.092*eV, 3.084*eV, 3.077*eV, 3.061*eV, 
-	  3.046*eV, 3.024*eV, 2.988*eV, 2.952*eV, 2.917*eV, 2.883*eV, 2.850*eV, 2.818*eV, 2.786*eV, 2.755*eV, 
-	  2.725*eV, 2.695*eV, 2.666*eV, 2.638*eV, 2.610*eV, 2.583*eV, 2.556*eV, 2.530*eV, 2.505*eV, 2.480*eV, 
-	  2.455*eV, 2.431*eV, 2.407*eV, 2.384*eV, 2.362*eV, 2.339*eV, 2.317*eV, 2.296*eV, 2.275*eV, 2.254*eV};
-	
-	G4double RefractiveIndex[nEntries] = 
-	  {
-	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 
-	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58,
-	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58,
-	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58,
-	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58,
-	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58,
-	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58,
-	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58,
-	    1.58, 1.58, 1.58, 1.58
-	  };
-
-	G4double AbsLength[nEntries] = 
-	 {0.55800*mm, 0.56400*mm, 0.56200*mm, 0.56400*mm, 0.56400*mm, 0.56200*mm, 0.57300*mm, 0.58200*mm, 0.59100*mm, 
-	  0.60900*mm, 0.62700*mm, 0.64500*mm, 0.67300*mm, 0.71800*mm, 0.76300*mm, 0.82000*mm, 0.89100*mm, 0.98200*mm, 
-	  1.08600*mm, 1.22000*mm, 1.38900*mm, 1.59900*mm, 1.85800*mm, 2.19300*mm, 2.62000*mm, 3.15300*mm, 3.83900*mm, 
-	  4.73900*mm, 5.86400*mm, 9.09800*mm, 13.9680*mm, 23.8580*mm, 39.5250*mm, 50.0130*mm, 60.7720*mm, 70.4490*mm, 
-	  78.8850*mm, 86.6010*mm, 96.8360*mm, 106.602*mm, 115.300*mm, 128.116*mm, 141.749*mm, 151.683*mm, 159.770*mm, 
-	  170.497*mm, 189.118*mm, 196.214*mm, 210.116*mm, 231.530*mm, 239.115*mm, 258.689*mm, 275.084*mm, 288.386*mm, 
-	  304.507*mm, 326.255*mm, 326.255*mm, 347.733*mm, 366.133*mm, 387.123*mm};
-	*/
 	
         //4mm Unirr
-	
+	/*
 	const G4int nEntries = 57;
-
+        //~350 to 550nm
 	G4double PhotonEnergy[nEntries] = 	
 	 {
 	   3.542405514*eV, 3.492512479*eV, 3.444005361*eV, 3.396827205*eV, 3.350924135*eV, 3.306245147*eV, 3.262741921*eV, 3.220368649*eV, 
@@ -1226,7 +1193,15 @@ void LYSimDetectorConstruction::DefineMaterials()
 	   252.1649689*mm, 267.0613552*mm, 280.9645483*mm, 293.2338149*mm, 304.009777*mm, 324.5206616*mm, 339.7711016*mm, 357.9664491*mm, 370.3212829*mm,
 	   393.1346279*mm, 426.5560315*mm, 434.4316833*mm
 	 };
-	
+	*/
+
+	const G4int nEntries = 2;
+	G4double PhotonEnergy[nEntries]= {1.0*eV,6.0*eV};
+	G4double RefractiveIndex[nEntries] = {1.58, 1.58};
+	G4double AbsLength[nEntries] = {380*cm, 380*cm};
+
+
+	for(int i = 0; i < nEntries; i++) AbsLength[i] *= Absmultiple;
 
         // Add entries into properties table
         G4MaterialPropertiesTable* MPTEJ200 = new G4MaterialPropertiesTable();
