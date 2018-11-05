@@ -150,7 +150,9 @@ private:
     G4double wrapgap;  // distance between tile and wrapping
     G4double tileAbsLength;
     G4double inducedMuTile; //Radiation-induced absorption coefficient (cm^-1) in tile
-
+    G4double Absmultiple; //factor for Abslength manipulation.
+    G4double Din; //Depth of dimple
+    G4double Rad; //Dimple radius
 
     G4ThreeVector corners[8];           //stores the corner coordinates of the tile
     G4ThreeVector readout0, readout1;   //location of readout at corner 0/1
