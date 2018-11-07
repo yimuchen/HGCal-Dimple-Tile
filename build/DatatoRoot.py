@@ -1,3 +1,6 @@
+# This script grabs data from FinalShallow.csv printed out py SubmitJobs.py at the end of a run
+# it creates root files for each set of data separated by a string.
+
 import sys, string, os
 from ROOT import TFile, TNtuple
 from ROOT import TCanvas, TGraphErrors, TLegend
@@ -28,9 +31,13 @@ for line in lines:
 			no = ('no','n')
 			name = labels[i-2]
 			hist = str(labels[i-2])
+			hist = hist.strip("['']")
+			print(hist)
 			choice = raw_input()
 			if choice in yes:
 				name = TGraphErrors(len(Arrx[i-1]), Arrx[i-1], Det[i-1], Err[i-1], Errs[i-1])
+				name.SetXTitle("X [CM]")
+				name.SetYTitle("Hits [PE]")
 				name.Write("%s" % (hist))
 			elif choice in no:
 				p = True
