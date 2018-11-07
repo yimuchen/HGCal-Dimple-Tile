@@ -14,6 +14,7 @@
 #include "G4Trd.hh"
 #include "G4Torus.hh"
 #include "G4Trap.hh"
+#include "G4Ellipsoid.hh"
 #include "G4RotationMatrix.hh"
 #include "G4IntersectionSolid.hh"
 #include "G4UnionSolid.hh"
@@ -50,6 +51,8 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
     fdetectorMessenger = new LYSimDetectorMessenger(this);
 
     //    detType = 0; // 0: Tile; 1: rod
+
+    DimpleType = 0; //0: Normal, 1: Pyramid, 2: Parabolic
     solidWorld = NULL;
     logicWorld = NULL;
     physWorld = NULL;
@@ -119,8 +122,9 @@ void LYSimDetectorConstruction::SetDefaults()
     world_sizeZ = 30*(scint_thickness);
 
     Absmultiple = 1.0; //factor for Abslength manipulation.
-    Din = 1.6*mm;
-    Rad = 3.4409*mm;
+    Din = 1.6*mm;      //Dimple depth
+    Rad = 3.4409*mm;     //Dimple radius
+    SiPM_Depth = 0.0*mm; //SiPM Depth (0.0 is flush with top of tile)
 }
 
 G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
@@ -300,6 +304,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     /*
     G4SubtractionSolid *DimpleEpox = new G4SubtractionSolid("DimpleEpox",DimpleAir,solidSiPMsub);
 */
+    if (DimpleType == 0){
     G4LogicalVolume* logicDimple =
       new G4LogicalVolume(DimpleAir,   //its solid
 			  fAir,     //its material
@@ -326,6 +331,86 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     DimpleVisAtt->SetForceWireframe(true);
     DimpleVisAtt->SetVisibility(true);
     logicDimple->SetVisAttributes(DimpleVisAtt);
+    }
+
+    if (DimpleType == 1){
+    //Pyramid Dimple
+    G4Trd* PyramidDimple = 
+      new G4Trd("Pyramid",
+                 0.0*mm, Rad,
+                 0.0*mm, Rad,
+                 Din*0.5 );
+
+    G4LogicalVolume* logicPyramid =
+      new G4LogicalVolume(PyramidDimple,   //its solid
+			  fAir,     //its material
+			  "Pyramid");     //its name
+
+    G4ThreeVector PyramidOffset(0, 0, 0.5*scint_thickness-0.5*Din);
+
+    G4VPhysicalVolume* PyramidRod = 
+      new G4PVPlacement(0,
+                              PyramidOffset,
+                              logicPyramid,
+                              "Pyramid",
+                              logicCalice,
+                              false,
+                              0,
+                              checkOverlaps);
+
+    G4LogicalBorderSurface* PyramidAirSurface =
+        new G4LogicalBorderSurface("PyramidSurface",
+                                    PyramidRod,
+				    physRod,
+        			    fIdealPolishedOpSurface);
+
+    G4VisAttributes * PyramidVisAtt = new G4VisAttributes(G4Colour(0.,1.,1.));
+    PyramidVisAtt->SetForceWireframe(true);
+    PyramidVisAtt->SetVisibility(true);
+    logicPyramid->SetVisAttributes(PyramidVisAtt);
+    }
+
+    else{
+    G4double SemiZ = (447317/288000)*mm + Din;
+    G4double SemiX = (447317/120000)*mm;
+    G4double SemiY = SemiX;
+
+    G4Ellipsoid* ParabolaDimple = 
+       new G4Ellipsoid("Ellip",
+                      SemiX,
+                      SemiY,
+                      SemiZ,
+                      -SemiZ, //< SemiZ
+                      -SemiZ+Din);  //>-SemiZ
+
+    G4LogicalVolume* logicEllipse =
+      new G4LogicalVolume(ParabolaDimple,   //its solid
+			  fAir,     //its material
+			  "Ellipse");     //its name
+
+    G4ThreeVector EllipseOffset(0, 0, 0.5*scint_thickness+SemiZ-Din);
+
+    G4VPhysicalVolume* EllipseRod = 
+      new G4PVPlacement(0,
+                              EllipseOffset,
+                              logicEllipse,
+                              "Ellipse",
+                              logicCalice,
+                              false,
+                              0,
+                              checkOverlaps);
+
+    G4LogicalBorderSurface* EllipseAirSurface =
+        new G4LogicalBorderSurface("EllipseSurface",
+                                    EllipseRod,
+				    physRod,
+        			    fIdealPolishedOpSurface);
+
+    G4VisAttributes * EllipseVisAtt = new G4VisAttributes(G4Colour(0.,1.,1.));
+    EllipseVisAtt->SetForceWireframe(true);
+    EllipseVisAtt->SetVisibility(true);
+    logicEllipse->SetVisAttributes(EllipseVisAtt);
+    }
 
         ////////////////////////////////////////////
         // SiPM
@@ -342,9 +427,9 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     G4RotationMatrix* rotSiPM = new G4RotationMatrix;
     rotSiPM->rotateX(0*rad);
     rotSiPM->invert();
-    G4double aSiPM = 0.5*scint_thickness+0.5*Photocat_thickness;
+    G4double aSiPM = 0.5*scint_thickness+0.5*Photocat_thickness-SiPM_Depth;
     G4ThreeVector transSiPM(xdisp2, 0, aSiPM);
-    
+    /*
     G4Box* solidSiPMbox =
 	new G4Box("SiPMBox",
 		  0.5*2.1*mm,0.5*2.1*mm,0.15*mm);
@@ -357,10 +442,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     G4double bsize(0.15*mm);
     G4double halfscint(0.5*scint_thickness);
 
-    //G4ThreeVector WindowOffset(xdisp2, 0, halfscint-bsize);
-    //G4ThreeVector WindowOffset(0, 0, -3.05*mm);
-    /*
-    G4ThreeVector WindowOffset(0, 0, -3.10*mm);
+    G4ThreeVector WindowOffset(0, 0, -3.10*mm-SiPM_Depth);
     G4VPhysicalVolume* SiPMWindow = 
       new G4PVPlacement(0,
                               WindowOffset,
@@ -378,6 +460,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     */
 
     G4double backthick(0.025*mm);
+
     G4Box* solidSiPMback =
 	new G4Box("SiPMBack",
 		  0.5*2.1*mm,0.5*2.1*mm,backthick);
