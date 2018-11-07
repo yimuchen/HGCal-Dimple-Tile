@@ -153,11 +153,13 @@ private:
     G4double Absmultiple; //factor for Abslength manipulation.
     G4double Din; //Depth of dimple
     G4double Rad; //Dimple radius
+    G4double SiPM_Depth; //SiPM depth
 
     G4ThreeVector corners[8];           //stores the corner coordinates of the tile
     G4ThreeVector readout0, readout1;   //location of readout at corner 0/1
   //G4ThreeVector mirror0, mirror1;     //location of mirrors at corner 0/1
     G4int readoutCorner;                //determines location of fiber readout (0:corner 0, 1:corner 1)
+    G4int DimpleType;
     };
 
 #endif
