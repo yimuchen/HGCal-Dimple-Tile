@@ -154,6 +154,7 @@ for x in range(len(Arr2)):
                                         ra = Rad/10
 					dep = Din/10
 					big_rad = 0.5*((Rad*Rad)/dep + dep)
+					#if -Rad < Arr2[x] < ra and -ra < Arr3[y] < Rad:
 					if dforcond <= ra:
 		        			# Reading in the file                                                            
 		        			with open('photontest.mac', 'r') as file:
@@ -162,8 +163,15 @@ for x in range(len(Arr2)):
 						#dfromcenter = math.sqrt(RandPosx**2+RandPosy**2)
 						dfromcenter = math.sqrt(Arr2[x]**2+Arr3[y]**2)
 					
+						#Pyramid
+						#if -Arr3[y] <= Arr2[x] <= Arr3[y]:
+							#thick = round((0.298 - (dep-(dep/ra)*(abs(Arr2[x])))), 4)
+						#if -Arr2[x] < Arr3[y] < Arr2[x]:
+							#thick = round((0.298 - (dep-(dep/ra)*(abs(Arr3[y])))), 4)
+
 						thick = round((0.298 - (math.sqrt(big_rad**2 - dfromcenter**2) - (big_rad-dep))), 4)
 						middle = -(0.298 - thick)/2
+
 						a =" "
 						j = a+str(thick/2)+a
 						i = a+str(0.149)+a
