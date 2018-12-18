@@ -87,6 +87,8 @@ private:
 
     //pointer for wrapping
     G4LogicalVolume* logicWWW;
+    //pointer for dimple
+    G4LogicalVolume* logicD;
 
     //Pointers to materials
     G4Material* fVacuum;
@@ -152,8 +154,10 @@ private:
     G4double inducedMuTile; //Radiation-induced absorption coefficient (cm^-1) in tile
     G4double Absmultiple; //factor for Abslength manipulation.
     G4double Din; //Depth of dimple
+    G4double deft; //default radius
     G4double Rad; //Dimple radius
     G4double SiPM_Depth; //SiPM depth
+    G4double aSiPM;
 
     G4ThreeVector corners[8];           //stores the corner coordinates of the tile
     G4ThreeVector readout0, readout1;   //location of readout at corner 0/1
