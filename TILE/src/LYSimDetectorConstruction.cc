@@ -1,5 +1,6 @@
 #include "LYSimDetectorConstruction.hh"
 #include "LYSimDetectorMessenger.hh"
+#include<math.h>
 
 #include "G4RunManager.hh"
 #include "G4NistManager.hh"
@@ -122,9 +123,12 @@ void LYSimDetectorConstruction::SetDefaults()
     world_sizeZ = 30*(scint_thickness);
 
     Absmultiple = 1.0; //factor for Abslength manipulation.
-    Din = 1.6*mm;      //Dimple depth
-    Rad = 3.4409*mm;     //Dimple radius
-    SiPM_Depth = 0.0*mm; //SiPM Depth (0.0 is flush with top of tile)
+    Din = 1.25*1.6*mm;
+    deft = sqrt((2*(4.5)-1.6)*1.6);
+    Rad = 1.25*deft*mm;//3.4409*mm
+    SiPM_Depth = 0.0*mm; //SiPM Depth (0.0 is flush with top of tile, don't use anything less than 0.05*mm unless 0.0)
+    //Dimple radius (normal is 3.4409*mm)
+    //Dimple depth (normal is 1.6*mm)
 }
 
 G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
@@ -289,26 +293,28 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     RodVisAtt->SetVisibility(true);
     logicCalice->SetVisAttributes(RodVisAtt);
 
-    G4double BSiz(10.0*mm);
+    G4double BSiz(15.0*mm);
     G4double SubDis = Dsize-Din;
     G4double Subsub(0.30*mm);
     G4Box* solidSub =
       new G4Box("SubBox",              //its name
 		BSiz, BSiz, SubDis);     //its size
-
+    /*
     G4Box* solidSiPMsub =  
 	new G4Box("SiPMsubtract",
-		  0.5*2.1*mm, 0.5*2.1*mm, SubDis+Subsub);
+		  0.5*2.1*mm, 0.5*2.1*mm, SubDis+SiPM_Depth);
+    */
 
     G4SubtractionSolid *DimpleAir = new G4SubtractionSolid("DimpleAir",solidDimple,solidSub);
-    /*
-    G4SubtractionSolid *DimpleEpox = new G4SubtractionSolid("DimpleEpox",DimpleAir,solidSiPMsub);
-*/
+   
+
     if (DimpleType == 0){
     G4LogicalVolume* logicDimple =
       new G4LogicalVolume(DimpleAir,   //its solid
 			  fAir,     //its material
 			  "Dimple");     //its name
+
+    logicD=logicDimple;
 
     G4ThreeVector DimpleOffset(xdisp, 0, zdisp);
     G4VPhysicalVolume* DimpleRod = 
@@ -333,7 +339,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     logicDimple->SetVisAttributes(DimpleVisAtt);
     }
 
-    if (DimpleType == 1){
+    else if (DimpleType == 1){
     //Pyramid Dimple
     G4Trd* PyramidDimple = 
       new G4Trd("Pyramid",
@@ -380,8 +386,8 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
                       SemiX,
                       SemiY,
                       SemiZ,
-                      -SemiZ, //< SemiZ
-                      -SemiZ+Din);  //>-SemiZ
+                      -SemiZ, //must be < SemiZ
+                      -SemiZ+Din);  //must be >-SemiZ
 
     G4LogicalVolume* logicEllipse =
       new G4LogicalVolume(ParabolaDimple,   //its solid
@@ -416,6 +422,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
         // SiPM
         ////////////////////////////////////////////
 
+    G4double SubD = Dsize-Din;
     G4Box* solidSiPM =
       new G4Box("SiPM",
 		0.5*Photocat_sizeX,0.5*Photocat_sizeY,0.5*Photocat_thickness);
@@ -427,37 +434,6 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     G4RotationMatrix* rotSiPM = new G4RotationMatrix;
     rotSiPM->rotateX(0*rad);
     rotSiPM->invert();
-    G4double aSiPM = 0.5*scint_thickness+0.5*Photocat_thickness-SiPM_Depth;
-    G4ThreeVector transSiPM(xdisp2, 0, aSiPM);
-    /*
-    G4Box* solidSiPMbox =
-	new G4Box("SiPMBox",
-		  0.5*2.1*mm,0.5*2.1*mm,0.15*mm);
-
-    G4LogicalVolume* logicSiPMWindow =
-      new G4LogicalVolume(solidSiPMbox,   //its solid
-			  fEpoxy,     //its material
-			  "SiPMWindow");     //its name
-
-    G4double bsize(0.15*mm);
-    G4double halfscint(0.5*scint_thickness);
-
-    G4ThreeVector WindowOffset(0, 0, -3.10*mm-SiPM_Depth);
-    G4VPhysicalVolume* SiPMWindow = 
-      new G4PVPlacement(0,
-                              WindowOffset,
-                              logicSiPMWindow,
-                              "Window",
-                              logicDimple,
-                              false,
-                              0,
-                              checkOverlaps);
-
-    G4VisAttributes* WindowVisAtt = new G4VisAttributes(G4Colour(0.,0.,1.));
-    WindowVisAtt->SetForceWireframe(true);
-    WindowVisAtt->SetVisibility(true);
-    logicSiPMWindow->SetVisAttributes(WindowVisAtt);
-    */
 
     G4double backthick(0.025*mm);
 
@@ -472,8 +448,8 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
                                 fEpoxy,
                                 "SiPMBack");
     
-    G4ThreeVector CaseOffset(xdisp2, 0, 0.5*scint_thickness+0.025*mm);
-
+    if (SiPM_Depth == 0.0*mm){
+    G4ThreeVector CaseOffset(xdisp2, 0, 0.5*scint_thickness+0.025*mm-SiPM_Depth);
     G4VPhysicalVolume* SiPMCasing = 
       new G4PVPlacement(0,
                               CaseOffset,
@@ -483,6 +459,21 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
                               false,
                               0,
                               checkOverlaps);
+
+    }
+    else {
+    G4ThreeVector CaseOffset(xdisp2, 0, -SubD+0.025*mm-SiPM_Depth);
+    G4VPhysicalVolume* SiPMCasing = 
+      new G4PVPlacement(0,
+                              CaseOffset,
+                              logicSiPMCase,
+                              "Case",
+                              logicD,
+                              false,
+                              0,
+                              checkOverlaps);
+    
+    }
     G4VisAttributes * CaseVisAtt = new G4VisAttributes(G4Colour(0.5,0.5,0.5));
     CaseVisAtt->SetForceSolid(true);
     CaseVisAtt->SetVisibility(true);
@@ -490,6 +481,8 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     
     G4LogicalSkinSurface* CaseSurface = new G4LogicalSkinSurface("name",logicSiPMCase,fIdealMirrorOpSurface);
 
+    if (SiPM_Depth == 0.0*mm){
+    G4ThreeVector transSiPM(xdisp2, 0, 0.5*scint_thickness+0.5*Photocat_thickness-SiPM_Depth);
     G4VPhysicalVolume* physSiPM = 
       new G4PVPlacement(rotSiPM,
                               transSiPM,
@@ -499,6 +492,20 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
                               false,
                               0,
                               checkOverlaps);
+    }
+
+    else {
+    G4ThreeVector transSiPM(xdisp2, 0, -SubD+0.5*Photocat_thickness-SiPM_Depth);
+    G4VPhysicalVolume* physSiPM = 
+      new G4PVPlacement(rotSiPM,
+                              transSiPM,
+                              logicSiPM,
+                              "SiPM",
+                              logicD,
+                              false,
+                              0,
+                              checkOverlaps);
+    }
 
     G4OpticalSurface* SiPMOpSurface = new G4OpticalSurface("SiPM_Surface");
     G4LogicalSkinSurface* SiPMSurface = new G4LogicalSkinSurface("name",logicSiPM,SiPMOpSurface);
@@ -1237,7 +1244,7 @@ void LYSimDetectorConstruction::DefineMaterials()
 	*/
 	
         //4mm Unirr
-	/*
+	
 	const G4int nEntries = 57;
         //~350 to 550nm
 	G4double PhotonEnergy[nEntries] = 	
@@ -1265,6 +1272,19 @@ void LYSimDetectorConstruction::DefineMaterials()
 	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58,
 	    1.58
 	 };
+/*
+	G4double AbsLength[nEntries] = 
+	 {
+            17.42923195*mm, 17.50261763*mm, 17.5208078*mm, 17.54004961*mm, 17.56848311*mm, 17.66153201*mm, 17.69242388*mm, 18.13437416*mm, 
+            22.14857794*mm, 23.91636107*mm, 26.19927553*mm, 29.08895*mm, 32.75048588*mm, 37.2814987*mm, 43.07842006*mm, 50.39849206*mm, 
+            59.85105799*mm, 71.98244983*mm, 87.89754636*mm, 108.7633087*mm, 136.5727481*mm, 173.1953472*mm, 222.5973304*mm, 287.5620553*mm, 
+            375.9938324*mm, 489.0761462*mm, 637.3307552*mm, 815.2529798*mm, 1039.85692*mm, 2315.937016*mm, 3211.846828*mm, 3800*mm, 
+            4162.309734*mm, 4429.365072*mm, 4633.055771*mm, 4944.6964*mm, 5176.400316*mm, 5396.503919*mm, 5716.638906*mm, 6168.317205*mm, 
+            6280.01449*mm, 6360.307136*mm, 6639.580861*mm, 6926.56235*mm, 7323.864938*mm, 7652.045236*mm, 8104.081942*mm, 8525.979809*mm, 
+            8898.295533*mm, 9225.296344*mm, 9847.707211*mm, 10310.48782*mm, 10862.6328*mm, 11237.54509*mm, 11929.82503*mm, 12944.01067*mm, 
+            13183.00043*mm
+         };
+*/
 
 	G4double AbsLength[nEntries] = 
 	 {
@@ -1276,13 +1296,13 @@ void LYSimDetectorConstruction::DefineMaterials()
 	   252.1649689*mm, 267.0613552*mm, 280.9645483*mm, 293.2338149*mm, 304.009777*mm, 324.5206616*mm, 339.7711016*mm, 357.9664491*mm, 370.3212829*mm,
 	   393.1346279*mm, 426.5560315*mm, 434.4316833*mm
 	 };
-	*/
 
+/*
 	const G4int nEntries = 2;
 	G4double PhotonEnergy[nEntries]= {1.0*eV,6.0*eV};
 	G4double RefractiveIndex[nEntries] = {1.58, 1.58};
 	G4double AbsLength[nEntries] = {380*cm, 380*cm};
-
+*/
 
 	for(int i = 0; i < nEntries; i++) AbsLength[i] *= Absmultiple;
 
