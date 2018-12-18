@@ -15,10 +15,11 @@ from ROOT import TCanvas, TGraphErrors
 from ROOT import gROOT
 from array import array
 
+deft = math.sqrt((2*(4.5)-1.6)*1.6)
 ##################################################
 ## Set Dimple Parameters##
-Rad = 3.4409  #Dimple radius mm (default 3.4409)
-Din = 1.6     #Dimple depth in mm (defaut 1.6)
+Rad = 1.25*deft  #Dimple radius mm (default 3.4409)
+Din = 1.25*1.6     #Dimple depth in mm (defaut 1.6)
 ##################################################
 if Din > Rad:
 	print("Depth cannot exceed radius")
@@ -31,22 +32,24 @@ for line in DCfile:
 	if "Din" in line:
 		dinline = line.replace("    Din = ","")
 		dinline = dinline.replace("*mm;","")
+		dinline = eval(dinline)
 		dinline = float(dinline)
 		if dinline == Din:
 			print("Depth matches source")
 		else:
 			print("Depth does not match source! Quitting..")
 			exit()
-	if "Rad" in line and "*mm;" in line:
+	elif "Rad" in line and "*mm;" in line:
 		radline = line.replace("    Rad = ","")
-		radline = radline.replace("*mm;","")
+		radline = radline.replace("*deft*mm;//3.4409*mm","")
+		radline = eval(radline)
 		radline = float(radline)
-		if radline == Rad:
+		if deft*radline == Rad:
 			print("Radius matches source")
 		else:
 			print("Radius does not match source! Quitting..")
 			exit()
-	if "G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()" in line:
+	elif "G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()" in line:
 		break
 
 JobTime = datetime.now()
@@ -83,7 +86,8 @@ except:
 
 #array that contains the different points being tested                    
 Arr = [-1.2, -0.7, -0.3, 0.0, 0.3, 0.7, 1.2]
-Arr2 = [-1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4]
+#Arr2 = [-1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4]
+Arr2 = [-1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0]
 Arr3 = [0.0]
 
 def random_N_digit(n):
@@ -102,38 +106,38 @@ for x in range(len(Arr2)):
 		q+=1
 		if q in range(0,40):
 			for w in range(1,11):
-				for n in range(1,1001):
+				for n in range (1, 1001):
 					#Replacement Random Numbers
     					RandF1 = random_N_digit(9)
 					RandF2 = random_N_digit(8)
 					if n == 1:
 						print("%s %s %s" % (Arr2[x], Arr3[y], str(q)))
- 		               		# Creating new file                                                              
-  		              		shutil.copy2('photontestbeams.mac', 'photontest.mac')
+ 	               			# Creating new file                                                              
+ 		              		shutil.copy2('photontestbeams.mac', 'photontest.mac')
 
 					### Write rand position of source 1###
-		        		# Reading in the file                                                            
-		        		with open('photontest.mac', 'r') as file:
-		        			filedata = file.read()
-			
+		       			# Reading in the file                                                            
+		       			with open('photontest.mac', 'r') as file:
+		       				filedata = file.read()
+		
 					# Random Number inside source area
-					RandPosx = round(random.uniform(Arr2[x]-0.15,Arr2[x]+0.15), 4)
-					RandPosy = round(random.uniform(Arr3[y]-0.15,Arr3[y]+0.15), 4)
+					#RandPosx = round(random.uniform(Arr2[x]-0.15,Arr2[x]+0.15), 4)
+					#RandPosy = round(random.uniform(Arr3[y]-0.15,Arr3[y]+0.15), 4)
 
 		        		# Replacing the target string   
 		        		a =" "
-		        		#j = str(RandPosx)+a+str(RandPosy)+a+str(0.0)
+		       			#j = str(RandPosx)+a+str(RandPosy)+a+str(0.0)
 					j = str(Arr2[x])+a+str(Arr3[y])+a+str(0.0)
-		        		i = str(0.0)+a+str(0.0)+a+str(0.0)
-		        		filedata = filedata.replace(i, j)
+	        			i = str(0.0)+a+str(0.0)+a+str(0.0)
+	        			filedata = filedata.replace(i, j)
 
 		        		# Writing out the new file                                                       
 		        		with open('photontest.mac', 'w') as file:
-		        			file.write(filedata)
+		       				file.write(filedata)
 				
-		        		# Reading in the file                                                            
-		        		with open('photontest.mac', 'r') as file:
-		        			filedata = file.read()		
+		       			# Reading in the file                                                            
+		       			with open('photontest.mac', 'r') as file:
+		       				filedata = file.read()		
 					# Replacing the target string
 					a =" "
 					j = str(RandF1)+a+str(RandF2)
@@ -143,31 +147,31 @@ for x in range(len(Arr2)):
 
 		        		# Writing out the new file                                                       
 		        		with open('photontest.mac', 'w') as file:
-		        			file.write(filedata)
+		       				file.write(filedata)
 			
 					#dforcond = math.sqrt(RandPosx**2+RandPosy**2)
 			
 					dforcond = math.sqrt(Arr2[x]**2+Arr3[y]**2)
-			
+				
 					# Shallow Dimple Conditional for Fewer Source Photons
 						#.3 for other dimple
-                                        ra = Rad/10
+					ra = Rad/10
 					dep = Din/10
-					big_rad = 0.5*((Rad*Rad)/dep + dep)
-					#if -Rad < Arr2[x] < ra and -ra < Arr3[y] < Rad:
+					big_rad = 0.5*((ra*ra)/dep + dep)
+					#if (-ra <= Arr2[x] <= ra and -ra <= Arr3[y] <= ra):
 					if dforcond <= ra:
-		        			# Reading in the file                                                            
-		        			with open('photontest.mac', 'r') as file:
+	        				# Reading in the file                                                            
+	        				with open('photontest.mac', 'r') as file:
 		        				filedata = file.read()		
 						# Replacing the target string
 						#dfromcenter = math.sqrt(RandPosx**2+RandPosy**2)
 						dfromcenter = math.sqrt(Arr2[x]**2+Arr3[y]**2)
 					
 						#Pyramid
-						#if -Arr3[y] <= Arr2[x] <= Arr3[y]:
-							#thick = round((0.298 - (dep-(dep/ra)*(abs(Arr2[x])))), 4)
-						#if -Arr2[x] < Arr3[y] < Arr2[x]:
-							#thick = round((0.298 - (dep-(dep/ra)*(abs(Arr3[y])))), 4)
+						#if abs(Arr3[y]) <= abs(Arr2[x]):
+						#	thick = round((0.298 - (dep-(dep/ra)*(abs(Arr2[x])))), 4)
+						#elif abs(Arr2[y]) < abs(Arr3[x]):
+						#	thick = round((0.298 - (dep-(dep/ra)*(abs(Arr3[y])))), 4)
 
 						thick = round((0.298 - (math.sqrt(big_rad**2 - dfromcenter**2) - (big_rad-dep))), 4)
 						middle = -(0.298 - thick)/2
@@ -179,15 +183,15 @@ for x in range(len(Arr2)):
 					
 		        			# Writing out the new file                                                       
 		        			with open('photontest.mac', 'w') as file:
-		        				file.write(filedata)
+		       					file.write(filedata)
 
 						a =" "
 						#r = str(RandPosx)+a+str(RandPosy)+a+str(middle)
 						#e = str(RandPosx)+a+str(RandPosy)+a+str(0.0)
 						r = str(Arr2[x])+a+str(Arr3[y])+a+str(middle)
 						e = str(Arr2[x])+a+str(Arr3[y])+a+str(0.0)
-		        			filedata = filedata.replace(e, r)
-
+	        				filedata = filedata.replace(e, r)
+	
 		        			# Writing out the new file                                                       
 		        			with open('photontest.mac', 'w') as file:
 		        				file.write(filedata)
@@ -201,50 +205,47 @@ for x in range(len(Arr2)):
 						filedata = filedata.replace(i, j)
 
 
-		        			# Writing out the new file                                                       
-		        			with open('photontest.mac', 'w') as file:
-		        				file.write(filedata)
+		       				# Writing out the new file                                                       
+		       				with open('photontest.mac', 'w') as file:
+		       					file.write(filedata)
 
 					# Shallow Dimple Conditional for Fewer Source Photons
 			
 		        		# Defining the infile                                                            
 		        		InFile = 'photontest.mac' 
 
-  		              		condorcmd = "condor_submit condor-jobs.jdl"
-	                	
+  		       			condorcmd = "condor_submit condor-jobs.jdl"
+	               	
 					#if w == 1:
 					#	print ('%s' % str(w))
 	
 	                		p=subprocess.Popen(condorcmd, shell=True)
 	                		p.wait()
                 
-					time.sleep(0.05)
                 	
 	        			#Make Sure Correct Numbers Are Replaced Next Loop
-	        			RandF1 = RandS1
-	        			RandF2 = RandS2
+	       				RandF1 = RandS1
+	       				RandF2 = RandS2
 
-	
 					if n == 1000:
-	                			time.sleep(20)
-	                			command = ["condor_q ahorst"]
+	               				command = ["condor_q ahorst"]
 	               				p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-	                			text= p.stdout.readlines()
-	                			abort_after = 60 * 60
-	                			start = time.time()
-	                			while any("0 idle, 0 running, 0 held" not in s for s in text):
- 		               				time.sleep(10)
+	               				text= p.stdout.readlines()
+	               				abort_after = 60 * 60
+	       					start = time.time()
+	               				while any("0 idle, 0 running, 0 held" not in s for s in text):
+ 	           					time.sleep(1)
  		               				delta = time.time() - start
 	                				command = ["condor_q ahorst"]
 	                 				p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
 	                 				text = p.stdout.readlines()
-	                 				if any("0 idle, 0 running, 0 held" in s for s in text):
+	               					if any("0 idle, 0 running, 0 held" in s for s in text):
 								errroots = 'find . -name "Analysis*.root" -size -3k -delete'
 								p = subprocess.Popen(errroots, shell=True)
 								p.wait()
 								hadd = ["hadd Part[%d][%s][%s].root Analysis*.root" % (w, Arr2[x], Arr3[y])]
 								p=subprocess.Popen(hadd, shell=True)
-	 	               					p.wait()
+	 	       						p.wait()
 								if q == 300:
 									movefile = ["mv Analysis*.root HitData/RootsForTestPoint"]
 									p=subprocess.Popen(movefile, shell=True)
@@ -256,9 +257,9 @@ for x in range(len(Arr2)):
 								remove = "rm photontest.mac photontest_*.mac Analysis*.txt *.condor *.stdout *.stderr"
 								p = subprocess.Popen(remove, shell=True)
 								p.wait()
- 	                	 	         		break
+                 	 	         			break
 	                 				if delta >= abort_after:
-	                 		        	  	end = "condor_rm ahorst"
+	                 		  	     	  	end = "condor_rm ahorst"
 								p = subprocess.Popen(end, shell=True)
 								p.wait()
 				if w == 10:
@@ -268,6 +269,7 @@ for x in range(len(Arr2)):
 					f = ROOT.TFile("Total[%s][%s].root" % (Arr2[x], Arr3[y]))
 					t = f.Get("Ndetect")
 					meant = t.GetMean()
+					meant = meant
 					rms = t.GetRMS()
 					ent = t.GetEntries()
 					err = rms/math.sqrt(ent)

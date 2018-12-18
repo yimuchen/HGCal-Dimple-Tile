@@ -6,8 +6,8 @@ from ROOT import TFile, TNtuple
 from ROOT import TCanvas, TGraphErrors, TLegend
 from ROOT import gROOT
 from array import array
-ifn = os.path.expandvars("FinalShallow.csv")
-ofn = 'FinalShallow.root'
+ifn = os.path.expandvars("FinalShallowGraph.csv")
+ofn = 'FinalShallowDec17.root'
 print ('opening file'), ifn, '...'
 infile = open( ifn, 'r' )
 lines  = infile.read().splitlines()
@@ -36,8 +36,10 @@ for line in lines:
 			choice = raw_input()
 			if choice in yes:
 				name = TGraphErrors(len(Arrx[i-1]), Arrx[i-1], Det[i-1], Err[i-1], Errs[i-1])
-				name.SetXTitle("X [CM]")
-				name.SetYTitle("Hits [PE]")
+				name.SetTitle(" ;X [CM];Hits [PE]")
+				name.SetMarkerColor(i*3)
+				name.SetLineColor(i*3)
+				#name.SetYTitle("Hits [PE]")
 				name.Write("%s" % (hist))
 			elif choice in no:
 				p = True
