@@ -17,9 +17,11 @@ from array import array
 
 deft = math.sqrt((2*(4.5)-1.6)*1.6)
 ##################################################
-## Set Dimple Parameters##
-Rad = 1.25*deft  #Dimple radius mm (default 3.4409)
-Din = 1.25*1.6     #Dimple depth in mm (defaut 1.6)
+## Set Dimple Parameters ##
+Rad = 3.0*deft  #Dimple radius mm (default 3.4409)
+Din = 1.1*1.6	#Dimple depth in mm (defaut 1.6)
+## Set Source ##
+Source = 0	#0 ->Trigger (spread inside area), 1 ->Point Source
 ##################################################
 if Din > Rad:
 	print("Depth cannot exceed radius")
@@ -49,6 +51,22 @@ for line in DCfile:
 		else:
 			print("Radius does not match source! Quitting..")
 			exit()
+	elif "DimpleType" in line:
+		Dimpleline = line.replace("    DimpleType = ","")
+		Dimpleline = Dimpleline.replace("; //0: Normal, 1: Pyramid, 2: Parabolic","")
+		Dimpleline = float(Dimpleline)
+		if Dimpleline == 0:
+			norm=1
+			pyramid=0
+			para=0
+		if Dimpleline == 1:
+			pyramid=1
+			norm=0
+			para=0
+		if Dimpleline == 2:
+			para=1
+			norm=0
+			pyramid=0
 	elif "G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()" in line:
 		break
 
@@ -87,7 +105,7 @@ except:
 #array that contains the different points being tested                    
 Arr = [-1.2, -0.7, -0.3, 0.0, 0.3, 0.7, 1.2]
 #Arr2 = [-1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4]
-Arr2 = [-1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0]
+Arr2 = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4]
 Arr3 = [0.0]
 
 def random_N_digit(n):
@@ -121,13 +139,16 @@ for x in range(len(Arr2)):
 		       				filedata = file.read()
 		
 					# Random Number inside source area
-					#RandPosx = round(random.uniform(Arr2[x]-0.15,Arr2[x]+0.15), 4)
-					#RandPosy = round(random.uniform(Arr3[y]-0.15,Arr3[y]+0.15), 4)
+					if Source == 0:
+						RandPosx = round(random.uniform(Arr2[x]-0.15,Arr2[x]+0.15), 4)
+						RandPosy = round(random.uniform(Arr3[y]-0.15,Arr3[y]+0.15), 4)
 
 		        		# Replacing the target string   
 		        		a =" "
-		       			#j = str(RandPosx)+a+str(RandPosy)+a+str(0.0)
-					j = str(Arr2[x])+a+str(Arr3[y])+a+str(0.0)
+					if Source == 0:
+		       				j = str(RandPosx)+a+str(RandPosy)+a+str(0.0)
+					elif Source ==1:
+						j = str(Arr2[x])+a+str(Arr3[y])+a+str(0.0)
 	        			i = str(0.0)+a+str(0.0)+a+str(0.0)
 	        			filedata = filedata.replace(i, j)
 
@@ -167,13 +188,15 @@ for x in range(len(Arr2)):
 						#dfromcenter = math.sqrt(RandPosx**2+RandPosy**2)
 						dfromcenter = math.sqrt(Arr2[x]**2+Arr3[y]**2)
 					
-						#Pyramid
-						#if abs(Arr3[y]) <= abs(Arr2[x]):
-						#	thick = round((0.298 - (dep-(dep/ra)*(abs(Arr2[x])))), 4)
-						#elif abs(Arr2[y]) < abs(Arr3[x]):
-						#	thick = round((0.298 - (dep-(dep/ra)*(abs(Arr3[y])))), 4)
-
-						thick = round((0.298 - (math.sqrt(big_rad**2 - dfromcenter**2) - (big_rad-dep))), 4)
+						if norm == 1:
+							thick = round((0.298 - (math.sqrt(big_rad**2 - dfromcenter**2) - (big_rad-dep))), 4)
+						elif para == 1:
+							thick = 0.298-abs(1.35*dfromcenter**2-dep)
+						elif pyramid == 1:
+							if abs(Arr3[y]) <= abs(Arr2[x]):
+								thick = round((0.298 - (dep-(dep/ra)*(abs(Arr2[x])))), 4)
+							elif abs(Arr2[y]) < abs(Arr3[x]):
+								thick = round((0.298 - (dep-(dep/ra)*(abs(Arr3[y])))), 4)
 						middle = -(0.298 - thick)/2
 
 						a =" "
@@ -186,10 +209,12 @@ for x in range(len(Arr2)):
 		       					file.write(filedata)
 
 						a =" "
-						#r = str(RandPosx)+a+str(RandPosy)+a+str(middle)
-						#e = str(RandPosx)+a+str(RandPosy)+a+str(0.0)
-						r = str(Arr2[x])+a+str(Arr3[y])+a+str(middle)
-						e = str(Arr2[x])+a+str(Arr3[y])+a+str(0.0)
+						if Source==0:
+							r = str(RandPosx)+a+str(RandPosy)+a+str(middle)
+							e = str(RandPosx)+a+str(RandPosy)+a+str(0.0)
+						elif Source==1:
+							r = str(Arr2[x])+a+str(Arr3[y])+a+str(middle)
+							e = str(Arr2[x])+a+str(Arr3[y])+a+str(0.0)
 	        				filedata = filedata.replace(e, r)
 	
 		        			# Writing out the new file                                                       
