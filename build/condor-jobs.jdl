@@ -5,4 +5,5 @@ Requirements = TARGET.FileSystemDomain == "privnet"
 Output = /data/users/ahorst/hgcal_tile/build/sce_$(cluster)_$(process).stdout
 Error = /data/users/ahorst/hgcal_tile/build/sce_$(cluster)_$(process).stderr
 Log = /data/users/ahorst/hgcal_tile/build/sce_$(cluster)_$(process).condor
+Arguments = photontest.mac -novis
 Queue 

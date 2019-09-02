@@ -1,12 +1,11 @@
-
 #ifndef LYSimPrimaryGeneratorAction_h
 #define LYSimPrimaryGeneratorAction_h
 
 #include "LYSimDetectorConstruction.hh"
 
-#include "G4VUserPrimaryGeneratorAction.hh"
-#include "G4GeneralParticleSource.hh"
 #include "globals.hh"
+#include "G4GeneralParticleSource.hh"
+#include "G4VUserPrimaryGeneratorAction.hh"
 
 class G4GeneralParticleSource;
 class G4Event;
@@ -14,43 +13,47 @@ class LYSimDetectorConstruction;
 class LYSimPrimaryGeneratorAction;
 class LYSimPrimaryGeneratorMessenger;
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 class LYSimPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
-  public:
-    LYSimPrimaryGeneratorAction(LYSimDetectorConstruction*);
-   ~LYSimPrimaryGeneratorAction();
+public:
+  LYSimPrimaryGeneratorAction( LYSimDetectorConstruction* );
+  ~LYSimPrimaryGeneratorAction();
 
-  public:
-    void GeneratePrimaries(G4Event*);
-
-
-  void SetSource000Toggle (G4bool toggle) {source000_toggle = toggle;}
-  G4bool GetSource000Toggle () {return source000_toggle;}
+public:
+  void GeneratePrimaries( G4Event* );
 
 
-  void SetAngle000Toggle (G4bool toggle) {angle000_toggle = toggle;}
-  G4bool GetAngle000Toggle () {return angle000_toggle;}
+  void
+  SetSource000Toggle ( G4bool toggle ){source000_toggle = toggle;}
+  G4bool
+  GetSource000Toggle (){return source000_toggle;}
 
 
-    void SetOptPhotonPolar();
-    void SetOptPhotonPolar(G4double);
-    const G4ThreeVector GetSourcePosition();
-    const G4ThreeVector GetParticleMomentumDirection();
+  void
+  SetAngle000Toggle ( G4bool toggle ){angle000_toggle = toggle;}
+  G4bool
+  GetAngle000Toggle (){return angle000_toggle;}
 
-  private:
-  LYSimPrimaryGeneratorMessenger* fprimarygeneratorMessenger;  
+
+  void SetOptPhotonPolar();
+  void SetOptPhotonPolar( G4double );
+  const G4ThreeVector GetSourcePosition();
+  const G4ThreeVector GetParticleMomentumDirection();
+
+private:
+  LYSimPrimaryGeneratorMessenger* fprimarygeneratorMessenger;
 
   G4GeneralParticleSource* particleSource;
-  //G4ParticleGun* particleSource;
+  // G4ParticleGun* particleSource;
   LYSimDetectorConstruction* fDetector;
   G4bool source000_toggle;
   G4bool angle000_toggle;
-  //G4double PhotonEnergy;
-    
+  // G4double PhotonEnergy;
+
 };
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif /*LYSimPrimaryGeneratorAction_h*/
+#endif/*LYSimPrimaryGeneratorAction_h*/

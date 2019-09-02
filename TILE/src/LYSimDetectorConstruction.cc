@@ -47,8 +47,8 @@ using namespace CLHEP;
 LYSimPMTSD* LYSimDetectorConstruction::fPMTSD = NULL;
 
 LYSimDetectorConstruction::LYSimDetectorConstruction()
-    : G4VUserDetectorConstruction() 
-{ 
+    : G4VUserDetectorConstruction()
+{
     fdetectorMessenger = new LYSimDetectorMessenger(this);
 
     //    detType = 0; // 0: Tile; 1: rod
@@ -75,14 +75,14 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 LYSimDetectorConstruction::~LYSimDetectorConstruction()
-{ 
+{
     if (fdetectorMessenger) delete fdetectorMessenger;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 G4VPhysicalVolume* LYSimDetectorConstruction::Construct()
-{  
+{
     SetDefaults();
     DefineMaterials();
     DefineSurfaces();
@@ -171,7 +171,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
       G4double xdisp = 0.25*(scint_sizeX-Dx2);
       G4double xdisp2 = 0.25*(scint_sizeX-Dx3);
 
-    if(wrapping_toggle) {  
+    if(wrapping_toggle) {
 	/*
       G4Box* solidWrap =
 	new G4Box("WrapBox",                                           //its name
@@ -181,9 +181,9 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
       G4ThreeVector wrapCenter(0, 0, 0);
 
       Dw2 = scint_sizeX-tan(angle1)*scint_sizeY-tan(angle3)*scint_sizeY;
-    
-      G4VSolid* solidWrap = 
-          ConstructTileSolid("TileTrap", 
+
+      G4VSolid* solidWrap =
+          ConstructTileSolid("TileTrap",
                              angle1,    //angle measured ccw from y axis for the side at -x
                              angle3,    //angle measured ccw from y axis for the side at +x
                              Dw2+2*wrapgap,       //length along x of side at y=+Dy
@@ -205,7 +205,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
 
       G4ThreeVector WrapOffset(-xdisp2, 0, 0);
 
-      G4VPhysicalVolume* physWrap = 
+      G4VPhysicalVolume* physWrap =
 	new G4PVPlacement(0,
 			  WrapOffset,
 			  logicWrap,
@@ -215,7 +215,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
 			  0,
 			  checkOverlaps);
 
-      G4LogicalBorderSurface* WrapAirSurface = 
+      G4LogicalBorderSurface* WrapAirSurface =
 	new G4LogicalBorderSurface("WrapAirSurface",
 				   physWrap,
 				   physWorld,
@@ -226,18 +226,18 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
       WrapVisAtt->SetForceWireframe(true);
       WrapVisAtt->SetVisibility(true);
       logicWrap->SetVisAttributes(WrapVisAtt);
-    
+
     }
- 
+
 
     ///////////////////////////////////////////////////////
     // Subtracted Dimple Version (dimple sub from tile, WWW = mothervolume of both) SHALLOW DIMPLE 4.5mm Radius
     /////////////////////////////////////////////////////////
 
     G4ThreeVector tileCenter(0, 0, 0);
-    
-    G4VSolid* solidRod = 
-        ConstructTileSolid("TileTrap", 
+
+    G4VSolid* solidRod =
+        ConstructTileSolid("TileTrap",
                            angle1,    //angle measured ccw from y axis for the side at -x
                            angle2,    //angle measured ccw from y axis for the side at +x
                            Dx2,       //length along x of side at y=+Dy
@@ -271,7 +271,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
 			  fEJ200,     //its material
 			  "Rod");     //its name
 
-    G4VPhysicalVolume* physRod = 
+    G4VPhysicalVolume* physRod =
       new G4PVPlacement(0,
                               RodOffset,
                               logicCalice,
@@ -281,7 +281,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
                               0,
                               checkOverlaps);
 
-    G4LogicalBorderSurface* RodAirSurface = 
+    G4LogicalBorderSurface* RodAirSurface =
             new G4LogicalBorderSurface("RodAirSurface",
                                        physRod,
                                        physWorld,
@@ -300,13 +300,13 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
       new G4Box("SubBox",              //its name
 		BSiz, BSiz, SubDis);     //its size
     /*
-    G4Box* solidSiPMsub =  
+    G4Box* solidSiPMsub =
 	new G4Box("SiPMsubtract",
 		  0.5*2.1*mm, 0.5*2.1*mm, SubDis+SiPM_Depth);
     */
 
     G4SubtractionSolid *DimpleAir = new G4SubtractionSolid("DimpleAir",solidDimple,solidSub);
-   
+
 
     if (DimpleType == 0){
     G4LogicalVolume* logicDimple =
@@ -317,7 +317,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     logicD=logicDimple;
 
     G4ThreeVector DimpleOffset(xdisp, 0, zdisp);
-    G4VPhysicalVolume* DimpleRod = 
+    G4VPhysicalVolume* DimpleRod =
       new G4PVPlacement(0,
                               DimpleOffset,
                               logicDimple,
@@ -341,7 +341,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
 
     else if (DimpleType == 1){
     //Pyramid Dimple
-    G4Trd* PyramidDimple = 
+    G4Trd* PyramidDimple =
       new G4Trd("Pyramid",
                  0.0*mm, Rad,
                  0.0*mm, Rad,
@@ -354,7 +354,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
 
     G4ThreeVector PyramidOffset(0, 0, 0.5*scint_thickness-0.5*Din);
 
-    G4VPhysicalVolume* PyramidRod = 
+    G4VPhysicalVolume* PyramidRod =
       new G4PVPlacement(0,
                               PyramidOffset,
                               logicPyramid,
@@ -381,7 +381,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     G4double SemiX = (447317/120000)*mm;
     G4double SemiY = SemiX;
 
-    G4Ellipsoid* ParabolaDimple = 
+    G4Ellipsoid* ParabolaDimple =
        new G4Ellipsoid("Ellip",
                       SemiX,
                       SemiY,
@@ -396,7 +396,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
 
     G4ThreeVector EllipseOffset(0, 0, 0.5*scint_thickness+SemiZ-Din);
 
-    G4VPhysicalVolume* EllipseRod = 
+    G4VPhysicalVolume* EllipseRod =
       new G4PVPlacement(0,
                               EllipseOffset,
                               logicEllipse,
@@ -447,10 +447,10 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
       new G4LogicalVolume(SiPMCase,
                                 fEpoxy,
                                 "SiPMBack");
-    
+
     if (SiPM_Depth == 0.0*mm){
     G4ThreeVector CaseOffset(xdisp2, 0, 0.5*scint_thickness+0.025*mm-SiPM_Depth);
-    G4VPhysicalVolume* SiPMCasing = 
+    G4VPhysicalVolume* SiPMCasing =
       new G4PVPlacement(0,
                               CaseOffset,
                               logicSiPMCase,
@@ -463,7 +463,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     }
     else {
     G4ThreeVector CaseOffset(xdisp2, 0, -SubD+0.025*mm-SiPM_Depth);
-    G4VPhysicalVolume* SiPMCasing = 
+    G4VPhysicalVolume* SiPMCasing =
       new G4PVPlacement(0,
                               CaseOffset,
                               logicSiPMCase,
@@ -472,18 +472,18 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
                               false,
                               0,
                               checkOverlaps);
-    
+
     }
     G4VisAttributes * CaseVisAtt = new G4VisAttributes(G4Colour(0.5,0.5,0.5));
     CaseVisAtt->SetForceSolid(true);
     CaseVisAtt->SetVisibility(true);
     logicSiPMCase->SetVisAttributes(CaseVisAtt);
-    
+
     G4LogicalSkinSurface* CaseSurface = new G4LogicalSkinSurface("name",logicSiPMCase,fIdealMirrorOpSurface);
 
     if (SiPM_Depth == 0.0*mm){
     G4ThreeVector transSiPM(xdisp2, 0, 0.5*scint_thickness+0.5*Photocat_thickness-SiPM_Depth);
-    G4VPhysicalVolume* physSiPM = 
+    G4VPhysicalVolume* physSiPM =
       new G4PVPlacement(rotSiPM,
                               transSiPM,
                               logicSiPM,
@@ -496,7 +496,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
 
     else {
     G4ThreeVector transSiPM(xdisp2, 0, -SubD+0.5*Photocat_thickness-SiPM_Depth);
-    G4VPhysicalVolume* physSiPM = 
+    G4VPhysicalVolume* physSiPM =
       new G4PVPlacement(rotSiPM,
                               transSiPM,
                               logicSiPM,
@@ -516,17 +516,17 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
     G4MaterialPropertiesTable *SiPMOpSurfaceProperty = new G4MaterialPropertiesTable();
 
     //From Meeting on HB SiPM selection (James Hirschauer)
-    
+
     const G4int SiPMnumentries = 49;
-    G4double SiPMenergies[SiPMnumentries] = 
-            {3.269640158*eV, 3.191037408*eV, 3.128716912*eV, 3.102662139*eV, 3.069524008*eV, 3.034012326*eV, 3.001068157*eV, 
-		2.959583079*eV, 2.901064107*eV, 2.838801776*eV, 2.779808831*eV, 2.721566033*eV, 2.667612494*eV, 2.615095968*eV, 
-		2.563388259*eV, 2.515844086*eV, 2.469260675*eV, 2.423979937*eV, 2.379744327*eV, 2.337228676*eV, 2.296532193*eV, 
-		2.257220927*eV, 2.219239034*eV, 2.182957454*eV, 2.147148186*eV, 2.112470008*eV, 2.079619445*eV, 2.047338607*eV, 
-		2.015906691*eV, 1.987528043*eV, 1.959370034*eV, 1.930211969*eV, 1.902680667*eV, 1.875153451*eV, 1.84878577*eV, 
-		1.823292126*eV, 1.799066012*eV, 1.775177229*eV, 1.751266161*eV, 1.728338166*eV, 1.705491878*eV, 1.683828975*eV, 
+    G4double SiPMenergies[SiPMnumentries] =
+            {3.269640158*eV, 3.191037408*eV, 3.128716912*eV, 3.102662139*eV, 3.069524008*eV, 3.034012326*eV, 3.001068157*eV,
+		2.959583079*eV, 2.901064107*eV, 2.838801776*eV, 2.779808831*eV, 2.721566033*eV, 2.667612494*eV, 2.615095968*eV,
+		2.563388259*eV, 2.515844086*eV, 2.469260675*eV, 2.423979937*eV, 2.379744327*eV, 2.337228676*eV, 2.296532193*eV,
+		2.257220927*eV, 2.219239034*eV, 2.182957454*eV, 2.147148186*eV, 2.112470008*eV, 2.079619445*eV, 2.047338607*eV,
+		2.015906691*eV, 1.987528043*eV, 1.959370034*eV, 1.930211969*eV, 1.902680667*eV, 1.875153451*eV, 1.84878577*eV,
+		1.823292126*eV, 1.799066012*eV, 1.775177229*eV, 1.751266161*eV, 1.728338166*eV, 1.705491878*eV, 1.683828975*eV,
 		1.662853866*eV, 1.643031375*eV, 1.623272564*eV, 1.603516479*eV, 1.584163112*eV, 1.565103929*eV, 1.548241716*eV};
-    G4double SiPMreflectivity[SiPMnumentries] = 
+    G4double SiPMreflectivity[SiPMnumentries] =
             {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 		0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 		0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -535,13 +535,13 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
 		0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 		0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     G4double quantumefficiency[SiPMnumentries] =
-            {0.00080151, 0.003873974, 0.009957452, 0.025682901, 0.070237974, 0.150458664, 0.218876073, 0.239857707, 0.250435989, 
-		0.259508637, 0.264540183, 0.266889254, 0.270669968, 0.273577562, 0.272402437, 0.270462795, 0.268157907, 0.264243881, 
-		0.25831461, 0.252029247, 0.245123015, 0.237845409, 0.230874024, 0.224981219, 0.220313658, 0.21616835, 0.211206974, 
-		0.205552053, 0.199704762, 0.193696557, 0.187884494, 0.182241421, 0.176095301, 0.168483378, 0.16291645, 0.157493577, 
-		0.152319279, 0.146859841, 0.141516867, 0.135704067, 0.129615124, 0.123742916, 0.11736541, 0.11184209, 0.105217764, 
+            {0.00080151, 0.003873974, 0.009957452, 0.025682901, 0.070237974, 0.150458664, 0.218876073, 0.239857707, 0.250435989,
+		0.259508637, 0.264540183, 0.266889254, 0.270669968, 0.273577562, 0.272402437, 0.270462795, 0.268157907, 0.264243881,
+		0.25831461, 0.252029247, 0.245123015, 0.237845409, 0.230874024, 0.224981219, 0.220313658, 0.21616835, 0.211206974,
+		0.205552053, 0.199704762, 0.193696557, 0.187884494, 0.182241421, 0.176095301, 0.168483378, 0.16291645, 0.157493577,
+		0.152319279, 0.146859841, 0.141516867, 0.135704067, 0.129615124, 0.123742916, 0.11736541, 0.11184209, 0.105217764,
 		0.097865669, 0.091000102, 0.084681686, 0.080451249};
-   
+
     //const G4int SiPMnumentries = 2;
     //G4double SiPMenergies[SiPMnumentries] = {1.0*eV,6.0*eV};
     //G4double SiPMreflectivity[SiPMnumentries] = {0.0,0.0};
@@ -568,7 +568,7 @@ G4VPhysicalVolume* LYSimDetectorConstruction::ConstructDetector()
 }
 
 
-G4VSolid* LYSimDetectorConstruction::ConstructTileSolid (const G4String& name, 
+G4VSolid* LYSimDetectorConstruction::ConstructTileSolid (const G4String& name,
                                                          G4double angle1,
                                                          G4double angle2,
                                                          G4double Dx2,
@@ -644,7 +644,7 @@ void LYSimDetectorConstruction::DefineMaterials()
         fBialkali = new G4Material("Bialkali", 4.28*g/cm3, 3, kStateSolid);
         fBialkali->AddElement(K,  13.3*perCent);
         fBialkali->AddElement(Cs, 45.2*perCent);
-        fBialkali->AddElement(Sb, 41.5*perCent); 
+        fBialkali->AddElement(Sb, 41.5*perCent);
     }
     {
         fEpoxy = new G4Material("Epoxy", 3.75*g/cm3, 2, kStateSolid);
@@ -749,7 +749,7 @@ void LYSimDetectorConstruction::DefineMaterials()
              3.20*eV,3.23*eV,3.26*eV,3.29*eV,3.32*eV,
              3.35*eV,3.38*eV,3.41*eV,3.44*eV,3.47*eV};
 
-        G4double RefractiveIndexFiber[nEntries] = 
+        G4double RefractiveIndexFiber[nEntries] =
             { 1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60,
               1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60,
               1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60, 1.60,
@@ -870,17 +870,17 @@ void LYSimDetectorConstruction::DefineMaterials()
 
     /*
       const G4int numentrieslysolal = 55;
-      G4double lysoenergieslal[numentrieslysolal] = 
-      {        3.542*eV, 3.493*eV, 3.444*eV, 3.397*eV, 3.351*eV, 
-      3.306*eV, 3.263*eV, 3.220*eV, 3.179*eV, 3.139*eV, 
-      3.100*eV, 3.061*eV, 3.024*eV, 2.988*eV, 2.952*eV, 
-      2.917*eV, 2.883*eV, 2.850*eV, 2.818*eV, 2.786*eV, 
-      2.755*eV, 2.725*eV, 2.695*eV, 2.666*eV, 2.638*eV, 
-      2.610*eV, 2.583*eV, 2.556*eV, 2.530*eV, 2.505*eV, 
-      2.480*eV, 2.455*eV, 2.431*eV, 2.407*eV, 2.384*eV, 
-      2.362*eV, 2.339*eV, 2.317*eV, 2.296*eV, 2.275*eV, 
-      2.254*eV, 2.234*eV, 2.214*eV, 2.194*eV, 2.175*eV, 
-      2.156*eV, 2.138*eV, 2.119*eV, 2.101*eV, 2.084*eV, 
+      G4double lysoenergieslal[numentrieslysolal] =
+      {        3.542*eV, 3.493*eV, 3.444*eV, 3.397*eV, 3.351*eV,
+      3.306*eV, 3.263*eV, 3.220*eV, 3.179*eV, 3.139*eV,
+      3.100*eV, 3.061*eV, 3.024*eV, 2.988*eV, 2.952*eV,
+      2.917*eV, 2.883*eV, 2.850*eV, 2.818*eV, 2.786*eV,
+      2.755*eV, 2.725*eV, 2.695*eV, 2.666*eV, 2.638*eV,
+      2.610*eV, 2.583*eV, 2.556*eV, 2.530*eV, 2.505*eV,
+      2.480*eV, 2.455*eV, 2.431*eV, 2.407*eV, 2.384*eV,
+      2.362*eV, 2.339*eV, 2.317*eV, 2.296*eV, 2.275*eV,
+      2.254*eV, 2.234*eV, 2.214*eV, 2.194*eV, 2.175*eV,
+      2.156*eV, 2.138*eV, 2.119*eV, 2.101*eV, 2.084*eV,
       2.066*eV, 2.049*eV, 2.033*eV, 2.016*eV, 2.000*eV };
       G4double lysolal[numentrieslysolal] =
       {0.001*cm, 0.0022387211*cm, 0.0050118723*cm, 0.0112201845*cm, 0.0251188643*cm, 0.0562341325*cm, 0.1258925412*cm, 0.2818382931*cm, 0.6309573445*cm, 1.4125375446*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm, 50*cm}; //scenario
@@ -888,14 +888,14 @@ void LYSimDetectorConstruction::DefineMaterials()
     /*
     //Pre-05/01/2013
     const G4int numentrieslysolal = 10;
-    G4double lysoenergieslal[numentrieslysolal] = 
+    G4double lysoenergieslal[numentrieslysolal] =
     {
-    3.26*eV, 3.18*eV, 3.10*eV, 3.02*eV, 2.95*eV, 
+    3.26*eV, 3.18*eV, 3.10*eV, 3.02*eV, 2.95*eV,
     2.82*eV, 2.48*eV, 2.21*eV, 1.94*eV, 1.55*eV,
     };
-    G4double lysolal[numentrieslysolal] = 
+    G4double lysolal[numentrieslysolal] =
     {
-    0.*cm, 4.*cm, 20.*cm, 60.*cm, 75.*cm, 
+    0.*cm, 4.*cm, 20.*cm, 60.*cm, 75.*cm,
     150.*cm, 330.*cm, 550.*cm, 640.*cm, 640.*cm
     };
     */
@@ -921,14 +921,14 @@ void LYSimDetectorConstruction::DefineMaterials()
 
         const G4int numentriesrefindex = 35;
         //wavelength array in nm
-        G4double lysowavelength[numentriesrefindex] = 
+        G4double lysowavelength[numentriesrefindex] =
             {
-                360, 370, 380, 390, 400, 
-                410, 420, 430, 440, 450, 
-                460, 470, 480, 490, 500, 
-                510, 520, 530, 540, 550, 
-                560, 570, 580, 590, 600, 
-                610, 620, 630, 640, 650, 
+                360, 370, 380, 390, 400,
+                410, 420, 430, 440, 450,
+                460, 470, 480, 490, 500,
+                510, 520, 530, 540, 550,
+                560, 570, 580, 590, 600,
+                610, 620, 630, 640, 650,
                 660, 670, 680, 690, 700
             };
 
@@ -957,7 +957,7 @@ void LYSimDetectorConstruction::DefineMaterials()
         //Light Absorption Length
         //From 1mm sample transmission data
         const G4int numentrieslysolal = 10;
-        G4double lysoenergieslal[numentrieslysolal] = 
+        G4double lysoenergieslal[numentrieslysolal] =
             {3.351*eV, 3.263*eV, 3.179*eV, 3.100*eV, 3.024*eV, 2.952*eV, 2.883*eV, 2.695*eV, 2.384*eV, 2.066*eV};
         G4double lysolal[numentrieslysolal] =
             {0.025*cm, 0.1*cm, 1*cm, 4*cm, 6*cm, 7*cm, 8*cm, 9*cm, 10*cm, 12*cm};
@@ -966,37 +966,37 @@ void LYSimDetectorConstruction::DefineMaterials()
         //Scintillation emission spectrum (fast component)
         //Gamma-ray emission
         const G4int numentriesemissiongamma = 16;
-        G4double lysoenergiesemissiongamma[numentriesemissiongamma] = 
+        G4double lysoenergiesemissiongamma[numentriesemissiongamma] =
             {
-                3.44*eV, 3.26*eV, 3.18*eV, 3.10*eV, 3.02*eV, 
-                2.95*eV, 2.88*eV, 2.82*eV, 2.70*eV, 2.58*eV, 
-                2.48*eV, 2.38*eV, 2.30*eV, 2.21*eV, 2.14*eV, 
+                3.44*eV, 3.26*eV, 3.18*eV, 3.10*eV, 3.02*eV,
+                2.95*eV, 2.88*eV, 2.82*eV, 2.70*eV, 2.58*eV,
+                2.48*eV, 2.38*eV, 2.30*eV, 2.21*eV, 2.14*eV,
                 1.82*eV
             };
-        G4double lysoemissiongamma[numentriesemissiongamma] = 
+        G4double lysoemissiongamma[numentriesemissiongamma] =
             {
-                0.00, 0.06, 0.28, 0.72, 1.40, 
-                2.00, 2.20, 2.06, 1.48, 0.94, 
-                0.60, 0.40, 0.30, 0.20, 0.10, 
+                0.00, 0.06, 0.28, 0.72, 1.40,
+                2.00, 2.20, 2.06, 1.48, 0.94,
+                0.60, 0.40, 0.30, 0.20, 0.10,
                 0.00
             };
 
         //Photoluminescence (theta = 10 deg)
         const G4int numentrieslysoemission = 21;
-        G4double lysoenergiesemission[numentrieslysoemission] = 
+        G4double lysoenergiesemission[numentrieslysoemission] =
             {
-                3.54*eV, 3.35*eV, 3.26*eV, 3.18*eV, 3.13*eV, 
-                3.10*eV, 3.02*eV, 2.95*eV, 2.88*eV, 2.82*eV, 
-                2.76*eV, 2.70*eV, 2.64*eV, 2.58*eV, 2.53*eV, 
-                2.48*eV, 2.43*eV, 2.38*eV, 2.30*eV, 2.21*eV, 
+                3.54*eV, 3.35*eV, 3.26*eV, 3.18*eV, 3.13*eV,
+                3.10*eV, 3.02*eV, 2.95*eV, 2.88*eV, 2.82*eV,
+                2.76*eV, 2.70*eV, 2.64*eV, 2.58*eV, 2.53*eV,
+                2.48*eV, 2.43*eV, 2.38*eV, 2.30*eV, 2.21*eV,
                 2.00*eV
             };
-        G4double lysoemission[numentrieslysoemission] = 
+        G4double lysoemission[numentrieslysoemission] =
             {
-                0, 0.26, 1.26, 2.14, 2.2, 
-                2.16, 2.04, 1.9, 1.64, 1.3, 
-                0.9, 0.62, 0.38, 0.26, 0.14, 
-                0.1, 0.08, 0.06, 0.04, 0.02, 
+                0, 0.26, 1.26, 2.14, 2.2,
+                2.16, 2.04, 1.9, 1.64, 1.3,
+                0.9, 0.62, 0.38, 0.26, 0.14,
+                0.1, 0.08, 0.06, 0.04, 0.02,
                 0
             };
 
@@ -1039,69 +1039,69 @@ void LYSimDetectorConstruction::DefineMaterials()
 
         //FIXME: findout Y11 parameters
         const G4int NUMENTRIES1 = 91;
-        G4double PhotonEnergy_WLS_ABS_FiberCore[NUMENTRIES1] = 
-            {        1.776*eV, 1.794*eV, 1.807*eV, 1.821*eV, 1.832*eV, 
-                     1.851*eV, 1.868*eV, 1.876*eV, 1.887*eV, 1.890*eV, 
-                     1.902*eV, 1.908*eV, 1.917*eV, 1.926*eV, 1.932*eV, 
-                     1.941*eV, 1.947*eV, 1.959*eV, 1.969*eV, 1.981*eV, 
-                     1.994*eV, 2.004*eV, 2.010*eV, 2.020*eV, 2.027*eV, 
-                     2.030*eV, 2.040*eV, 2.047*eV, 2.054*eV, 2.061*eV, 
-                     2.071*eV, 2.081*eV, 2.088*eV, 2.099*eV, 2.110*eV, 
-                     2.135*eV, 2.154*eV, 2.161*eV, 2.177*eV, 2.212*eV, 
-                     2.244*eV, 2.273*eV, 2.285*eV, 2.302*eV, 2.311*eV, 
-                     2.320*eV, 2.333*eV, 2.359*eV, 2.377*eV, 2.391*eV, 
-                     2.410*eV, 2.424*eV, 2.443*eV, 2.458*eV, 2.478*eV, 
-                     2.513*eV, 2.572*eV, 2.594*eV, 2.616*eV, 2.632*eV, 
-                     2.649*eV, 2.666*eV, 2.678*eV, 2.695*eV, 2.701*eV, 
-                     2.731*eV, 2.749*eV, 2.768*eV, 2.792*eV, 2.811*eV, 
-                     2.824*eV, 2.831*eV, 2.850*eV, 2.877*eV, 2.904*eV, 
-                     2.910*eV, 2.931*eV, 2.952*eV, 2.980*eV, 3.017*eV, 
-                     3.046*eV, 3.069*eV, 3.092*eV, 3.123*eV, 3.155*eV, 
-                     3.212*eV, 3.271*eV, 3.315*eV, 3.378*eV, 3.454*eV, 
+        G4double PhotonEnergy_WLS_ABS_FiberCore[NUMENTRIES1] =
+            {        1.776*eV, 1.794*eV, 1.807*eV, 1.821*eV, 1.832*eV,
+                     1.851*eV, 1.868*eV, 1.876*eV, 1.887*eV, 1.890*eV,
+                     1.902*eV, 1.908*eV, 1.917*eV, 1.926*eV, 1.932*eV,
+                     1.941*eV, 1.947*eV, 1.959*eV, 1.969*eV, 1.981*eV,
+                     1.994*eV, 2.004*eV, 2.010*eV, 2.020*eV, 2.027*eV,
+                     2.030*eV, 2.040*eV, 2.047*eV, 2.054*eV, 2.061*eV,
+                     2.071*eV, 2.081*eV, 2.088*eV, 2.099*eV, 2.110*eV,
+                     2.135*eV, 2.154*eV, 2.161*eV, 2.177*eV, 2.212*eV,
+                     2.244*eV, 2.273*eV, 2.285*eV, 2.302*eV, 2.311*eV,
+                     2.320*eV, 2.333*eV, 2.359*eV, 2.377*eV, 2.391*eV,
+                     2.410*eV, 2.424*eV, 2.443*eV, 2.458*eV, 2.478*eV,
+                     2.513*eV, 2.572*eV, 2.594*eV, 2.616*eV, 2.632*eV,
+                     2.649*eV, 2.666*eV, 2.678*eV, 2.695*eV, 2.701*eV,
+                     2.731*eV, 2.749*eV, 2.768*eV, 2.792*eV, 2.811*eV,
+                     2.824*eV, 2.831*eV, 2.850*eV, 2.877*eV, 2.904*eV,
+                     2.910*eV, 2.931*eV, 2.952*eV, 2.980*eV, 3.017*eV,
+                     3.046*eV, 3.069*eV, 3.092*eV, 3.123*eV, 3.155*eV,
+                     3.212*eV, 3.271*eV, 3.315*eV, 3.378*eV, 3.454*eV,
                      3.522*eV};
 
-        G4double WLS_ABSLENGTH_FiberCore[NUMENTRIES1] = 
-            {        71.2971*cm, 117.49*cm, 146.611*cm, 181.757*cm, 211.883*cm, 
-                     224.937*cm, 207.866*cm, 204.854*cm, 188.787*cm, 174.728*cm, 
-                     155.649*cm, 139.582*cm, 128.536*cm, 131.548*cm, 141.59*cm, 
-                     152.636*cm, 167.699*cm, 185.774*cm, 198.828*cm, 204.854*cm, 
-                     200.837*cm, 187.782*cm, 165.69*cm, 123.515*cm, 85.3556*cm, 
-                     67.2803*cm, 61.2552*cm, 63.2636*cm, 69.2887*cm, 86.3598*cm, 
-                     111.464*cm, 139.582*cm, 156.653*cm, 168.703*cm, 178.745*cm, 
-                     177.741*cm, 166.695*cm, 160.669*cm, 152.636*cm, 144.603*cm, 
-                     136.569*cm, 129.54*cm, 119.498*cm, 108.452*cm, 99.4142*cm, 
-                     88.3682*cm, 82.3431*cm, 84.3515*cm, 81.3389*cm, 74.3096*cm, 
-                     65.272*cm, 56.2343*cm, 42.1757*cm, 31.1297*cm, 22.0921*cm, 
-                     11.046*cm, 1.64583*cm, 0.51974*cm, 0.214673*cm, 0.121914*cm, 
-                     0.0742481*cm, 0.0539618*cm, 0.0416667*cm, 0.0337031*cm, 0.0298338*cm, 
-                     0.0277388*cm, 0.029216*cm, 0.0309561*cm, 0.0321661*cm, 0.0317524*cm, 
-                     0.0301988*cm, 0.0278955*cm, 0.0261243*cm, 0.025*cm, 0.0261936*cm, 
-                     0.0282951*cm, 0.0321661*cm, 0.0347711*cm, 0.0387255*cm, 0.0404713*cm, 
-                     0.0418432*cm, 0.046801*cm, 0.0536685*cm, 0.0671769*cm, 0.0822918*cm, 
-                     0.109722*cm, 0.147388*cm, 0.205729*cm, 0.308594*cm, 0.448864*cm, 
+        G4double WLS_ABSLENGTH_FiberCore[NUMENTRIES1] =
+            {        71.2971*cm, 117.49*cm, 146.611*cm, 181.757*cm, 211.883*cm,
+                     224.937*cm, 207.866*cm, 204.854*cm, 188.787*cm, 174.728*cm,
+                     155.649*cm, 139.582*cm, 128.536*cm, 131.548*cm, 141.59*cm,
+                     152.636*cm, 167.699*cm, 185.774*cm, 198.828*cm, 204.854*cm,
+                     200.837*cm, 187.782*cm, 165.69*cm, 123.515*cm, 85.3556*cm,
+                     67.2803*cm, 61.2552*cm, 63.2636*cm, 69.2887*cm, 86.3598*cm,
+                     111.464*cm, 139.582*cm, 156.653*cm, 168.703*cm, 178.745*cm,
+                     177.741*cm, 166.695*cm, 160.669*cm, 152.636*cm, 144.603*cm,
+                     136.569*cm, 129.54*cm, 119.498*cm, 108.452*cm, 99.4142*cm,
+                     88.3682*cm, 82.3431*cm, 84.3515*cm, 81.3389*cm, 74.3096*cm,
+                     65.272*cm, 56.2343*cm, 42.1757*cm, 31.1297*cm, 22.0921*cm,
+                     11.046*cm, 1.64583*cm, 0.51974*cm, 0.214673*cm, 0.121914*cm,
+                     0.0742481*cm, 0.0539618*cm, 0.0416667*cm, 0.0337031*cm, 0.0298338*cm,
+                     0.0277388*cm, 0.029216*cm, 0.0309561*cm, 0.0321661*cm, 0.0317524*cm,
+                     0.0301988*cm, 0.0278955*cm, 0.0261243*cm, 0.025*cm, 0.0261936*cm,
+                     0.0282951*cm, 0.0321661*cm, 0.0347711*cm, 0.0387255*cm, 0.0404713*cm,
+                     0.0418432*cm, 0.046801*cm, 0.0536685*cm, 0.0671769*cm, 0.0822918*cm,
+                     0.109722*cm, 0.147388*cm, 0.205729*cm, 0.308594*cm, 0.448864*cm,
                      0.548611*cm};
 
         const G4int NUMENTRIES2 = 42;
-        G4double PhotonEnergy_WLS_Em_FiberCore[NUMENTRIES2] = 
-            {        1.993*eV, 2.029*eV, 2.070*eV, 2.109*eV, 2.153*eV, 
-                     2.187*eV, 2.222*eV, 2.246*eV, 2.271*eV, 2.305*eV, 
-                     2.331*eV, 2.353*eV, 2.366*eV, 2.384*eV, 2.394*eV, 
-                     2.407*eV, 2.417*eV, 2.431*eV, 2.445*eV, 2.460*eV, 
-                     2.475*eV, 2.490*eV, 2.510*eV, 2.520*eV, 2.535*eV, 
-                     2.546*eV, 2.562*eV, 2.572*eV, 2.583*eV, 2.594*eV, 
-                     2.605*eV, 2.616*eV, 2.627*eV, 2.644*eV, 2.661*eV, 
-                     2.666*eV, 2.678*eV, 2.689*eV, 2.701*eV, 2.719*eV, 
+        G4double PhotonEnergy_WLS_Em_FiberCore[NUMENTRIES2] =
+            {        1.993*eV, 2.029*eV, 2.070*eV, 2.109*eV, 2.153*eV,
+                     2.187*eV, 2.222*eV, 2.246*eV, 2.271*eV, 2.305*eV,
+                     2.331*eV, 2.353*eV, 2.366*eV, 2.384*eV, 2.394*eV,
+                     2.407*eV, 2.417*eV, 2.431*eV, 2.445*eV, 2.460*eV,
+                     2.475*eV, 2.490*eV, 2.510*eV, 2.520*eV, 2.535*eV,
+                     2.546*eV, 2.562*eV, 2.572*eV, 2.583*eV, 2.594*eV,
+                     2.605*eV, 2.616*eV, 2.627*eV, 2.644*eV, 2.661*eV,
+                     2.666*eV, 2.678*eV, 2.689*eV, 2.701*eV, 2.719*eV,
                      2.749*eV, 2.780*eV };
 
-        G4double WLS_Emission_FiberCore[NUMENTRIES2] = 
-            {        0.00505051, 0.012626, 0.0252525, 0.035353, 0.0555556, 
-                     0.0782828, 0.126263, 0.164141, 0.222222, 0.270202, 
-                     0.315657, 0.373737, 0.444444, 0.515152, 0.580808, 
-                     0.65404, 0.719697, 0.762626, 0.792929, 0.777778, 
-                     0.747475, 0.70202, 0.686869, 0.69697, 0.739899, 
-                     0.787879, 0.858586, 0.919192, 0.969697, 1, 
-                     0.984848, 0.924242, 0.815657, 0.64899, 0.517677, 
-                     0.39899, 0.287879, 0.186869, 0.103535, 0.0530303, 
+        G4double WLS_Emission_FiberCore[NUMENTRIES2] =
+            {        0.00505051, 0.012626, 0.0252525, 0.035353, 0.0555556,
+                     0.0782828, 0.126263, 0.164141, 0.222222, 0.270202,
+                     0.315657, 0.373737, 0.444444, 0.515152, 0.580808,
+                     0.65404, 0.719697, 0.762626, 0.792929, 0.777778,
+                     0.747475, 0.70202, 0.686869, 0.69697, 0.739899,
+                     0.787879, 0.858586, 0.919192, 0.969697, 1,
+                     0.984848, 0.924242, 0.815657, 0.64899, 0.517677,
+                     0.39899, 0.287879, 0.186869, 0.103535, 0.0530303,
                      0.0151515, 0 };
 
         G4MaterialPropertiesTable* MPTFiberCore = new G4MaterialPropertiesTable();
@@ -1192,9 +1192,9 @@ void LYSimDetectorConstruction::DefineMaterials()
 	//const G4int nEntries = 2;
         //G4double PhotonEnergy[nEntries] = {1.0*eV, 6.0*eV};
         //G4double RefractiveIndex[nEntries] = {1.58, 1.58};
-       	
+
         //const G4int nEntries = 41;
-        /*G4double PhotonEnergy[nEntries] = 
+        /*G4double PhotonEnergy[nEntries] =
           {2.25433247*eV, 2.27501442*eV, 2.29607937*eV, 2.31753806*eV, 2.33940162*eV,
            2.36168164*eV, 2.38439012*eV, 2.40753953*eV, 2.43114286*eV, 2.45521358*eV,
            2.47976572*eV, 2.50481386*eV, 2.53037318*eV, 2.55645951*eV, 2.58308929*eV,
@@ -1204,8 +1204,8 @@ void LYSimDetectorConstruction::DefineMaterials()
            3.09970715*eV, 3.13894395*eV, 3.17918682*eV, 3.22047496*eV, 3.26284963*eV,
            3.30635429*eV, 3.35103476*eV, 3.39693934*eV, 3.44411906*eV, 3.49262777*eV,
            3.54252246*eV};
-	
-	G4double RefractiveIndex[nEntries] = 
+
+	G4double RefractiveIndex[nEntries] =
 	 {1.58, 1.58, 1.58, 1.58, 1.58,
 	  1.58, 1.58, 1.58, 1.58, 1.58,
 	  1.58, 1.58, 1.58, 1.58, 1.58,
@@ -1215,8 +1215,8 @@ void LYSimDetectorConstruction::DefineMaterials()
 	  1.58, 1.58, 1.58, 1.58, 1.58,
 	  1.58, 1.58, 1.58, 1.58, 1.58,
 	  1.58};
-	
-	G4double AbsLength[nEntries] = 
+
+	G4double AbsLength[nEntries] =
 	  {124.0151808*cm, 121.5151144*cm, 111.5082173*cm, 111.5001357*cm, 109.3711504*cm,
            107.6920217*cm, 104.7432022*cm, 102.5760019*cm, 97.4190864*cm, 89.49243424*cm,
            86.97876601*cm, 78.90244211*cm, 72.94223244*cm, 69.24306758*cm, 62.16439407*cm,
@@ -1226,30 +1226,30 @@ void LYSimDetectorConstruction::DefineMaterials()
            0.307094977*cm, 0.15251478*cm, 0.144117313*cm, 0.144066445*cm, 0.143662647*cm,
            0.143359894*cm, 0.143032223*cm, 0.142956159*cm, 0.142906311*cm, 0.142855274*cm,
            0.142805293*cm};
-	
-	
+
+
 	const G4int nEntries = 2;
 	G4double PhotonEnergy[nEntries]= {1.0*eV,6.0*eV};
 	G4double RefractiveIndex[nEntries] = {1.58, 1.58};
-	 
+
         G4double baseAbsLength = GetTileAbsLength();
         G4double baseMu = 1 / baseAbsLength;
         G4double inducedMu = GetInducedMuTile();
         G4double mu = baseMu + inducedMu;
         G4double absLength = 1 / mu;
-	
+
 	G4cout << "[LYSim] [EJ200] Tile abs length set to " << G4BestUnit(absLength, "Length") << G4endl;
-  	
+
 	G4double AbsLength[nEntries] = {absLength, absLength};
 	*/
-	
+
         //4mm Unirr
-	
+
 	const G4int nEntries = 57;
         //~350 to 550nm
-	G4double PhotonEnergy[nEntries] = 	
+	G4double PhotonEnergy[nEntries] =
 	 {
-	   3.542405514*eV, 3.492512479*eV, 3.444005361*eV, 3.396827205*eV, 3.350924135*eV, 3.306245147*eV, 3.262741921*eV, 3.220368649*eV, 
+	   3.542405514*eV, 3.492512479*eV, 3.444005361*eV, 3.396827205*eV, 3.350924135*eV, 3.306245147*eV, 3.262741921*eV, 3.220368649*eV,
 	   3.179081872*eV, 3.170951228*eV, 3.162862066*eV, 3.154814071*eV, 3.146806929*eV, 3.138840329*eV, 3.130913965*eV, 3.123027531*eV,
 	   3.115180729*eV, 3.107373258*eV, 3.099604825*eV, 3.091875137*eV, 3.084183905*eV, 3.076530844*eV, 3.068915668*eV, 3.061338099*eV,
 	   3.053797857*eV, 3.046294668*eV, 3.038828260*eV, 3.031398362*eV, 3.024004707*eV, 2.987570916*eV, 2.952004595*eV, 2.917275129*eV,
@@ -1257,12 +1257,12 @@ void LYSimDetectorConstruction::DefineMaterials()
 	   2.637961553*eV, 2.610193537*eV, 2.583004021*eV, 2.556375113*eV, 2.530289653*eV, 2.504731172*eV, 2.479683860*eV, 2.455132535*eV,
 	   2.431062608*eV, 2.407460058*eV, 2.384311404*eV, 2.361603676*eV, 2.339324396*eV, 2.317461551*eV, 2.296003574*eV, 2.274939321*eV,
 	   2.254258055*eV
-	 };  
+	 };
 
-		
-	G4double RefractiveIndex[nEntries] = 
+
+	G4double RefractiveIndex[nEntries] =
 	 {
-	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 
+	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58,
 	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58,
 	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58,
 	    1.58, 1.58, 1.58, 1.58, 1.58, 1.58, 1.58,
@@ -1273,25 +1273,25 @@ void LYSimDetectorConstruction::DefineMaterials()
 	    1.58
 	 };
 /*
-	G4double AbsLength[nEntries] = 
+	G4double AbsLength[nEntries] =
 	 {
-            17.42923195*mm, 17.50261763*mm, 17.5208078*mm, 17.54004961*mm, 17.56848311*mm, 17.66153201*mm, 17.69242388*mm, 18.13437416*mm, 
-            22.14857794*mm, 23.91636107*mm, 26.19927553*mm, 29.08895*mm, 32.75048588*mm, 37.2814987*mm, 43.07842006*mm, 50.39849206*mm, 
-            59.85105799*mm, 71.98244983*mm, 87.89754636*mm, 108.7633087*mm, 136.5727481*mm, 173.1953472*mm, 222.5973304*mm, 287.5620553*mm, 
-            375.9938324*mm, 489.0761462*mm, 637.3307552*mm, 815.2529798*mm, 1039.85692*mm, 2315.937016*mm, 3211.846828*mm, 3800*mm, 
-            4162.309734*mm, 4429.365072*mm, 4633.055771*mm, 4944.6964*mm, 5176.400316*mm, 5396.503919*mm, 5716.638906*mm, 6168.317205*mm, 
-            6280.01449*mm, 6360.307136*mm, 6639.580861*mm, 6926.56235*mm, 7323.864938*mm, 7652.045236*mm, 8104.081942*mm, 8525.979809*mm, 
-            8898.295533*mm, 9225.296344*mm, 9847.707211*mm, 10310.48782*mm, 10862.6328*mm, 11237.54509*mm, 11929.82503*mm, 12944.01067*mm, 
+            17.42923195*mm, 17.50261763*mm, 17.5208078*mm, 17.54004961*mm, 17.56848311*mm, 17.66153201*mm, 17.69242388*mm, 18.13437416*mm,
+            22.14857794*mm, 23.91636107*mm, 26.19927553*mm, 29.08895*mm, 32.75048588*mm, 37.2814987*mm, 43.07842006*mm, 50.39849206*mm,
+            59.85105799*mm, 71.98244983*mm, 87.89754636*mm, 108.7633087*mm, 136.5727481*mm, 173.1953472*mm, 222.5973304*mm, 287.5620553*mm,
+            375.9938324*mm, 489.0761462*mm, 637.3307552*mm, 815.2529798*mm, 1039.85692*mm, 2315.937016*mm, 3211.846828*mm, 3800*mm,
+            4162.309734*mm, 4429.365072*mm, 4633.055771*mm, 4944.6964*mm, 5176.400316*mm, 5396.503919*mm, 5716.638906*mm, 6168.317205*mm,
+            6280.01449*mm, 6360.307136*mm, 6639.580861*mm, 6926.56235*mm, 7323.864938*mm, 7652.045236*mm, 8104.081942*mm, 8525.979809*mm,
+            8898.295533*mm, 9225.296344*mm, 9847.707211*mm, 10310.48782*mm, 10862.6328*mm, 11237.54509*mm, 11929.82503*mm, 12944.01067*mm,
             13183.00043*mm
          };
 */
 
-	G4double AbsLength[nEntries] = 
+	G4double AbsLength[nEntries] =
 	 {
 	   0.5743617028*mm, 0.5767800495*mm, 0.5773794872*mm, 0.5780135803*mm, 0.5789505759*mm, 0.582016903*mm, 0.5830349115*mm, 0.5975989105*mm, 0.729882704*mm,
 	   0.7881381067*mm, 0.8633691117*mm, 0.9585952443*mm, 1.079257244*mm, 1.228571927*mm, 1.419603272*mm, 1.660828418*mm, 1.972327621*mm, 2.372104668*mm,
-	   2.896569657*mm, 3.584178546*mm, 4.500608885*mm, 5.707467479*mm, 7.335457013*mm, 9.476300059*mm, 12.39047472*mm, 16.11698146*mm, 21.00255358*mm, 
-	   26.86579025*mm, 34.26737294*mm, 76.31922807*mm, 105.842978*mm, 125.2249369*mm, 137.1644668*mm, 145.9649899*mm, 152.6773991*mm, 162.9471828*mm, 
+	   2.896569657*mm, 3.584178546*mm, 4.500608885*mm, 5.707467479*mm, 7.335457013*mm, 9.476300059*mm, 12.39047472*mm, 16.11698146*mm, 21.00255358*mm,
+	   26.86579025*mm, 34.26737294*mm, 76.31922807*mm, 105.842978*mm, 125.2249369*mm, 137.1644668*mm, 145.9649899*mm, 152.6773991*mm, 162.9471828*mm,
 	   170.5827376*mm, 177.8360165*mm, 188.3857227*mm, 203.2702981*mm, 206.9511627*mm, 209.597121*mm, 218.800288*mm, 228.2574561*mm, 241.3501381*mm,
 	   252.1649689*mm, 267.0613552*mm, 280.9645483*mm, 293.2338149*mm, 304.009777*mm, 324.5206616*mm, 339.7711016*mm, 357.9664491*mm, 370.3212829*mm,
 	   393.1346279*mm, 426.5560315*mm, 434.4316833*mm
@@ -1365,7 +1365,7 @@ void LYSimDetectorConstruction::DefineMaterials()
 }
 
 
-   
+
 void LYSimDetectorConstruction::DefineSurfaces()
 {
     {

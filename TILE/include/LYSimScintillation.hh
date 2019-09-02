@@ -8,11 +8,11 @@
 class LYSimScintillation : public G4Scintillation
 {
 public:
-    LYSimScintillation(const G4String &processName="Scintillation", G4ProcessType type=fElectromagnetic);
-    virtual ~LYSimScintillation();
+  LYSimScintillation( const G4String & processName = "Scintillation", G4ProcessType type = fElectromagnetic );
+  virtual ~LYSimScintillation();
 
-    G4VParticleChange* PostStepDoIt(const G4Track& aTrack, const G4Step&  aStep);
-    
+  G4VParticleChange* PostStepDoIt( const G4Track& aTrack, const G4Step& aStep );
+
 };
 
 #endif

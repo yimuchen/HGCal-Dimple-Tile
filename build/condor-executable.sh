@@ -1,15 +1,11 @@
 #!/bin/bash
 
-cd /data/users/ahorst/hgcal_tile/build/
-
+cd /home/eno/hgtile/build/
 
 export UNIQUE_ID=sce
 export CONDOR_PROCESS=sce
 export RUN_DIR=`pwd`
-TAG=$RANDOM
-echo "TAG"
-cp photontest.mac photontest_${TAG}.mac
-export PARAMETER_SET=photontest_${TAG}.mac
+export PARAMETER_SET=photontest.mac
 
 
 START_TIME=`/bin/date`
@@ -21,6 +17,7 @@ echo "UNIQUE_ID: $UNIQUE_ID"
 echo "CONDOR_PROCESS: $CONDOR_PROCESS"
 echo "RUN_DIR: $RUN_DIR"
 echo "PARAMETER_SET: $PARAMETER_SET"
+
 
 
 #

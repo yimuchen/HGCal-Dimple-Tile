@@ -3,14 +3,15 @@
 
 #include "G4UserTrackingAction.hh"
 
-class LYSimTrackingAction : public G4UserTrackingAction {
+class LYSimTrackingAction : public G4UserTrackingAction
+{
 
-  public:
+public:
 
-    LYSimTrackingAction() { };
-    ~LYSimTrackingAction() { };
-    void PreUserTrackingAction(const G4Track*);
-    void PostUserTrackingAction(const G4Track*);
+  LYSimTrackingAction(){};
+  ~LYSimTrackingAction(){};
+  void PreUserTrackingAction( const G4Track* );
+  void PostUserTrackingAction( const G4Track* );
 };
 
 #endif

@@ -20,18 +20,18 @@ class LYSimPrimaryGeneratorMessenger : public G4UImessenger
 {
 public:
 
-    LYSimPrimaryGeneratorMessenger(LYSimPrimaryGeneratorAction* );
-    ~LYSimPrimaryGeneratorMessenger();
- 
-    void SetNewValue(G4UIcommand*, G4String);
+  LYSimPrimaryGeneratorMessenger( LYSimPrimaryGeneratorAction* );
+  ~LYSimPrimaryGeneratorMessenger();
+
+  void SetNewValue( G4UIcommand*, G4String );
 
 private:
 
   LYSimPrimaryGeneratorAction* Paction;
-    G4UIdirectory* detDir;
+  G4UIdirectory* detDir;
 
-  G4UIcmdWithABool*           SetSource000Cmd;
-  G4UIcmdWithABool*           SetAngle000Cmd;
+  G4UIcmdWithABool* SetSource000Cmd;
+  G4UIcmdWithABool* SetAngle000Cmd;
 
 
 

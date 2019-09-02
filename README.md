@@ -25,7 +25,7 @@ cmake --build ../TILE
 ## running
 
 ```bash
-./LYSIM photontest.mac [-novis] [output_filename] [root_filename}
+./LYSIM photontest.mac [-novis] [output_filename] [root_filename]
 ```
 
 (if running without -novis

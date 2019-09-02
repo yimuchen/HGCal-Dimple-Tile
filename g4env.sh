@@ -5,7 +5,7 @@ export USERBASE=$(pwd)
 export ARCH=x86_64-slc6-gcc46-opt
 export ARCH2=x86_64-slc6-gcc46-opt
 export ARCHd=x86_64-slc6-gcc46-dbg
-source /cvmfs/sft.cern.ch/lcg/external/gcc/4.6.3/x86_64-slc6/setup.csh
+source /cvmfs/sft.cern.ch/lcg/external/gcc/4.6.3/x86_64-slc6/setup.sh
 export QTHOME=/cvmfs/sft.cern.ch/lcg/external/qt/4.8.4/${ARCH}/
 export DAWNHOME=/afs/cern.ch/sw/lcg/external/dawn/3_88a/x86_64-slc5-gcc43-opt/
 export G4DAWNFILE_DEST_DIR=${USERBASE}/DawnFiles/
@@ -22,8 +22,11 @@ export PATH=$PATH:/cvmfs/sft.cern.ch/lcg/external/expat/2.0.1/${ARCH}
 #cd ${USERBASE}
 
 export G4BASE=/data/users/eno/geant4.9.6.p04-install/
-source /data/users/eno/geant4.9.6.p04-install/share/Geant4-9.6.4/geant4make/geant4make.sh
-cd /cvmfs/sft.cern.ch/lcg/external/ROOT/5.34.00/${ARCH}/root/bin/thisroot.sh
+## Must be done like this
+cd     /data/users/eno/geant4.9.6.p04-install/share/Geant4-9.6.4/geant4make
+source geant4make.sh
+cd     /cvmfs/sft.cern.ch/lcg/external/ROOT/5.34.00/${ARCH}/root/
+source ./bin/thisroot.sh
 
 cd ${USERBASE}
 

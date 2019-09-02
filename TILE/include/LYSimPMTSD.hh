@@ -30,8 +30,8 @@
 //
 //
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
+// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
+// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
 #ifndef LYSimPMTSD_h
 #define LYSimPMTSD_h
@@ -45,28 +45,28 @@ class G4HCofThisEvent;
 
 class LYSimPMTSD : public G4VSensitiveDetector
 {
-  public:
+public:
 
-    LYSimPMTSD(G4String name);
-    ~LYSimPMTSD();
+  LYSimPMTSD( G4String name );
+  ~LYSimPMTSD();
 
 
-    G4bool ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist);
-    //A version of processHits that keeps aStep constant
-    G4bool ProcessHits_constStep(const G4Step* aStep,
-                                 G4TouchableHistory* ROhist);
+  G4bool ProcessHits( G4Step* aStep, G4TouchableHistory* ROhist );
+  // A version of processHits that keeps aStep constant
+  G4bool ProcessHits_constStep( const G4Step*       aStep,
+                                G4TouchableHistory* ROhist );
 
-    void Initialize(G4HCofThisEvent* HCE);
-    void EndOfEvent(G4HCofThisEvent* HCE);
+  void Initialize( G4HCofThisEvent* HCE );
+  void EndOfEvent( G4HCofThisEvent* HCE );
 
-    void clear();
-    void DrawAll();
-    void PrintAll();
+  void clear();
+  void DrawAll();
+  void PrintAll();
 
-  private:
+private:
 
-    LYSimPMTHitsCollection* fPMTHitsCollection;
- 
+  LYSimPMTHitsCollection* fPMTHitsCollection;
+
 };
 
 #endif

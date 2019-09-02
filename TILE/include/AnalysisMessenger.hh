@@ -18,20 +18,20 @@ class G4UIcmdWithoutParameter;
 
 class AnalysisMessenger : public G4UImessenger
 {
-  public:
+public:
 
-    AnalysisMessenger(Analysis* );
-    ~AnalysisMessenger();
- 
-    void SetNewValue(G4UIcommand*, G4String);
+  AnalysisMessenger( Analysis* );
+  ~AnalysisMessenger();
 
-  private:
+  void SetNewValue( G4UIcommand*, G4String );
 
-    Analysis*   analysis;
- 
-    G4UIdirectory*          analysisDir;
+private:
 
-    G4UIcmdWithADouble*   	SetTileAbsLengthCmd;
+  Analysis* analysis;
+
+  G4UIdirectory* analysisDir;
+
+  G4UIcmdWithADouble* SetTileAbsLengthCmd;
 
 };
 
