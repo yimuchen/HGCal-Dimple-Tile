@@ -22,23 +22,31 @@ cmake -DWITH_GEANT4_UIVIS=ON -DGeant4_DIR=$G4LIB ../TILE
 cmake --build ../TILE
 ```
 
-## running
+## Single test point run
 
 ```bash
-./LYSIM photontest.mac [-novis] [output_filename] [root_filename]
+./LYSIM photontest.mac [output_filename]
 ```
 
-(if running without -novis
-         /run/beamOn 5
+The output options is optional. Will save to data/Analysis<RandomInt>.root if not specified.
 
+Alternaltively, on can just start
 
-## run the job on condor.
+```bash
+./LYSim
+```
+
+To begin an interactive Geant4 session.
+
+## Running on condor
 
 edit the condor-*.* so that they point to your areas, not mine
 
 submit with
 
+```bash
 condor_submit condor_jobs.jdl
+```
 
 see if it is running with
 
@@ -46,10 +54,11 @@ condor_q -submitter your-user-name
 
 look at Analysis.root
 
+OR
 
-  OR
-
-     python SubmitJobs.py
+```bash
+python SubmitJobs.py
+```
 
 *WARNING* it's currently set to run 2000 jobs at 31 points, it takes a long time.
 Use screen or create fewer jobs per point

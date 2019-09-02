@@ -135,7 +135,7 @@ for x in range(len(Arr2)):
           RandF2 = random_N_digit(8)
           if n == 1:
             print("%s %s %s" % (Arr2[x], Arr3[y], str(q)))
-# Creating new file
+          # Creating new file
           shutil.copy2('photontestbeams.mac', 'photontest.mac')
 
           ### Write rand position of source 1###
@@ -143,12 +143,12 @@ for x in range(len(Arr2)):
           with open('photontest.mac', 'r') as file:
             filedata = file.read()
 
-        # Random Number inside source area
+          # Random Number inside source area
           if Source == 0:
             RandPosx = round(random.uniform(Arr2[x] - 0.15, Arr2[x] + 0.15), 4)
             RandPosy = round(random.uniform(Arr3[y] - 0.15, Arr3[y] + 0.15), 4)
 
-    # Replacing the target string
+          # Replacing the target string
           a = " "
           if Source == 0:
             j = str(RandPosx) + a + str(RandPosy) + a + str(0.0)
@@ -161,10 +161,10 @@ for x in range(len(Arr2)):
           with open('photontest.mac', 'w') as file:
             file.write(filedata)
 
-    # Reading in the file
+          # Reading in the file
           with open('photontest.mac', 'r') as file:
             filedata = file.read()
-        # Replacing the target string
+          # Replacing the target string
           a = " "
           j = str(RandF1) + a + str(RandF2)
           i = str(RandS1) + a + str(RandS2)
@@ -188,8 +188,8 @@ for x in range(len(Arr2)):
             # Reading in the file
             with open('photontest.mac', 'r') as file:
               filedata = file.read()
-        # Replacing the target string
-        #dfromcenter = math.sqrt(RandPosx**2+RandPosy**2)
+            # Replacing the target string
+            #dfromcenter = math.sqrt(RandPosx**2+RandPosy**2)
             dfromcenter = math.sqrt(Arr2[x]**2 + Arr3[y]**2)
 
             if norm == 1:
@@ -237,9 +237,9 @@ for x in range(len(Arr2)):
             with open('photontest.mac', 'w') as file:
               file.write(filedata)
 
-        # Shallow Dimple Conditional for Fewer Source Photons
+          # Shallow Dimple Conditional for Fewer Source Photons
 
-        # Defining the infile
+          # Defining the infile
           InFile = 'photontest.mac'
 
           condorcmd = "condor_submit condor-jobs.jdl"
