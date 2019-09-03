@@ -13,4 +13,4 @@
 /process/setVerbose 0
 
 # Visualization setting
-/control/execute vis.mac
+/control/execute mac/vis.mac

@@ -13,13 +13,11 @@ Tested/Edited by Alan Horst, Yi-Mu Chen
 ## compiling
 
 ```bash
-git clone https://github.com/yimuchen/HGCal-Dimple-Tile.git
-cd hgcal_tile
-./g4env.sh
-mkdir build
-cd build
-cmake -DWITH_GEANT4_UIVIS=ON -DGeant4_DIR=$G4LIB ../TILE
-cmake --build ../TILE
+git clone https://github.com/yimuchen/HGCal-Dimple-Tile.git HGCalTileSim
+cd     HGCalTileSim
+source ./g4env.sh
+cmake -DGeant4_DIR=$G4LIB .
+cmake --build .
 ```
 
 ## Single test point run
@@ -28,9 +26,8 @@ cmake --build ../TILE
 ./LYSIM photontest.mac [output_filename]
 ```
 
-The output options is optional. Will save to data/Analysis<RandomInt>.root if not specified.
-
-Alternaltively, on can just start
+The output options is optional. Will save to data/Analysis<RandomInt>.root if not
+specified. Alternatively, on can just start
 
 ```bash
 ./LYSim
