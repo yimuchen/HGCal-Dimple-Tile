@@ -14,10 +14,11 @@ AnalysisMessenger::AnalysisMessenger( Analysis* instance )
   analysisDir = new G4UIdirectory( "/analysis/" );
   analysisDir->SetGuidance( " Analysis commands " );
 
-  SetTileAbsLengthCmd = new G4UIcmdWithADouble( "/analysis/setTileAbsLength", this );
-  SetTileAbsLengthCmd->SetGuidance( "Set tile absorption length (cm) to be recorded in output file." );
+  SetTileAbsLengthCmd =
+    new G4UIcmdWithADouble( "/analysis/setTileAbsLength", this );
+  SetTileAbsLengthCmd->SetGuidance(
+    "Set tile absorption length (cm) to be recorded in output file." );
   SetTileAbsLengthCmd->AvailableForStates( G4State_Idle );
-
 }
 
 AnalysisMessenger::~AnalysisMessenger()

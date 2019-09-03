@@ -24,52 +24,51 @@ public:
 
 
   // Toggle Tyvek on or off
-  void
-  SetWrappingToggle ( G4bool toggle ){wrapping_toggle = toggle;}
-  G4bool
-  GetWrappingToggle (){return wrapping_toggle;}
+  inline void
+  SetWrappingToggle ( const G4bool x ){wrapping_toggle = x;}
+  inline G4bool
+  GetWrappingToggle () const {return wrapping_toggle;}
 
   // Set ref index of scint pmt gap
-  void
-  SetRefIndex ( G4double iRefIndex ){RefIndex = iRefIndex;}
-  G4double
-  GetRefIndex (){return RefIndex;}
+  inline void
+  SetRefIndex ( const G4double iRefIndex ){RefIndex = iRefIndex;}
+  inline G4double
+  GetRefIndex() const {return RefIndex;}
 
-  void
-  SetScintThickness ( G4double iscint_thickness ){scint_thickness = iscint_thickness;}
-  G4double
-  GetScintThickness(){return scint_thickness;}
+  inline void
+  SetScintThickness ( const G4double x ){ scint_thickness = x;}
+  inline G4double
+  GetScintThickness() const {return scint_thickness;}
 
-  void
-  SetScintSizeX ( G4double iscint_sizeX ){scint_sizeX = iscint_sizeX;}
-  G4double
-  GetScintSizeX(){return scint_sizeX;}
+  inline void
+  SetScintSizeX ( const G4double x ){scint_sizeX = x;}
+  inline G4double
+  GetScintSizeX() const {return scint_sizeX;}
 
-  void
-  SetScintSizeY ( G4double iscint_sizeY ){scint_sizeY = iscint_sizeY;}
-  G4double
-  GetScintSizeY(){return scint_sizeY;}
+  inline void
+  SetScintSizeY ( const G4double y ){scint_sizeY = y;}
+  inline G4double
+  GetScintSizeY() const {return scint_sizeY;}
 
-  void
-  SetScintPMTGapThickness ( G4double ithickness ){ScintPMT_gap = ithickness;}
-  G4double
-  GetScintPMTGapThickness(){return ScintPMT_gap;}
+  inline void
+  SetScintPMTGapThickness ( const G4double x ){ScintPMT_gap = x;}
+  inline G4double
+  GetScintPMTGapThickness() const {return ScintPMT_gap;}
 
-  void
-  SetTileAbsLength ( G4double iAbsLength ){tileAbsLength = iAbsLength;}
-  G4double
-  GetTileAbsLength(){return tileAbsLength;}
+  inline void
+  SetTileAbsLength ( const G4double x ){tileAbsLength = x;}
+  inline G4double
+  GetTileAbsLength() const {return tileAbsLength;}
 
-  void
-  SetInducedMuTile( G4double value ){inducedMuTile = value;}
-  G4double
-  GetInducedMuTile(){return inducedMuTile;}
+  inline void
+  SetInducedMuTile( const G4double x ){inducedMuTile = x;}
+  inline G4double
+  GetInducedMuTile() const {return inducedMuTile;}
 
-
-  G4double
-  GetMinZ(){return minZposition;}
-  G4double
-  GetMaxZ(){return maxZposition;}
+  inline G4double
+  GetMinZ() const {return minZposition;}
+  inline G4double
+  GetMaxZ() const {return maxZposition;}
 
 private:
   // Subfunctions for cleaner code
@@ -77,13 +76,16 @@ private:
   void               DefineSurfaces();
   void               SetDefaults();// *-*Doesn't seem to work right now
   G4VPhysicalVolume* ConstructDetector();
-  G4VSolid*          ConstructTileSolid( const G4String& name,
-                                         G4double        angle1,// angle measured ccw from y axis for the side at -x
-                                         G4double        angle2,// angle measured ccw from y axis for the side at +x
-                                         G4double        Dx2,// length along x of side at y=+Dy
-                                         G4double        Dy,// length along y
-                                         G4double        Dz,// length along z
-                                         G4ThreeVector&  centerCoord );// coordinate of center of gravity w.r.t. corner 0 at -x, -y
+  G4VSolid*          ConstructTileSolid(
+    const G4String& name,
+    G4double        angle1, // angle measured ccw from y axis for the side at -x
+    G4double        angle2, // angle measured ccw from y axis for the side at +x
+    G4double        Dx2,    // length along x of side at y=+Dy
+    G4double        Dy,     // length along y
+    G4double        Dz,     // length along z
+    G4ThreeVector&  centerCoord ); // coordinate of center of gravity w.r.t.
+                                   // corner 0 at -x, -y
+
   // Pointer to detector messenger class
   LYSimDetectorMessenger* fdetectorMessenger;
 
@@ -108,26 +110,13 @@ private:
   G4LogicalVolume* logicD;
 
   // Pointers to materials
-  G4Material* fVacuum;
   G4Material* fAir;
-  G4Material* fSiO2;
-  G4Material* fPolystyrene;
-  G4Material* fPolycarbonate;
-  G4Material* fFiberCore;
-  G4Material* fFiberInnerCladding;
-  G4Material* fFiberOuterCladding;
-  G4Material* fLYSO;
-  G4Material* fGaAs;
-  G4Material* fPyrex;
-  G4Material* fWater;
   G4Material* fSCSN81;
   G4Material* fEJ200;
   G4Material* fEJ260;
-  G4Material* fScintPmtGapMat;
   G4Material* fBialkali;
   G4Material* fEpoxy;
   G4Material* fEpoxy2;
-  G4Material* fBacking;
 
   // Pointers to surfaces
   G4OpticalSurface* fTyvekOpSurface;
@@ -148,8 +137,8 @@ private:
 
   // Geometry parameters
   // Important parameters marked with ////
-  G4bool wrapping_toggle;   // (Tyvek) wrapping around scintillator
-  G4double RefIndex;   // Refractive index of fiber or scint-PMT gap
+  G4bool wrapping_toggle;// (Tyvek) wrapping around scintillator
+  G4double RefIndex;// Refractive index of fiber or scint-PMT gap
   G4double angle1;
   G4double angle2;
   G4double angle3;
@@ -165,21 +154,21 @@ private:
   G4double Photocat_sizeX;
   G4double Photocat_sizeY;
   G4double Photocat_thickness;
-  G4double ScintPMT_gap;   // thickness of gap between scintillator and PMT
-  G4double wrapgap;    // distance between tile and wrapping
+  G4double ScintPMT_gap;// thickness of gap between scintillator and PMT
+  G4double wrapgap;// distance between tile and wrapping
   G4double tileAbsLength;
-  G4double inducedMuTile;   // Radiation-induced absorption coefficient (cm^-1) in tile
-  G4double Absmultiple;   // factor for Abslength manipulation.
-  G4double Din;   // Depth of dimple
-  G4double deft;   // default radius
-  G4double Rad;   // Dimple radius
-  G4double SiPM_Depth;   // SiPM depth
+  G4double inducedMuTile;// Radiation-induced absorption coefficient (cm^-1) in tile
+  G4double Absmultiple;// factor for Abslength manipulation.
+  G4double Din;// Depth of dimple
+  G4double deft;// default radius
+  G4double Rad;// Dimple radius
+  G4double SiPM_Depth;// SiPM depth
   G4double aSiPM;
 
-  G4ThreeVector corners[8];             // stores the corner coordinates of the tile
-  G4ThreeVector readout0, readout1;     // location of readout at corner 0/1
+  G4ThreeVector corners[8];// stores the corner coordinates of the tile
+  G4ThreeVector readout0, readout1;// location of readout at corner 0/1
   // G4ThreeVector mirror0, mirror1;     //location of mirrors at corner 0/1
-  G4int readoutCorner;                  // determines location of fiber readout (0:corner 0, 1:corner 1)
+  G4int readoutCorner;// determines location of fiber readout (0:corner 0, 1:corner 1)
   G4int DimpleType;
 };
 

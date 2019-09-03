@@ -3,8 +3,6 @@
 
 #include "LYSimTrajectory.hh"
 
-// #include "LYSimUserTrackInformation.hh"
-
 #include "Analysis.hh"
 #include "G4ParticleTypes.hh"
 #include "G4Track.hh"

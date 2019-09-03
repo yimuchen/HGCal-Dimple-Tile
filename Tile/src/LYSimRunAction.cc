@@ -34,26 +34,16 @@ LYSimRunAction::BeginOfRunAction( const G4Run* aRun )
   man->SetFirstHistoId( 1 );
 
   // Create histogram(s) (avoid non-integer bins)
-  // 1
-  man->CreateH1( "ogammaE",   "Optical photons Wavelength [nm]",// histoID,histo name
-    100, 200., 1200. );                // bins' number, xmin, xmax
-  // 2
-  man->CreateH1( "Ndetect",   "Number of detected photons per event",
-    250, 0., 250. );                // bins' number, xmin, xmax
-  // 3
-  man->CreateH1( "totE",      "Total optical photons energy deposited per event [eV]",
-    100, 0., 5. );                // bins' number, xmin, xmax
-  // 4
-  man->CreateH1( "timeGamma", "time of detected photon [ns]",      100, 0.,   100. );
-  // 5
-  man->CreateH1( "npvs",      "number produced photons vs x [mm]", 400,  -20., 20. );
-  // 6
-  man->CreateH1( "ndvs",      "number detected photons vs x [mm]", 400,  -20., 20. );
+  man->CreateH1( "ogammaE",   "Optical photons Wavelength [nm]",       100, 200.,  1200. );
+  man->CreateH1( "Ndetect",   "Number of detected photons per event",  250,   0.,    50. );
+  man->CreateH1( "totE",      "Total Energy deposited per event [eV]", 100,   0.,     5. );
+  man->CreateH1( "timeGamma", "time of detected photon [ns]",          100,   0.,   100. );
+  man->CreateH1( "npvs",      "number produced photons vs x [mm]",     400,    -20., 20. );
+  man->CreateH1( "ndvs",      "number detected photons vs x [mm]",     400,    -20., 20. );
 
   // 2D hists
   man->CreateH2( "xycr",  "xy creation point of optical photons",          400, -20., 20., 400, -20., 20. );
   man->CreateH2( "szcr",  "xz creation point of optical photons",          400, -20., 20., 400, -20., 20. );
-
   man->CreateH2( "xycrd", "xy creation point of detected optical photons", 400, -20., 20., 400, -20., 20. );
   man->CreateH2( "szcrd", "xz creation point of detected optical photons", 400, -20., 20., 400, -20., 20. );
 

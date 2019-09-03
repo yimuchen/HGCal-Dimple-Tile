@@ -95,11 +95,9 @@ LYSimTrajectoryPoint::CreateAttValues() const
   std::vector<G4AttValue>* values = new std::vector<G4AttValue>;
 
   values->push_back( G4AttValue( "Time", G4BestUnit( fTime, "Time" ), "" ) );
-
-  values->push_back( G4AttValue( "Momentum", G4BestUnit( fMomentum, "Momentum" ), "" ) );
-
+  values->push_back(
+    G4AttValue( "Momentum", G4BestUnit( fMomentum, "Momentum" ), "" ) );
   values->push_back( G4AttValue( "StepStatus", fStepStatus, "" ) );
-
   values->push_back( G4AttValue( "VolumeName", fVolumeName, "" ) );
 
 #ifdef G4ATTDEBUG

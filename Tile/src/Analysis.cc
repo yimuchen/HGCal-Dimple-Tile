@@ -49,7 +49,6 @@ Analysis::PrepareNewEvent( const G4Event*/*anEvent*/ )
 void
 Analysis::EndOfEvent( const G4Event* anEvent )
 {
-  G4int ii;
   // G4PrimaryParticle* primary = anEvent->GetPrimaryVertex(0)->GetPrimary(0);
   // G4cout << G4endl
   //     << ">>> Event " << anEvent->GetEventID() << " >>> Simulation truth : "
@@ -86,7 +85,7 @@ Analysis::EndOfEvent( const G4Event* anEvent )
   LYSimPMTHitsCollection* hits = 0;
   if( hitsCollections ){
     hits = static_cast<LYSimPMTHitsCollection*>( hitsCollections->GetHC( hitCollID ) );
-  } else   {
+  } else {
     G4cerr << "hitsCollection not found" << G4endl;
     return;
   }
@@ -139,12 +138,18 @@ Analysis::EndOfRun( const G4Run* )
   G4double detEff   = ( PhotonCount > 0 ? (G4double)HitCount/(G4double)PhotonCount : 0.0 );
   G4cout << "Efficiency in this run is " << detEff  << G4endl;
   if( outputfile.is_open() ){
-    // outputfile << "#Mu_tile [cm^-1]\tMu_fiber [cm^-1]\tEfficiency" << G4endl;
-    outputfile << inducedMuTile << "\t" << inducedMuFiber << "\t" << detEff << "\t" << pos.x() << "\t" << pos.y() << G4endl;
-  } else   {
+    outputfile << inducedMuTile << "\t"
+               << inducedMuFiber << "\t"
+               << detEff << "\t"
+               << pos.x() << "\t"
+               << pos.y() << G4endl;
+  } else {
     G4cout << "Output file not open" << G4endl;
-    // G4cout << "#Mu_tile [cm^-1]\tMu_fiber [cm^-1]\tEfficiency" << G4endl;
-    G4cout << inducedMuTile << "\t" << inducedMuFiber << "\t" << detEff << "\t" << pos.x() << "\t" << pos.y() <<  G4endl;
+    G4cout << inducedMuTile << "\t"
+           << inducedMuFiber << "\t"
+           << detEff << "\t"
+           << pos.x() << "\t"
+           << pos.y() <<  G4endl;
   }
   outputfile.close();
 
@@ -152,5 +157,4 @@ Analysis::EndOfRun( const G4Run* )
   G4AnalysisManager* man = G4AnalysisManager::Instance();
   man->Write();
   man->CloseFile();
-
 }

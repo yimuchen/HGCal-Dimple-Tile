@@ -1,17 +1,11 @@
 #!/usr/bin/python2
 import os, sys, string
-import subprocess
-from datetime import datetime, date
-import time
-import time
-from random import randint
-import random
 import math
-from array import array
+from random import randint
 
 ## Defining global variables.
 USER_NAME = os.environ['USER']
-BASE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/../'
+BASE_DIR = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../')
 DATA_DIR = BASE_DIR + '/data/photontest/'
 
 ## These parameters should match those in Tile/src/LYSimDetectorConstruction.cc
@@ -29,7 +23,7 @@ PHOTON_TESTBEAM_MACRO_TEMPLATE = """
 /gps/pos/type Volume
 /gps/pos/shape Cylinder
 /gps/pos/radius 0.001 mm
-/gps/pos/halfz {3} cm #thickness position
+/gps/pos/halfz {3} mm #thickness position
 /gps/pos/centre {1} {2} 0.0 mm # Beam position
 /gps/ang/type iso
 /gps/ene/type Arb

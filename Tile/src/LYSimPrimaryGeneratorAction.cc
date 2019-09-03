@@ -54,7 +54,8 @@
 
 // ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-LYSimPrimaryGeneratorAction::LYSimPrimaryGeneratorAction( LYSimDetectorConstruction* det )
+LYSimPrimaryGeneratorAction::LYSimPrimaryGeneratorAction(
+  LYSimDetectorConstruction* det )
 {
   std::cout<<"[LYSIM] entering LYSIMPrimaryGeneratorAction"<<std::endl;
   fDetector                  = det;
@@ -74,7 +75,10 @@ LYSimPrimaryGeneratorAction::LYSimPrimaryGeneratorAction( LYSimDetectorConstruct
   // particleSource->SetParticleEnergy(2.95*eV);
   // particleSource->SetParticleMomentumDirection(G4ThreeVector (0.,0.,1.));
   G4ThreeVector meme = particleSource->GetParticlePosition();
-  std::cout<<"[LYSIM] set default particle position to "<<meme.x()<<","<<meme.y()<<","<<meme.z()<<std::endl;
+  std::cout << "[LYSIM] set default particle position to "
+            << meme.x() << ","
+            << meme.y() << ","
+            << meme.z() << std::endl;
 }
 
 // ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -92,15 +96,18 @@ LYSimPrimaryGeneratorAction::GeneratePrimaries( G4Event* anEvent )
   if( particleSource->GetParticleDefinition()->GetParticleName() == "opticalphoton" ){
     SetOptPhotonPolar();
   }
-  // G4ThreeVector pos = particleSource->GetParticlePosition();
-  // std::cout << "XYZXYZXYZ " << pos.x()<<" "<<pos.y()<<" "<<pos.z() << std::endl;
 
   std::string name = "World";
   int icnt         = 0;
   G4ThreeVector point1( 0.*mm, 0.*mm, 0.*mm );
   if( !source000_toggle ){
     while( ( name != "Rod" ) && ( icnt < 10 ) ){
-      if( icnt != 0 ){ std::cout<<"rethrowing since name is "<<name<<" at coord "<<point1.x()<<","<<point1.y()<<","<<point1.z()<<std::endl;}
+      if( icnt != 0 ){
+        std::cout << "rethrowing since name is " << name <<" at coord "
+                  << point1.x() <<","
+                  << point1.y() <<","
+                  << point1.z() <<std::endl;
+      }
       G4double xx = fDetector->GetScintSizeX()*( -0.5+G4UniformRand() );
       G4double yy = fDetector->GetScintSizeY()*( -0.5+G4UniformRand() );
       G4double zz = fDetector->GetScintThickness()*( -0.5+G4UniformRand() );
@@ -109,9 +116,10 @@ LYSimPrimaryGeneratorAction::GeneratePrimaries( G4Event* anEvent )
       point1.setZ( zz );
 
       // check if it is in scintillator
-
       G4VPhysicalVolume* pv =
-        G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->LocateGlobalPointAndSetup( point1, (const G4ThreeVector*)0, false, true );
+        G4TransportationManager::GetTransportationManager()
+        ->GetNavigatorForTracking()->LocateGlobalPointAndSetup(
+          point1, (const G4ThreeVector*)0, false, true );
       name = pv->GetName();
       icnt++;
 
@@ -131,11 +139,6 @@ LYSimPrimaryGeneratorAction::GeneratePrimaries( G4Event* anEvent )
     Direction.setY( sin( phi )*sintheta );
     Direction.setZ( costheta );
   }
-
-  // particleSource->SetParticleMomentumDirection(Direction);
-
-
-  // std::cout<<" photon position is "<<point1.x()<<","<<point1.y()<<","<<point1.z()<<" and direction is "<<Direction.x()<<","<<Direction.y()<<","<<Direction.z()<<std::endl;
 
   particleSource->GeneratePrimaryVertex( anEvent );
 
@@ -166,7 +169,9 @@ LYSimPrimaryGeneratorAction::SetOptPhotonPolar( G4double angle )
     G4double modul2       = product*product;
 
     G4ThreeVector e_perpend( 0., 0., 1. );
-    if( modul2 > 0. ){ e_perpend = ( 1./std::sqrt( modul2 ) )*product;}
+    if( modul2 > 0. ){
+      e_perpend = ( 1./std::sqrt( modul2 ) )*product;
+    }
     G4ThreeVector e_paralle = e_perpend.cross( kphoton );
 
     G4ThreeVector polar = std::cos( angle )*e_paralle + std::sin( angle )*e_perpend;
@@ -181,6 +186,7 @@ LYSimPrimaryGeneratorAction::GetSourcePosition()
   G4ThreeVector pos = particleSource->GetParticlePosition();
   return pos;
 }
+
 const G4ThreeVector
 LYSimPrimaryGeneratorAction::GetParticleMomentumDirection()
 {

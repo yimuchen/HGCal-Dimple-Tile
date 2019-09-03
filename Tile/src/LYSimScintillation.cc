@@ -4,7 +4,6 @@
 #include <G4VParticleChange.hh>
 
 using namespace CLHEP;
-// extern std::ofstream outFile;
 
 LYSimScintillation::LYSimScintillation( const G4String & processName, G4ProcessType type )
   : G4Scintillation( processName, type )
@@ -46,7 +45,6 @@ LYSimScintillation::PostStepDoIt( const G4Track& aTrack, const G4Step& aStep )
            << "producing " << result->GetNumberOfSecondaries() << " optical photons"
            << G4endl
            << std::resetiosflags( std::ios::fixed );
-    // }
   }
 
   return result;

@@ -174,7 +174,7 @@ LYSimTrajectory::DrawTrajectory( G4int i_mode ) const
       } else {// Scintillation and Cerenkov photons are green
         colour = G4Colour( 0., 1., 0. );
       }
-    } else   {// All other particles are blue
+    } else {// All other particles are blue
       colour = G4Colour( 0., 0., 1. );
     }
 
@@ -274,28 +274,28 @@ LYSimTrajectory::CreateAttValues() const
 {
   std::vector<G4AttValue>* values = new std::vector<G4AttValue>;
 
-  values->push_back
-    (                G4AttValue( "ID", G4UIcommand::ConvertToString( fTrackID ), "" ) );
+  values->push_back(
+    G4AttValue( "ID", G4UIcommand::ConvertToString( fTrackID ), "" ) );
 
-  values->push_back
-    (                G4AttValue( "PID", G4UIcommand::ConvertToString( fParentID ), "" ) );
+  values->push_back(
+    G4AttValue( "PID", G4UIcommand::ConvertToString( fParentID ), "" ) );
 
   values->push_back( G4AttValue( "PN", ParticleName, "" ) );
 
-  values->push_back
-    (                G4AttValue( "Ch", G4UIcommand::ConvertToString( PDGCharge ), "" ) );
+  values->push_back(
+    G4AttValue( "Ch", G4UIcommand::ConvertToString( PDGCharge ), "" ) );
 
-  values->push_back
-    (                G4AttValue( "PDG", G4UIcommand::ConvertToString( PDGEncoding ), "" ) );
+  values->push_back(
+    G4AttValue( "PDG", G4UIcommand::ConvertToString( PDGEncoding ), "" ) );
 
-  values->push_back
-    (                G4AttValue( "IMom", G4BestUnit( initialMomentum, "Energy" ), "" ) );
+  values->push_back(
+    G4AttValue( "IMom", G4BestUnit( initialMomentum, "Energy" ), "" ) );
 
-  values->push_back
-    (                G4AttValue( "IMag", G4BestUnit( initialMomentum.mag(), "Energy" ), "" ) );
+  values->push_back(
+    G4AttValue( "IMag", G4BestUnit( initialMomentum.mag(), "Energy" ), "" ) );
 
-  values->push_back
-    (                G4AttValue( "NTP", G4UIcommand::ConvertToString( GetPointEntries() ), "" ) );
+  values->push_back(
+    G4AttValue( "NTP", G4UIcommand::ConvertToString( GetPointEntries() ), "" ) );
 
 #ifdef G4ATTDEBUG
   G4cout << G4AttCheck( values, GetAttDefs() );

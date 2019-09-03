@@ -64,7 +64,9 @@ LYSimPMTHit::operator=( const LYSimPMTHit & right )
 G4int
 LYSimPMTHit::operator==( const LYSimPMTHit& right ) const
 {
-  return fEnergy == right.fEnergy && fPhotonCount == right.fPhotonCount && fTime == right.fTime;
+  return fEnergy == right.fEnergy &&
+         fPhotonCount == right.fPhotonCount &&
+         fTime == right.fTime;
 }
 
 void

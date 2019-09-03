@@ -15,14 +15,15 @@ LYSimPrimaryGeneratorMessenger::LYSimPrimaryGeneratorMessenger( LYSimPrimaryGene
   detDir = new G4UIdirectory( "/LYSim/" );
   detDir->SetGuidance( " Geometry Setup " );
 
-
   SetSource000Cmd = new G4UIcmdWithABool( "/LYSim/SetSource000", this );
-  SetSource000Cmd->SetGuidance( "Set source position to 0,0,0 toggle true or false" );
+  SetSource000Cmd->SetGuidance(
+    "Set source position to 0,0,0 toggle true or false" );
   SetSource000Cmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
 
   SetAngle000Cmd = new G4UIcmdWithABool( "/LYSim/SetAngle000", this );
-  SetAngle000Cmd->SetGuidance( "Set photon angle to perp to surface toggle true or false" );
+  SetAngle000Cmd->SetGuidance(
+    "Set photon angle to perp to surface toggle true or false" );
   SetAngle000Cmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
 }
