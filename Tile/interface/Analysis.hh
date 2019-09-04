@@ -76,7 +76,7 @@ public:
   // Set tile absorption length to record
   void
   SetTileAbsLength ( G4double length ){ tileAbsLength = length; }
-  // Set the induced Mu in Tile/Fiber to record
+  // Set the induced Mu in TileGeometryFiber to record
   void
   SetInducedMuTile ( G4double value ){ inducedMuTile = value; }
   void

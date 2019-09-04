@@ -289,7 +289,7 @@ Make_LYSO()
 {
   // ------------------------------
   G4Material* material
-    = new G4Material( "LYSOtemplate", 7.1*g/cm3, 5, kStateSolid );
+    = new G4Material( "LYSO", 7.1*g/cm3, 5, kStateSolid );
   material->AddElement( Lu, 71.43*perCent );
   material->AddElement( Y,   4.03*perCent );
   material->AddElement( Si,  6.37*perCent );
@@ -327,11 +327,15 @@ Make_LYSO()
     lysorefindex[i] = sqrt( 1 + pow( n0, 2.0 ) + pow( n1, 2.0 ) / ( 1 - pow( lambda1, 2.0 ) / pow( lysowavelength[i], 2.0 ) ) );
   }
 
+  /*
   double lysoconstrefindex[nentriesrefindex];
 
   for( unsigned i = 0; i < nentriesrefindex; i++ ){
     lysoconstrefindex[i] = 1.82;
   }
+  */
+
+
 
   const unsigned nentrieslal      = 2;
   double energieslal[nentrieslal] = {1.0*eV, 6.0*eV};
@@ -342,10 +346,12 @@ Make_LYSO()
   const unsigned nentrieslysolal          = 10;
   double lysoenergieslal[nentrieslysolal] = {
     3.351*eV, 3.263*eV, 3.179*eV, 3.100*eV, 3.024*eV,
-    2.952*eV, 2.883*eV, 2.695*eV, 2.384*eV, 2.066*eV};
+    2.952*eV, 2.883*eV, 2.695*eV, 2.384*eV, 2.066*eV
+  };
   double lysolal[nentrieslysolal] = {
     0.025*cm, 0.1*cm,   1*cm,     4*cm,      6*cm,
-    7*cm,     8*cm,     9*cm,     10*cm,     12*cm};
+    7*cm,     8*cm,     9*cm,     10*cm,     12*cm
+  };
 
 
   // Scintillation emission spectrum (fast component)
@@ -367,7 +373,7 @@ Make_LYSO()
   };
 
   // Photoluminescence (theta = 10 deg)
-  static const unsigned nentrieslysoemission         = 21;
+  static const unsigned nentrieslysoemission               = 21;
   static double lysoenergiesemission[nentrieslysoemission] = {
     3.54*eV, 3.35*eV, 3.26*eV, 3.18*eV, 3.13*eV,
     3.10*eV, 3.02*eV, 2.95*eV, 2.88*eV, 2.82*eV,
@@ -638,11 +644,15 @@ Make_EJ200( const double mult )
   table->AddProperty( "RINDEX",    photonE, refrac_idx, nentries );
   table->AddProperty( "ABSLENGTH", photonE, abs_length, nentries );
   table->AddConstProperty( "SCINTILLATIONYIELD",         10./keV );
-  table->AddConstProperty( "ELECTRONSCINTILLATIONYIELD", 10./keV );
-  table->AddConstProperty( "ALPHASCINTILLATIONYIELD",   100./MeV );
+
   table->AddConstProperty( "RESOLUTIONSCALE",            1.0 );
   table->AddConstProperty( "FASTSCINTILLATIONRISETIME",  0.9*ns );
-  table->AddConstProperty( "FASTTIMECONSTANT",           2.1*ns );
+
+  // Disabled for CMSSW
+  //table->AddConstProperty( "ELECTRONSCINTILLATIONYIELD", 10./keV );
+  //table->AddConstProperty( "ALPHASCINTILLATIONYIELD",   100./MeV );
+  //table->AddConstProperty( "FASTTIMECONSTANT",           2.1*ns );
+
   // table->AddProperty("FASTCOMPONENT",photonE,Scints,nentries);
   // table->AddConstProperty("YIELDRATIO",1.0);//Fast component/Tot scint
   material->SetMaterialPropertiesTable( table );
@@ -672,11 +682,14 @@ Make_EJ260( const double abs, const double induced_mu )
   table->AddProperty( "RINDEX",    photonE, refrac_idx, nentries );
   table->AddProperty( "ABSLENGTH", photonE, abs_length, nentries );
   table->AddConstProperty( "SCINTILLATIONYIELD",        9.2/keV );  // ELJEN
-  // table->AddConstProperty("ELECTRONSCINTILLATIONYIELD",9.2/keV); // default: electron
-  // table->AddConstProperty("ALPHASCINTILLATIONYIELD",10.12/keV); // alpha particle
   table->AddConstProperty( "RESOLUTIONSCALE",           1.0 );
   table->AddConstProperty( "FASTSCINTILLATIONRISETIME", 1.3*ns );// Rise time
-  table->AddConstProperty( "FASTIMECONSTANT",           9.2*ns );  // Decay time
+
+  // Disabled for CMSSW
+  // table->AddConstProperty( "FASTIMECONSTANT",           9.2*ns );
+  // table->AddConstProperty("ELECTRONSCINTILLATIONYIELD",9.2/keV);
+  // table->AddConstProperty("ALPHASCINTILLATIONYIELD",10.12/keV);
+
   material->SetMaterialPropertiesTable( table );
 
   // FIXME: Set the Birks Constant for the EJ260 scintillator

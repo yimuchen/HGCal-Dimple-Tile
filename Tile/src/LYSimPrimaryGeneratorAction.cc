@@ -54,8 +54,7 @@
 
 // ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-LYSimPrimaryGeneratorAction::LYSimPrimaryGeneratorAction(
-  LYSimDetectorConstruction* det )
+LYSimPrimaryGeneratorAction::LYSimPrimaryGeneratorAction( LYSimDetectorConstruction* det )
 {
   std::cout<<"[LYSIM] entering LYSIMPrimaryGeneratorAction"<<std::endl;
   fDetector                  = det;
@@ -132,7 +131,7 @@ LYSimPrimaryGeneratorAction::GeneratePrimaries( G4Event* anEvent )
   // set photon direction randomly
   G4ThreeVector Direction( 0., 0., 1. );
   if( !angle000_toggle ){
-    double phi      = pi*G4UniformRand();
+    double phi      = CLHEP::pi*G4UniformRand();
     double costheta = -1+2.*G4UniformRand();
     double sintheta = sqrt( 1.-costheta*costheta );
     Direction.setX( cos( phi )*sintheta );
@@ -174,7 +173,8 @@ LYSimPrimaryGeneratorAction::SetOptPhotonPolar( G4double angle )
     }
     G4ThreeVector e_paralle = e_perpend.cross( kphoton );
 
-    G4ThreeVector polar = std::cos( angle )*e_paralle + std::sin( angle )*e_perpend;
+    G4ThreeVector polar = std::cos( angle )*e_paralle
+                          + std::sin( angle )*e_perpend;
     particleSource->SetParticlePolarization( polar );
   }
 

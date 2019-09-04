@@ -70,9 +70,17 @@ public:
   inline G4double
   GetMaxZ() const {return maxZposition;}
 
+  inline double
+  GetDimpleRadius() const { return Rad; }
+  inline double
+         GetDimpleIndent() const { return Din; }
+  double GetDimpleSizeRadius() const;
+
+  int GetDimpleType() const {return DimpleType; }
+  inline double GetTileThickness() const { return scint_thickness; }
+
 private:
   // Subfunctions for cleaner code
-  void               DefineMaterials();
   void               DefineSurfaces();
   void               SetDefaults();// *-*Doesn't seem to work right now
   G4VPhysicalVolume* ConstructDetector();
@@ -157,7 +165,7 @@ private:
   G4double ScintPMT_gap;// thickness of gap between scintillator and PMT
   G4double wrapgap;// distance between tile and wrapping
   G4double tileAbsLength;
-  G4double inducedMuTile;// Radiation-induced absorption coefficient (cm^-1) in tile
+  G4double inducedMuTile;// Radiation-induced absorption coefficient (cm^-1)
   G4double Absmultiple;// factor for Abslength manipulation.
   G4double Din;// Depth of dimple
   G4double deft;// default radius

@@ -14,13 +14,8 @@
 #include "G4RunManager.hh"
 #include "G4UImanager.hh"
 
-// Always include VI, UI
-// #ifdef G4VIS_USE
 #include "G4VisExecutive.hh"
-// #endif
-// #ifdef G4UI_USE
 #include "G4UIExecutive.hh"
-// #endif
 
 #include <cstdlib>
 #include <iostream>
@@ -31,7 +26,6 @@
 #include <time.h>
 
 #include "Randomize.hh"
-
 
 // ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 template<class T>
@@ -99,7 +93,7 @@ main( int argc, char** argv )
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
 
 
-  if( macfile != "init_vis.mac" ){
+  if( macfile != "mac/init_vis.mac" ){
     G4cout << ">>> Executing file [" << macfile << "]..." << G4endl;
     const G4String command = "/control/execute " + macfile;
     UImanager->ApplyCommand( command );

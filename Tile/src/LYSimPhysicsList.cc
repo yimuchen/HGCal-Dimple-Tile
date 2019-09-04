@@ -138,6 +138,8 @@ LYSimPhysicsList::ConstructGeneral()
 {
   // Add Decay Process
   G4Decay* theDecayProcess = new G4Decay();
+  G4ParticleTable::G4PTblDicIterator* theParticleIterator
+    = theParticleTable->GetIterator();
   theParticleIterator->reset();
 
   while( ( *theParticleIterator )() ){
@@ -177,6 +179,8 @@ LYSimPhysicsList::ConstructGeneral()
 void
 LYSimPhysicsList::ConstructEM()
 {
+  G4ParticleTable::G4PTblDicIterator* theParticleIterator
+    = theParticleTable->GetIterator();
   theParticleIterator->reset();
 
   while( ( *theParticleIterator )() ){
@@ -260,6 +264,8 @@ LYSimPhysicsList::ConstructOp()
 
   theWLSProcess->UseTimeProfile( "delta" );
 
+  G4ParticleTable::G4PTblDicIterator* theParticleIterator
+    = theParticleTable->GetIterator();
   theParticleIterator->reset();
 
   while( ( *theParticleIterator )() ){
@@ -320,6 +326,8 @@ LYSimPhysicsList::ConstructIdealOp()
 
   theWLSProcess->UseTimeProfile( "delta" );
 
+  G4ParticleTable::G4PTblDicIterator* theParticleIterator
+    = theParticleTable->GetIterator();
   theParticleIterator->reset();
 
   while( ( *theParticleIterator )() ){

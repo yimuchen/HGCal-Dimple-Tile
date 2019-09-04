@@ -1,5 +1,6 @@
 #include "Analysis.hh"
 #include "AnalysisMessenger.hh"
+
 #include "g4root.hh"
 #include "G4Event.hh"
 #include "G4EventManager.hh"
@@ -10,6 +11,7 @@
 #include "G4RootAnalysisManager.hh"
 #include "G4SDManager.hh"
 #include "G4UnitsTable.hh"
+
 #include "LYSimDetectorConstruction.hh"
 #include "LYSimEventAction.hh"
 #include "LYSimPrimaryGeneratorAction.hh"
@@ -153,8 +155,4 @@ Analysis::EndOfRun( const G4Run* )
   }
   outputfile.close();
 
-  // Save histograms
-  G4AnalysisManager* man = G4AnalysisManager::Instance();
-  man->Write();
-  man->CloseFile();
 }

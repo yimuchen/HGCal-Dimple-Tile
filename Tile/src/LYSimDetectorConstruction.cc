@@ -60,9 +60,14 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   logicWWW   = NULL;
 
   // Defining material list.
-  fAir      = NULL;
-  fBialkali = fEpoxy = fEpoxy2 = NULL;// SiPM and Adhesive
-  fSCSN81   = fEJ200 = fEJ260 = NULL; // Scintillating material.
+  fBialkali = Make_Bialkali();
+  fEpoxy    = Make_Epoxy();
+  fEpoxy2   = Make_Epoxy2();
+  fAir      = Make_Custom_Air();
+
+  fSCSN81 = Make_SCSN81( GetTileAbsLength(), GetInducedMuTile() );
+  fEJ200  = Make_EJ200( Absmultiple );
+  fEJ260  = Make_EJ260( GetTileAbsLength(), GetInducedMuTile() );
 
   fTyvekOpSurface    = fIdealTyvekOpSurface = fUnifiedTyvekOpSurface = fUnifiedIdealTyvekOpSurface = NULL;
   fESROpSurface      = NULL;
@@ -85,7 +90,6 @@ G4VPhysicalVolume*
 LYSimDetectorConstruction::Construct()
 {
   SetDefaults();
-  DefineMaterials();
   DefineSurfaces();
   return ConstructDetector();
 }
@@ -258,7 +262,7 @@ LYSimDetectorConstruction::ConstructDetector()
 
   // G4SubtractionSolid *ROD = new G4SubtractionSolid("rodsub",solidRod,calicesub,0,G4ThreeVector(10*mm, 0, 0));
 
-  G4double Dsize = 0.5*( ( Rad*Rad )/Din + Din );
+  G4double Dsize = GetDimpleSizeRadius();
 
   G4Sphere* solidDimple = new G4Sphere( "Dimple", 0., Dsize, 0., 2.*pi, pi/2., pi );
 
@@ -616,21 +620,6 @@ LYSimDetectorConstruction::ConstructTileSolid ( const G4String& name,
 }
 
 void
-LYSimDetectorConstruction::DefineMaterials()
-{
-  fBialkali = Make_Bialkali();
-  fEpoxy    = Make_Epoxy();
-  fEpoxy2   = Make_Epoxy2();
-  fAir      = Make_Custom_Air();
-
-  fSCSN81 = Make_SCSN81( GetTileAbsLength(), GetInducedMuTile() );
-  fEJ200  = Make_EJ200( Absmultiple );
-  fEJ260  = Make_EJ260( GetTileAbsLength(), GetInducedMuTile() );
-}
-
-
-
-void
 LYSimDetectorConstruction::DefineSurfaces()
 {
   {
@@ -857,7 +846,6 @@ LYSimDetectorConstruction::UpdateGeometry()
   G4LogicalBorderSurface::CleanSurfaceTable();
   G4SurfaceProperty::CleanSurfacePropertyTable();
 
-  DefineMaterials();
   DefineSurfaces();
   G4RunManager::GetRunManager()->DefineWorldVolume( ConstructDetector() );
   G4cout << "[LYSim] Setting induced absorption coefficient = "
@@ -869,3 +857,7 @@ LYSimDetectorConstruction::UpdateGeometry()
 }
 
 // ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+double LYSimDetectorConstruction::GetDimpleSizeRadius() const
+{
+  return 0.5*( ( Rad*Rad )/Din + Din );
+}
