@@ -4,9 +4,11 @@
 #include "globals.hh"
 #include "G4UImessenger.hh"
 
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#else
 #include "Analysis.hh"
-
-class Analysis;
+#endif
 
 class G4UIdirectory;
 class G4UIcmdWithABool;

@@ -1,6 +1,12 @@
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/LYSimScintillation.hh"
+#else
 #include "Analysis.hh"
-#include "g4root.hh"
 #include "LYSimScintillation.hh"
+#endif
+
+#include "g4root.hh"
 #include <G4VParticleChange.hh>
 
 using namespace CLHEP;
@@ -28,7 +34,6 @@ LYSimScintillation::PostStepDoIt( const G4Track& aTrack, const G4Step& aStep )
     G4ThreeVector pos = aStep.GetPreStepPoint()->GetPosition();
     depenergy += TotEnergy;
     G4cout << "[LYSim] Energy Deposited keV: " << depenergy << G4endl;
-
 
     G4cout << "scintillating: "
            << std::setprecision( 4 )

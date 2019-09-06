@@ -14,7 +14,7 @@ Requirements = TARGET.FileSystemDomain == "privnet"
 Output = {1}/sce_{2}_{3}_$(cluster)_$(process).stdout
 Error  = {1}/sce_{2}_{3}_$(cluster)_$(process).stderr
 Log    = {1}/sce_{2}_{3}_$(cluster)_$(process).condor
-Arguments = {2} {3} 1.5 1000000 {4}
+Arguments = {2} {3} 1.5 10000 {4}
 Queue
 """
 

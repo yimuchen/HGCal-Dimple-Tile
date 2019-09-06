@@ -1,4 +1,8 @@
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/LYSimDetectorMessenger.hh"
+#else
 #include "LYSimDetectorMessenger.hh"
+#endif
 
 #include "G4UIcmdWithABool.hh"
 #include "G4UIcmdWithADouble.hh"
@@ -32,30 +36,30 @@ LYSimDetectorMessenger::LYSimDetectorMessenger( LYSimDetectorConstruction* Det )
   SetRefIndexCmd->SetRange( "RefIndex>=1." );
   SetRefIndexCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
-  SetScintThicknessCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetScintThickness", this );
-  SetScintThicknessCmd->SetGuidance( "Set the scintillator thickness" );
-  SetScintThicknessCmd->SetParameterName( "ScintThickness", false );
-  SetScintThicknessCmd->SetUnitCategory( "Length" );
-  SetScintThicknessCmd->SetDefaultUnit( "mm" );
-  SetScintThicknessCmd->SetRange( "ScintThickness>=0." );
-  SetScintThicknessCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+  SetTileZCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetTileZ", this );
+  SetTileZCmd->SetGuidance( "Set the scintillator thickness" );
+  SetTileZCmd->SetParameterName( "TileZ", false );
+  SetTileZCmd->SetUnitCategory( "Length" );
+  SetTileZCmd->SetDefaultUnit( "mm" );
+  SetTileZCmd->SetRange( "TileZ>=0." );
+  SetTileZCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
-  SetScintSizeXCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetScintSizeX", this );
-  SetScintSizeXCmd->SetGuidance( "Set the scintillator transverse dimenstions" );
-  SetScintSizeXCmd->SetParameterName( "ScintSizeX", false );
-  SetScintSizeXCmd->SetUnitCategory( "Length" );
-  SetScintSizeXCmd->SetDefaultUnit( "mm" );
-  SetScintSizeXCmd->SetRange( "ScintSizeX>=0." );
-  SetScintSizeXCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+  SetTileXCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetTileX", this );
+  SetTileXCmd->SetGuidance( "Set the scintillator transverse dimenstions" );
+  SetTileXCmd->SetParameterName( "TileZ", false );
+  SetTileXCmd->SetUnitCategory( "Length" );
+  SetTileXCmd->SetDefaultUnit( "mm" );
+  SetTileXCmd->SetRange( "TileZ>=0." );
+  SetTileXCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
 
-  SetScintSizeYCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetScintSizeY", this );
-  SetScintSizeYCmd->SetGuidance( "Set the scintillator transverse dimenstions" );
-  SetScintSizeYCmd->SetParameterName( "ScintSizeY", false );
-  SetScintSizeYCmd->SetUnitCategory( "Length" );
-  SetScintSizeYCmd->SetDefaultUnit( "mm" );
-  SetScintSizeYCmd->SetRange( "ScintSizeY>=0." );
-  SetScintSizeYCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+  SetTileYCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetTileY", this );
+  SetTileYCmd->SetGuidance( "Set the scintillator transverse dimenstions" );
+  SetTileYCmd->SetParameterName( "TileY", false );
+  SetTileYCmd->SetUnitCategory( "Length" );
+  SetTileYCmd->SetDefaultUnit( "mm" );
+  SetTileYCmd->SetRange( "TileY>=0." );
+  SetTileYCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
   SetScintPMTGapThicknessCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetGapThickness", this );
   SetScintPMTGapThicknessCmd->SetGuidance( "Set the thickness of the gap between the scintillator and PMT" );
@@ -93,9 +97,9 @@ LYSimDetectorMessenger::~LYSimDetectorMessenger()
   delete UpdateCmd;
   delete SetWrappingCmd;
   delete SetRefIndexCmd;
-  delete SetScintThicknessCmd;
-  delete SetScintSizeXCmd;
-  delete SetScintSizeYCmd;
+  delete SetTileZCmd;
+  delete SetTileXCmd;
+  delete SetTileYCmd;
   delete SetScintPMTGapThicknessCmd;
   delete SetTileAbsLengthCmd;
   delete SetInducedAbsLengthCmd;
@@ -107,17 +111,17 @@ LYSimDetectorMessenger::SetNewValue( G4UIcommand* command, G4String val )
   if( command == UpdateCmd ){
     Detector->UpdateGeometry();
   } else if( command == SetWrappingCmd ){
-    Detector->SetWrappingToggle( G4UIcmdWithABool::GetNewBoolValue( val ) );
+    Detector->SetWrapping( G4UIcmdWithABool::GetNewBoolValue( val ) );
   } else if( command == SetRefIndexCmd ){
     Detector->SetRefIndex( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
-  } else if( command == SetScintThicknessCmd ){
+  } else if( command == SetTileZCmd ){
     Detector->
-    SetScintThickness( G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
-  } else if( command == SetScintSizeXCmd ){
+    SetTileZ( G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
+  } else if( command == SetTileXCmd ){
     Detector->
-    SetScintSizeX( G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
-  } else if( command == SetScintSizeYCmd ){
-    Detector->SetScintSizeY(
+    SetTileX( G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
+  } else if( command == SetTileYCmd ){
+    Detector->SetTileY(
       G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
   } else if( command == SetScintPMTGapThicknessCmd ){
     Detector->SetScintPMTGapThickness(

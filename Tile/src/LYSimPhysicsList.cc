@@ -1,6 +1,12 @@
-#include "globals.hh"
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/LYSimPhysicsList.hh"
+#include "HGCalTileSim/Tile/interface/LYSimScintillation.hh"
+#else
 #include "LYSimPhysicsList.hh"
-// #include "LYSimPhysicsListMessenger.hh"
+#include "LYSimScintillation.hh"
+#endif
+
+#include "globals.hh"
 
 #include "G4ParticleDefinition.hh"
 #include "G4ParticleTable.hh"
@@ -14,13 +20,11 @@
 #include "G4OpMieHG.hh"
 #include "G4OpRayleigh.hh"
 #include "G4OpWLS.hh"
-#include "LYSimScintillation.hh"
 
 #include "G4EmSaturation.hh"
 #include "G4LossTableManager.hh"
 #include "G4PhysicalConstants.hh"
 #include "G4SystemOfUnits.hh"
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 LYSimPhysicsList::LYSimPhysicsList() :  G4VUserPhysicsList()
 {
@@ -36,27 +40,20 @@ LYSimPhysicsList::LYSimPhysicsList() :  G4VUserPhysicsList()
   SetVerboseLevel( 0 );
 }
 
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 LYSimPhysicsList::~LYSimPhysicsList(){}
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void
 LYSimPhysicsList::ConstructParticle()
 {
-  // In this method, static member functions should be called
-  // for all particles which you want to use.
-  // This ensures that objects of these particle types will be
-  // created in the program.
+  // In this method, static member functions should be called for all particles
+  // which you want to use. This ensures that objects of these particle types
+  // will be created in the program.
 
   ConstructBosons();
   ConstructLeptons();
   ConstructMesons();
   ConstructBaryons();
 }
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void
 LYSimPhysicsList::ConstructBosons()
@@ -71,8 +68,6 @@ LYSimPhysicsList::ConstructBosons()
   // optical photon
   G4OpticalPhoton::OpticalPhotonDefinition();
 }
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void
 LYSimPhysicsList::ConstructLeptons()
@@ -92,8 +87,6 @@ LYSimPhysicsList::ConstructLeptons()
   G4AntiNeutrinoMu::AntiNeutrinoMuDefinition();
 }
 
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 void
 LYSimPhysicsList::ConstructMesons()
 {
@@ -102,8 +95,6 @@ LYSimPhysicsList::ConstructMesons()
   G4PionMinus::PionMinusDefinition();
   G4PionZero::PionZeroDefinition();
 }
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void
 LYSimPhysicsList::ConstructBaryons()
@@ -116,8 +107,6 @@ LYSimPhysicsList::ConstructBaryons()
   G4AntiNeutron::AntiNeutronDefinition();
 }
 
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 void
 LYSimPhysicsList::ConstructProcess()
 {
@@ -127,11 +116,7 @@ LYSimPhysicsList::ConstructProcess()
   ConstructOp();
 }
 
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 #include "G4Decay.hh"
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void
 LYSimPhysicsList::ConstructGeneral()
@@ -154,8 +139,6 @@ LYSimPhysicsList::ConstructGeneral()
   }
 }
 
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 #include "G4ComptonScattering.hh"
 #include "G4GammaConversion.hh"
 #include "G4PhotoElectricEffect.hh"
@@ -173,8 +156,6 @@ LYSimPhysicsList::ConstructGeneral()
 #include "G4MuPairProduction.hh"
 
 #include "G4hIonisation.hh"
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void
 LYSimPhysicsList::ConstructEM()
@@ -230,8 +211,6 @@ LYSimPhysicsList::ConstructEM()
   }
 }
 
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 void
 LYSimPhysicsList::ConstructOp()
 {
@@ -243,10 +222,6 @@ LYSimPhysicsList::ConstructOp()
   theBoundaryProcess           = new G4OpBoundaryProcess();
   theWLSProcess                = new G4OpWLS();
 
-  //  theCerenkovProcess->DumpPhysicsTable();
-  //  theScintillationProcess->DumpPhysicsTable();
-  //  theRayleighScatteringProcess->DumpPhysicsTable();
-
   // Set verbose level to 0
   SetVerbose( 1 );
 
@@ -256,11 +231,6 @@ LYSimPhysicsList::ConstructOp()
 
   theScintillationProcess->SetScintillationYieldFactor( 1. );
   theScintillationProcess->SetTrackSecondariesFirst( true );
-
-  // Use Birks Correction in the Scintillation process
-  // *-*
-  // G4EmSaturation* emSaturation = G4LossTableManager::Instance()->EmSaturation();
-  // theScintillationProcess->AddSaturation(emSaturation);
 
   theWLSProcess->UseTimeProfile( "delta" );
 
@@ -295,7 +265,6 @@ LYSimPhysicsList::ConstructOp()
 
 void
 LYSimPhysicsList::ConstructIdealOp()
-// Use instead of ConstructOp to only activate WLS and Boundary processes.
 {
   theCerenkovProcess           = new G4Cerenkov( "Cerenkov" );
   theScintillationProcess      = new LYSimScintillation( "Scintillation" );
@@ -304,10 +273,6 @@ LYSimPhysicsList::ConstructIdealOp()
   theMieHGScatteringProcess    = new G4OpMieHG();
   theBoundaryProcess           = new G4OpBoundaryProcess();
   theWLSProcess                = new G4OpWLS();
-
-  //  theCerenkovProcess->DumpPhysicsTable();
-  //  theScintillationProcess->DumpPhysicsTable();
-  //  theRayleighScatteringProcess->DumpPhysicsTable();
 
   // Verbose level set to 0
   SetVerbose( 0 );
@@ -318,8 +283,6 @@ LYSimPhysicsList::ConstructIdealOp()
 
   theScintillationProcess->SetScintillationYieldFactor( 1. );
   theScintillationProcess->SetTrackSecondariesFirst( true );
-
-  // Use Birks Correction in the Scintillation process
 
   G4EmSaturation* emSaturation = G4LossTableManager::Instance()->EmSaturation();
   theScintillationProcess->AddSaturation( emSaturation );
@@ -334,32 +297,13 @@ LYSimPhysicsList::ConstructIdealOp()
     G4ParticleDefinition* particle = theParticleIterator->value();
     G4ProcessManager* pmanager     = particle->GetProcessManager();
     G4String particleName          = particle->GetParticleName();
-//		if (theCerenkovProcess->IsApplicable(*particle)) {
-//			pmanager->AddProcess(theCerenkovProcess);
-//			pmanager->SetProcessOrdering(theCerenkovProcess,idxPostStep);
-//		}
-//		if (theScintillationProcess->IsApplicable(*particle)) {
-//			pmanager->AddProcess(theScintillationProcess);
-//			pmanager->SetProcessOrderingToLast(theScintillationProcess, idxAtRest);
-//			pmanager->SetProcessOrderingToLast(theScintillationProcess, idxPostStep);
-//		}
     if( particleName == "opticalphoton" ){
       G4cout << " AddDiscreteProcess to OpticalPhoton " << G4endl;
-//			pmanager->AddDiscreteProcess(theAbsorptionProcess);
-//			pmanager->AddDiscreteProcess(theRayleighScatteringProcess);
-//			pmanager->AddDiscreteProcess(theMieHGScatteringProcess);
       pmanager->AddDiscreteProcess( theBoundaryProcess );
       pmanager->AddDiscreteProcess(      theWLSProcess );
     }
   }
 }
-
-
-
-
-
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void
 LYSimPhysicsList::SetVerbose( G4int verbose )
@@ -373,25 +317,14 @@ LYSimPhysicsList::SetVerbose( G4int verbose )
   theWLSProcess->SetVerboseLevel( 1 );
 }
 
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 void
 LYSimPhysicsList::SetNbOfPhotonsCerenkov( G4int MaxNumber )
 {
   theCerenkovProcess->SetMaxNumPhotonsPerStep( MaxNumber );
 }
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void
 LYSimPhysicsList::SetCuts()
 {
-  //  " G4VUserPhysicsList::SetCutsWithDefault" method sets
-  //   the default cut value for all particle types
-  //
   SetCutsWithDefault();
-
-// temp disabled cut value display
-//	if (verboseLevel>0) DumpCutValuesTable();
 }
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

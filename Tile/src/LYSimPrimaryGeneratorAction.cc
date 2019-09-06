@@ -1,39 +1,14 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-//
-//
-// $Id$
-//
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimPrimaryGeneratorAction.hh"
+#include "HGCalTileSim/Tile/interface/ProjectPath.hh"
+#else
 #include "Analysis.hh"
-
 #include "LYSimDetectorConstruction.hh"
 #include "LYSimPrimaryGeneratorAction.hh"
-#include "LYSimPrimaryGeneratorMessenger.hh"
+#include "ProjectPath.hh"
+#endif
 
 #include "Randomize.hh"
 
@@ -49,149 +24,139 @@
 
 #include <CLHEP/Units/PhysicalConstants.h>
 
-
-// #include "G4OpticalPhoton.hh"
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 LYSimPrimaryGeneratorAction::LYSimPrimaryGeneratorAction( LYSimDetectorConstruction* det )
 {
-  std::cout<<"[LYSIM] entering LYSIMPrimaryGeneratorAction"<<std::endl;
-  fDetector                  = det;
-  fprimarygeneratorMessenger = new LYSimPrimaryGeneratorMessenger( this );
-  particleSource             = new G4GeneralParticleSource();
+  std::cout << "[LYSIM] entering LYSIMPrimaryGeneratorAction" << std::endl;
+  fDetector = det;
 
-  source000_toggle = false;
-  angle000_toggle  = false;
+  /**
+   * This particle source will be directly controlled via the /gps commands In
+   * user scripts and the ApplyCommand calls in the main function. We are going
+   * to set up the common stuff here.
+   */
+  particleSource = new G4GeneralParticleSource();
 
-  G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
-  G4ParticleDefinition* particle = G4OpticalPhoton::OpticalPhotonDefinition();
+  particleSource->SetParticleDefinition(
+    G4OpticalPhoton::OpticalPhotonDefinition() );
 
-  particleSource->SetParticleDefinition( particle );
-  particleSource->SetParticleTime( 0.0*ns );
-  G4ThreeVector point1( 0.*mm, 0.*mm, 0.*mm );
-  particleSource->SetParticlePosition( point1 );
-  // particleSource->SetParticleEnergy(2.95*eV);
-  // particleSource->SetParticleMomentumDirection(G4ThreeVector (0.,0.,1.));
-  G4ThreeVector meme = particleSource->GetParticlePosition();
-  std::cout << "[LYSIM] set default particle position to "
-            << meme.x() << ","
-            << meme.y() << ","
-            << meme.z() << std::endl;
 }
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 LYSimPrimaryGeneratorAction::~LYSimPrimaryGeneratorAction()
 {
   delete particleSource;
 }
 
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+void
+LYSimPrimaryGeneratorAction::InitSource()
+{
+  // For setting the via the interactive session, look at
+  // http://geant4-userdoc.web.cern.ch/geant4-userdoc/UsersGuides/
+  // ForApplicationDeveloper/html/GettingStarted/generalParticleSource.html
+
+  // Setting default spacial distribution
+  G4SPSPosDistribution* pos = particleSource->GetCurrentSource()->GetPosDist();
+  pos->SetPosDisType( "Volume" );
+  pos->SetPosDisShape( "Cylinder" );
+  pos->SetRadius( 0.001*CLHEP::mm );
+  pos->SetHalfZ( fDetector->GetTileZ() );
+  // Covering more than necessary.
+  pos->SetCentreCoords( G4ThreeVector( 0, 0, 0 ) );
+  // pos->ConfineSourceToVolume( "TilePhysic" );
+
+  std::cout << pos->GetHalfZ() << std::endl;
+  std::cout << fDetector->GetTileZ() << std::endl;
+
+  // Setting default angular distrution of particle  (isotropic)
+  G4SPSAngDistribution* ang = particleSource->GetCurrentSource()->GetAngDist();
+  ang->SetAngDistType( "iso" );
+
+  // Energy distribution.
+  G4SPSEneDistribution* ene = particleSource->GetCurrentSource()->GetEneDist();
+  ene->SetEnergyDisType( "Arb" );
+  ene->ArbEnergyHistoFile( project_base + "/Tile/data/PhotonSpectrum.dat" );
+  ene->ArbInterpolate( "Lin" );
+}
 
 void
 LYSimPrimaryGeneratorAction::GeneratePrimaries( G4Event* anEvent )
 {
-  if( particleSource->GetParticleDefinition()->GetParticleName() == "opticalphoton" ){
-    SetOptPhotonPolar();
+  assert( particleSource->GetParticleDefinition()->GetParticleName()
+    == "opticalphoton" );
+
+  // Randomizing the photon polarization for each event
+  const double angle = G4UniformRand() * 360.0*deg;
+  const G4ThreeVector normal( 1., 0., 0. );
+  const G4ThreeVector kphoton = particleSource->GetParticleMomentumDirection();
+  const G4ThreeVector product = normal.cross( kphoton );
+  const double modul2         = product*product;
+
+  G4ThreeVector e_perpend( 0., 0., 1. );
+  if( modul2 > 0. ){
+    e_perpend = ( 1./std::sqrt( modul2 ) )*product;
   }
+  G4ThreeVector e_paralle = e_perpend.cross( kphoton );
+  G4ThreeVector polar     = std::cos( angle )*e_paralle
+                            + std::sin( angle )*e_perpend;
+  particleSource->SetParticlePolarization( polar );
 
-  std::string name = "World";
-  int icnt         = 0;
-  G4ThreeVector point1( 0.*mm, 0.*mm, 0.*mm );
-  if( !source000_toggle ){
-    while( ( name != "Rod" ) && ( icnt < 10 ) ){
-      if( icnt != 0 ){
-        std::cout << "rethrowing since name is " << name <<" at coord "
-                  << point1.x() <<","
-                  << point1.y() <<","
-                  << point1.z() <<std::endl;
-      }
-      G4double xx = fDetector->GetScintSizeX()*( -0.5+G4UniformRand() );
-      G4double yy = fDetector->GetScintSizeY()*( -0.5+G4UniformRand() );
-      G4double zz = fDetector->GetScintThickness()*( -0.5+G4UniformRand() );
-      point1.setX( xx );
-      point1.setY( yy );
-      point1.setZ( zz );
-
-      // check if it is in scintillator
-      G4VPhysicalVolume* pv =
-        G4TransportationManager::GetTransportationManager()
-        ->GetNavigatorForTracking()->LocateGlobalPointAndSetup(
-          point1, (const G4ThreeVector*)0, false, true );
-      name = pv->GetName();
-      icnt++;
-
-    }
-
-    if( icnt == 10 ){ std::cout<<"Danger Danger Will Robinson"<<std::endl;}
-  }
-  particleSource->SetParticlePosition( point1 );
-  //
-  // set photon direction randomly
-  G4ThreeVector Direction( 0., 0., 1. );
-  if( !angle000_toggle ){
-    double phi      = CLHEP::pi*G4UniformRand();
-    double costheta = -1+2.*G4UniformRand();
-    double sintheta = sqrt( 1.-costheta*costheta );
-    Direction.setX( cos( phi )*sintheta );
-    Direction.setY( sin( phi )*sintheta );
-    Direction.setZ( costheta );
-  }
-
+  // We still need to generate the primary vertex.
   particleSource->GeneratePrimaryVertex( anEvent );
-
-  // Analysis
-  // Analysis::GetInstance()->AddPhotonCount(1);
 }
 
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+static double CalcThickness( const LYSimDetectorConstruction* detector,
+                             const double x, const double y );
+static int CalcNumPhotons( const double thickness );
 
-// Photon polarization is randomized
 void
-LYSimPrimaryGeneratorAction::SetOptPhotonPolar()
+LYSimPrimaryGeneratorAction::MoveSource( const double x_center,
+                                         const double y_center,
+                                         const double width )
 {
-  G4double angle = G4UniformRand() * 360.0*deg;
-  SetOptPhotonPolar( angle );
+  const float x = ( 2*double(rand()%1000000)/double(1000000)-1 )*width + x_center;
+  const float y = ( 2*double(rand()%1000000)/double(1000000)-1 )*width + y_center;
+  const float t = CalcThickness( fDetector, x, y );
+  const int np  = CalcNumPhotons( t );
+
+  G4SPSPosDistribution* pos = particleSource->GetCurrentSource()->GetPosDist();
+  pos->SetHalfZ( t/2 );
+  pos->SetCentreCoords( G4ThreeVector( x, y, t/2 ) );
+  particleSource->GetCurrentSource()->SetNumberOfParticles( np );
+  //pos->ConfineSourceToVolume( "TilePhysic" );
 }
 
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-
-void
-LYSimPrimaryGeneratorAction::SetOptPhotonPolar( G4double angle )
+double
+CalcThickness( const LYSimDetectorConstruction* detector,
+               const double x, const double y )
 {
-  if( particleSource->GetParticleDefinition()->GetParticleName() == "opticalphoton" ){
-    G4ThreeVector normal( 1., 0., 0. );
-    G4ThreeVector kphoton = particleSource->GetParticleMomentumDirection();
-    G4ThreeVector product = normal.cross( kphoton );
-    G4double modul2       = product*product;
+  const double dimple_r  = detector->GetDimpleRadius();
+  const double dimple_i  = detector->GetDimpleIndent();
+  const double beam_r    = sqrt( x*x+y*y );
+  const double big_r     = detector->GetDimpleSizeRadius();
+  const double thickness = detector->GetTileZ();
+  const int type         = detector->Get_dimple_type();
 
-    G4ThreeVector e_perpend( 0., 0., 1. );
-    if( modul2 > 0. ){
-      e_perpend = ( 1./std::sqrt( modul2 ) )*product;
+  if( beam_r <= dimple_r ){
+    if( type == 0 ){
+      return thickness - ( sqrt( big_r*big_r - beam_r*beam_r ) -
+                           ( big_r - dimple_i ) );
+    } else if( type == 2 ){//  # Parabolic
+      return thickness - abs( 1.35 * beam_r*beam_r - dimple_i );
+    } else if( type == 1 ){
+      if( fabs( y ) <= fabs( x ) ){
+        return thickness - ( dimple_i - ( dimple_i / dimple_r ) * fabs( x ) );
+      } else {
+        return thickness - ( dimple_i - ( dimple_i / dimple_r ) * fabs( y ) );
+      }
+    }  else {
+      return thickness;
     }
-    G4ThreeVector e_paralle = e_perpend.cross( kphoton );
-
-    G4ThreeVector polar = std::cos( angle )*e_paralle
-                          + std::sin( angle )*e_perpend;
-    particleSource->SetParticlePolarization( polar );
+  } else {
+    return thickness;
   }
-
 }
 
-const G4ThreeVector
-LYSimPrimaryGeneratorAction::GetSourcePosition()
+int
+CalcNumPhotons( const double thickness )
 {
-  G4ThreeVector pos = particleSource->GetParticlePosition();
-  return pos;
+  return int(std::floor( (double)6677 * thickness/3.0 ) );
 }
-
-const G4ThreeVector
-LYSimPrimaryGeneratorAction::GetParticleMomentumDirection()
-{
-  G4ThreeVector p = particleSource->GetParticleMomentumDirection();
-  return p;
-}
-
-// ....oooOO-1OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

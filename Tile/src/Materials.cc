@@ -1,5 +1,10 @@
 #include "G4NistManager.hh"
+
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/Materials.hh"
+#else
 #include "Materials.hh"
+#endif
 
 using namespace CLHEP;
 

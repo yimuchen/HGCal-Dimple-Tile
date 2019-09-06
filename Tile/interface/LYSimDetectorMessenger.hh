@@ -1,11 +1,17 @@
 #ifndef LYSimDetectorMessenger_h
 #define LYSimDetectorMessenger_h
 
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
+#else
+#include "Analysis.hh"
+#include "LYSimDetectorConstruction.hh"
+#endif
+
 #include "globals.hh"
 #include "G4UImessenger.hh"
 
-#include "Analysis.hh"
-#include "LYSimDetectorConstruction.hh"
 
 class G4UIdirectory;
 class G4UIcmdWithABool;
@@ -35,14 +41,12 @@ private:
   G4UIcmdWithoutParameter* UpdateCmd;
   G4UIcmdWithABool* SetWrappingCmd;
   G4UIcmdWithADouble* SetRefIndexCmd;
-  G4UIcmdWithADoubleAndUnit* SetScintThicknessCmd;
-  G4UIcmdWithADoubleAndUnit* SetScintSizeXCmd;
-  G4UIcmdWithADoubleAndUnit* SetScintSizeYCmd;
+  G4UIcmdWithADoubleAndUnit* SetTileZCmd;
+  G4UIcmdWithADoubleAndUnit* SetTileXCmd;
+  G4UIcmdWithADoubleAndUnit* SetTileYCmd;
   G4UIcmdWithADoubleAndUnit* SetScintPMTGapThicknessCmd;
   G4UIcmdWithADoubleAndUnit* SetTileAbsLengthCmd;
   G4UIcmdWithADoubleAndUnit* SetInducedAbsLengthCmd;
-
-
 };
 
 #endif

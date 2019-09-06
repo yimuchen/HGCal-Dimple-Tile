@@ -30,6 +30,9 @@ include(${Geant4_USE_FILE})
 #  return()
 #endif()
 
+## Passing source directory to file to enable data file finding.
+configure_file(Tile/src/ProjectPath.cc.in  Tile/src/ProjectPath.cc)
+
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project

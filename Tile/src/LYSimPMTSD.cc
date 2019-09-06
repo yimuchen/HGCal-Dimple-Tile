@@ -1,9 +1,12 @@
-/// \file LYSim/src/LYSimPMTSD.cc
-/// \brief Implementation of the LYSimPMTSD class
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/LYSimPMTHit.hh"
+#include "HGCalTileSim/Tile/interface/LYSimPMTSD.hh"
+#else
 #include "Analysis.hh"
-
 #include "LYSimPMTHit.hh"
 #include "LYSimPMTSD.hh"
+#endif
 
 #include "G4ios.hh"
 #include "G4ParticleDefinition.hh"

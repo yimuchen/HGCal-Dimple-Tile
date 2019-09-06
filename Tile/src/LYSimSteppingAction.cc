@@ -1,6 +1,12 @@
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimPMTSD.hh"
+#include "HGCalTileSim/Tile/interface/LYSimSteppingAction.hh"
+#else
 #include "LYSimDetectorConstruction.hh"
 #include "LYSimPMTSD.hh"
 #include "LYSimSteppingAction.hh"
+#endif
 
 #include "G4EventManager.hh"
 #include "G4OpBoundaryProcess.hh"
@@ -68,12 +74,11 @@ LYSimSteppingAction::UserSteppingAction( const G4Step* step )
     boundaryStatus = boundary->GetStatus();
 
     switch( boundaryStatus ){
-    case Detection:     // Note, this assumes that the volume causing detection
-      // is the photocathode because it is the only one with
-      // non-zero efficiency
+    case Detection:
+      // Note, this assumes that the volume causing detection is the photocathode
+      // because it is the only one with non-zero efficiency. Trigger sensitive
+      // detector manually since photon is absorbed but status was Detection
     {
-      // Trigger sensitive detector manually since photon is
-      // absorbed but status was Detection
       G4EventManager::GetEventManager()->KeepTheCurrentEvent();
       G4SDManager* SDman = G4SDManager::GetSDMpointer();
       G4String sdName    = "/LYSimPMT";

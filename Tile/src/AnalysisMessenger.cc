@@ -1,4 +1,8 @@
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/AnalysisMessenger.hh"
+#else
 #include "AnalysisMessenger.hh"
+#endif
 
 #include "G4UIcmdWithABool.hh"
 #include "G4UIcmdWithADouble.hh"

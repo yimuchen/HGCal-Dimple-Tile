@@ -1,5 +1,20 @@
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/AnalysisMessenger.hh"
+#include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimEventAction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimPrimaryGeneratorAction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimScintillation.hh"
+#include "HGCalTileSim/Tile/interface/LYSimTrajectoryPoint.hh"
+#else
 #include "Analysis.hh"
 #include "AnalysisMessenger.hh"
+#include "LYSimDetectorConstruction.hh"
+#include "LYSimEventAction.hh"
+#include "LYSimPrimaryGeneratorAction.hh"
+#include "LYSimScintillation.hh"
+#include "LYSimTrajectoryPoint.hh"
+#endif
 
 #include "g4root.hh"
 #include "G4Event.hh"
@@ -12,29 +27,15 @@
 #include "G4SDManager.hh"
 #include "G4UnitsTable.hh"
 
-#include "LYSimDetectorConstruction.hh"
-#include "LYSimEventAction.hh"
-#include "LYSimPrimaryGeneratorAction.hh"
-#include "LYSimScintillation.hh"
-#include "LYSimTrajectoryPoint.hh"
 
 using namespace std;
 using namespace CLHEP;
 
-// ROOT Stuff
-// #include "TProfile.h"
-// #include "TFile.h"
-
 Analysis* Analysis::singleton = 0;
 
-// Constructor
 Analysis::Analysis()
 {
   fMessenger = new AnalysisMessenger( this );
-  // //Delete previous contents of output file.
-  // outputfile.open(fOutputFileName.c_str(), ofstream::out | ofstream::trunc);
-  // outputfile.close();
-  // Instantiate the analysis manager
   G4AnalysisManager::Instance();
 
 }
@@ -45,34 +46,14 @@ Analysis::~Analysis()
 }
 
 void
-Analysis::PrepareNewEvent( const G4Event*/*anEvent*/ )
+Analysis::PrepareNewEvent( const G4Event* )
 {
 }
+
 void
 Analysis::EndOfEvent( const G4Event* anEvent )
 {
-  // G4PrimaryParticle* primary = anEvent->GetPrimaryVertex(0)->GetPrimary(0);
-  // G4cout << G4endl
-  //     << ">>> Event " << anEvent->GetEventID() << " >>> Simulation truth : "
-  //     << primary->GetG4code()->GetParticleName()
-  //	 << " " << primary->GetMomentum() << G4endl;
-
   G4AnalysisManager* man = G4AnalysisManager::Instance();
-
-  G4PrimaryVertex* ivtx = anEvent->GetPrimaryVertex();
-  G4double xPos         = ivtx->GetX0();
-  G4double yPos         = ivtx->GetY0();
-  G4double zPos         = ivtx->GetZ0();
-  // std::cout<<" [LYSIM] creation position is "<<xPos<<","<<yPos<<","<<zPos<<std::endl;
-  man->FillH2( 1, xPos, yPos );
-  man->FillH2( 2, xPos, zPos );
-  man->FillH1( 5, xPos );
-
-  G4double px    = generatorAction->GetParticleMomentumDirection().x();
-  G4double py    = generatorAction->GetParticleMomentumDirection().y();
-  G4double pz    = generatorAction->GetParticleMomentumDirection().z();
-  G4double phi   = atan( ( py )/( px ) );
-  G4double theta = acos( pz );
 
   G4String hitCollName   = "PMTHitsCollection";
   G4SDManager* SDman     = G4SDManager::GetSDMpointer();
@@ -86,7 +67,8 @@ Analysis::EndOfEvent( const G4Event* anEvent )
 
   LYSimPMTHitsCollection* hits = 0;
   if( hitsCollections ){
-    hits = static_cast<LYSimPMTHitsCollection*>( hitsCollections->GetHC( hitCollID ) );
+    hits = static_cast<LYSimPMTHitsCollection*>(
+      hitsCollections->GetHC( hitCollID ) );
   } else {
     G4cerr << "hitsCollection not found" << G4endl;
     return;
@@ -102,25 +84,18 @@ Analysis::EndOfEvent( const G4Event* anEvent )
     G4double HitTime   = ( *hits )[i]->GetTime();
     if( i == 0 ){
       HitCount++;
-      man->FillH2( 3, xPos, yPos );
-      man->FillH2( 4, xPos, zPos );
-      man->FillH1( 6, xPos );
-      man->FillNtupleDColumn( 0, zPos );
-      man->FillNtupleDColumn( 1, phi );
-      man->FillNtupleDColumn( 2, theta );
-      man->AddNtupleRow();
-
+      // man->AddNtupleRow(); asdf
     }
 
-
+    assert( ( *hits )[i]->GetPhotonCount() == 1 );
     EventEnergy      += HitEnergy;
     EventPhotonCount += ( *hits )[i]->GetPhotonCount();
     man->FillH1( 1, 1239.842/( HitEnergy/eV ) );
     man->FillH1( 4, HitTime/ns );
   }
 
-  man->FillH1( 2, EventPhotonCount );// Photon hits per event
-  man->FillH1( 3, EventEnergy/eV );// total energy deposited at PMT per event
+  man->FillH1( 2, EventPhotonCount );
+  man->FillH1( 3, EventEnergy/eV );
 }
 
 void
@@ -135,24 +110,10 @@ Analysis::PrepareNewRun( const G4Run* )
 void
 Analysis::EndOfRun( const G4Run* )
 {
-  outputfile.open( fOutputFileName.c_str(), ofstream::out | ofstream::app );
-  G4ThreeVector pos = generatorAction->GetSourcePosition();
-  G4double detEff   = ( PhotonCount > 0 ? (G4double)HitCount/(G4double)PhotonCount : 0.0 );
+  G4double detEff = PhotonCount > 0 ? (double)HitCount/(double)PhotonCount :
+                    0.0;
   G4cout << "Efficiency in this run is " << detEff  << G4endl;
-  if( outputfile.is_open() ){
-    outputfile << inducedMuTile << "\t"
-               << inducedMuFiber << "\t"
-               << detEff << "\t"
-               << pos.x() << "\t"
-               << pos.y() << G4endl;
-  } else {
-    G4cout << "Output file not open" << G4endl;
-    G4cout << inducedMuTile << "\t"
-           << inducedMuFiber << "\t"
-           << detEff << "\t"
-           << pos.x() << "\t"
-           << pos.y() <<  G4endl;
-  }
-  outputfile.close();
-
+  G4cout << inducedMuTile << "\t"
+         << inducedMuFiber << "\t"
+         << detEff <<  G4endl;
 }

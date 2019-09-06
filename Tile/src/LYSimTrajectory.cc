@@ -1,5 +1,12 @@
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/LYSimTrajectory.hh"
+#include "HGCalTileSim/Tile/interface/LYSimTrajectoryPoint.hh"
+#else
+#include "Analysis.hh"
 #include "LYSimTrajectory.hh"
 #include "LYSimTrajectoryPoint.hh"
+#endif
 
 #include "G4AttDef.hh"
 #include "G4AttDefStore.hh"
@@ -11,7 +18,6 @@
 #include "G4ParticleTable.hh"
 #include "G4ParticleTypes.hh"
 
-#include "Analysis.hh"
 #include "G4Colour.hh"
 #include "G4Polyline.hh"
 #include "G4Polymarker.hh"

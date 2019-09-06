@@ -1,0 +1,5 @@
+<use name="geant4"/>
+<use name="HGCalTileSim/Tile"/>
+
+<bin file="InteractiveSession.cc" name="LYSim_Session"/>
+<bin file="LY_SquareTrigger.cc"   name="LYSim_SquareTrigger"/>

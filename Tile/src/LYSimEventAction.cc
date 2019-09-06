@@ -1,14 +1,26 @@
-// LYSimEventAction.cc
-
-#include "Analysis.hh"
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/AnalysisMessenger.hh"
+#include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimEventAction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimEventAction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimPrimaryGeneratorAction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimScintillation.hh"
+#include "HGCalTileSim/Tile/interface/LYSimTrajectoryPoint.hh"
+#else
 #include "Analysis.hh"
 #include "AnalysisMessenger.hh"
-#include "g4root.hh"
+#include "LYSimDetectorConstruction.hh"
+#include "LYSimEventAction.hh"
+#include "LYSimPrimaryGeneratorAction.hh"
+#include "LYSimScintillation.hh"
+#include "LYSimTrajectoryPoint.hh"
+#endif
+
 #include "g4root.hh"
 #include "G4DigiManager.hh"
 #include "G4Event.hh"
-#include "G4Event.hh"
-#include "G4EventManager.hh"
 #include "G4EventManager.hh"
 #include "G4GeneralParticleSource.hh"
 #include "G4HCofThisEvent.hh"
@@ -17,15 +29,7 @@
 #include "G4PrimaryVertex.hh"
 #include "G4RootAnalysisManager.hh"
 #include "G4SDManager.hh"
-#include "G4SDManager.hh"
 #include "G4UnitsTable.hh"
-#include "G4UnitsTable.hh"
-#include "LYSimDetectorConstruction.hh"
-#include "LYSimEventAction.hh"
-#include "LYSimEventAction.hh"
-#include "LYSimPrimaryGeneratorAction.hh"
-#include "LYSimScintillation.hh"
-#include "LYSimTrajectoryPoint.hh"
 
 
 LYSimEventAction::LYSimEventAction()

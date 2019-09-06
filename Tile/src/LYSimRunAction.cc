@@ -1,15 +1,21 @@
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/LYSimRunAction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
+#else
 #include "Analysis.hh"
-
 #include "LYSimRunAction.hh"
+#include "LYSimDetectorConstruction.hh"
+#endif
 
 #include "G4Run.hh"
 #include "G4RunManager.hh"
 
 #include "g4root.hh"
-#include "LYSimDetectorConstruction.hh"
 #include <iostream>
 
-LYSimRunAction::LYSimRunAction( LYSimDetectorConstruction* ipDetectorConstruction )
+LYSimRunAction::LYSimRunAction(
+  LYSimDetectorConstruction* ipDetectorConstruction )
 {
 //     runMessenger = new LYSimRunActionMessenger(this);
   pDetectorConstruction = ipDetectorConstruction;
@@ -23,24 +29,7 @@ LYSimRunAction::LYSimRunAction( LYSimDetectorConstruction* ipDetectorConstructio
 
   // Create histogram(s) (avoid non-integer bins)
   man->CreateH1( "ogammaE",   "Optical photons Wavelength [nm]",       100, 200.,  1200. );
-  man->CreateH1( "Ndetect",   "Number of detected photons per event",  250,   0.,    250. );
-  man->CreateH1( "totE",      "Total Energy deposited per event [eV]", 100,   0.,     5. );
-  man->CreateH1( "timeGamma", "time of detected photon [ns]",          100,   0.,   100. );
-  man->CreateH1( "npvs",      "number produced photons vs x [mm]",     400,    -20., 20. );
-  man->CreateH1( "ndvs",      "number detected photons vs x [mm]",     400,    -20., 20. );
-
-  // 2D hists
-  man->CreateH2( "xycr",  "xy creation point of optical photons",          400, -20., 20., 400, -20., 20. );
-  man->CreateH2( "szcr",  "xz creation point of optical photons",          400, -20., 20., 400, -20., 20. );
-  man->CreateH2( "xycrd", "xy creation point of detected optical photons", 400, -20., 20., 400, -20., 20. );
-  man->CreateH2( "szcrd", "xz creation point of detected optical photons", 400, -20., 20., 400, -20., 20. );
-
-  // 3D Hist
-  man->CreateNtuple( "Traj", "Trajectory of Detected Optical Photons" );
-  man->CreateNtupleDColumn( "zPos" );
-  man->CreateNtupleDColumn( "Phi" );
-  man->CreateNtupleDColumn( "Theta" );
-  man->FinishNtuple();
+  man->CreateH1( "Ndetect",   "Number of detected photons per event",  500,   0.,    500. );
 }
 
 LYSimRunAction::~LYSimRunAction()

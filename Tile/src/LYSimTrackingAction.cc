@@ -1,14 +1,20 @@
+#ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/LYSimTrajectory.hh"
+#include "HGCalTileSim/Tile/interface/LYSimTrackingAction.hh"
+#else
+#include "Analysis.hh"
+#include "LYSimTrajectory.hh"
+#include "LYSimTrackingAction.hh"
+#endif
+
 #include "globals.hh"
 #include "G4RunManager.hh"
 
-#include "LYSimTrajectory.hh"
-
-#include "Analysis.hh"
 #include "G4ParticleTypes.hh"
 #include "G4Track.hh"
 #include "G4TrackingManager.hh"
 
-#include "LYSimTrackingAction.hh"
 
 void
 LYSimTrackingAction::PreUserTrackingAction( const G4Track* aTrack )
@@ -18,22 +24,6 @@ LYSimTrackingAction::PreUserTrackingAction( const G4Track* aTrack )
 
   // Use custom trajectory class
   fpTrackingManager->SetTrajectory( new LYSimTrajectory( aTrack ) );
-
-  /*  LYSimUserTrackInformation* trackInformation = new LYSimUserTrackInformation();
-
-     if (aTrack->GetMomentumDirection().z()>0.0) {
-     trackInformation->AddStatusFlag(right);
-     } else {
-     trackInformation->AddStatusFlag(left);
-     }
-
-     G4String PVName = aTrack->GetVolume()->GetName();
-
-     if (PVName == "LYSimFiber" || PVName == "Clad1" || PVName == "Clad2")
-     trackInformation->AddStatusFlag(InsideOfFiber);
-
-     fpTrackingManager->SetUserTrackInformation(trackInformation);
-   */
 }
 
 void
