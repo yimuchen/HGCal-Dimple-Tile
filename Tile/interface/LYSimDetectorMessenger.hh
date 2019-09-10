@@ -39,12 +39,10 @@ private:
   G4UIdirectory* detDir;
 
   G4UIcmdWithoutParameter* UpdateCmd;
-  G4UIcmdWithABool* SetWrappingCmd;
-  G4UIcmdWithADouble* SetRefIndexCmd;
-  G4UIcmdWithADoubleAndUnit* SetTileZCmd;
   G4UIcmdWithADoubleAndUnit* SetTileXCmd;
   G4UIcmdWithADoubleAndUnit* SetTileYCmd;
-  G4UIcmdWithADoubleAndUnit* SetScintPMTGapThicknessCmd;
+  G4UIcmdWithADoubleAndUnit* SetTileZCmd;
+
   G4UIcmdWithADoubleAndUnit* SetTileAbsLengthCmd;
   G4UIcmdWithADoubleAndUnit* SetInducedAbsLengthCmd;
 

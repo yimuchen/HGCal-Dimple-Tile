@@ -29,17 +29,6 @@ public:
 
   // Get set functions of geometric variables.
   inline void
-  SetWrapping ( const G4bool x ){_wrapping = x;}
-  inline G4bool
-  GetWrapping () const {return _wrapping;}
-
-  // Set ref index of scint pmt gap
-  inline void
-  SetRefIndex ( const G4double iRefIndex ){RefIndex = iRefIndex;}
-  inline G4double
-  GetRefIndex() const {return RefIndex;}
-
-  inline void
   SetTileZ ( const G4double x ){ _tilez = x;}
   inline G4double
   GetTileZ() const {return _tilez;}
@@ -55,11 +44,6 @@ public:
   GetTileY() const {return _tiley;}
 
   inline void
-  SetScintPMTGapThickness ( const G4double x ){ScintPMT_gap = x;}
-  inline G4double
-  GetScintPMTGapThickness() const {return ScintPMT_gap;}
-
-  inline void
   SetTileAbsLength ( const G4double x ){tileAbsLength = x;}
   inline G4double
   GetTileAbsLength() const {return tileAbsLength;}
@@ -73,42 +57,42 @@ public:
   inline double
   GetDimpleRadius() const { return _dimple_radius; }
   inline void
-  SetDimpleRadius( const double x ){ _dimple_radius = x ; }
+  SetDimpleRadius( const double x ){ _dimple_radius = x; }
   inline double
   GetDimpleIndent() const { return _dimple_indent; }
   inline void
-  SetDimpleIndent( const double x ){ _dimple_indent = x ; }
+  SetDimpleIndent( const double x ){ _dimple_indent = x; }
 
   int
   GetDimpleType() const {return _dimple_type; }
   inline void
-  SetDimpleType( const int x ){ _dimple_type = x ; }
+  SetDimpleType( const int x ){ _dimple_type = x; }
 
-  enum  DIMPLE_TYPE {
-    SPHERICAL ,
-    PARABOLIC ,
+  enum  DIMPLE_TYPE
+  {
+    SPHERICAL,
+    PARABOLIC,
     PYRAMID
   };
 
   // Additional geometric factors.
-  double WorldHalfX() const ;
-  double WorldHalfY() const ;
-  double WorldHalfZ() const ;
+  double WorldHalfX() const;
+  double WorldHalfY() const;
+  double WorldHalfZ() const;
 
   double GetDimpleSizeRadius() const;
-  double LocalTileZ( const double x, const double y ) const ;
+  double LocalTileZ( const double x, const double y ) const;
 
 private:
   // Subfunctions for cleaner code
-  G4VSolid*          ConstructTileSolid(
+  G4VSolid* ConstructTileSolid(
     const G4String& name,
     G4double        angle1, // angle measured ccw from y axis for the side at -x
     G4double        angle2, // angle measured ccw from y axis for the side at +x
     G4double        Dx2,    // length along x of side at y=+Dy
     G4double        Dy,     // length along y
-    G4double        Dz,     // length along z
-    G4ThreeVector&  centerCoord ); // coordinate of center of gravity w.r.t.
-                                   // corner 0 at -x, -y
+    G4double        Dz     // length along z
+    );
 
   G4VSolid*     ConstructSphereDimpleSolid() const;
   G4VSolid*     ConstructPyramidDimpleSolid() const;
@@ -118,23 +102,10 @@ private:
   // Pointer to detector messenger class
   LYSimDetectorMessenger* fdetectorMessenger;
 
-  G4bool fUpdated;
-
   // Contains the minimum and maximum Z-position of the previously defined volume
   // Use this variable to define volume successively along the z-axis
   // (max for +z direction, min for -z direction)
   // Set value after defining a physical volume
-
-  // Pointers to main volumes
-  G4Box* solidWorld;
-  G4LogicalVolume* logicWorld;
-  G4VPhysicalVolume* physWorld;
-  G4VPhysicalVolume* physTile;
-
-  // pointer for wrapping
-  G4LogicalVolume* logicWWW;
-  // pointer for dimple
-  G4LogicalVolume* logicD;
 
   // Pointers to materials
   G4Material* fAir;
@@ -146,26 +117,16 @@ private:
   G4Material* fEpoxy2;
 
   // Pointers to surfaces
-  G4OpticalSurface* fTyvekOpSurface;
-  G4OpticalSurface* fIdealTyvekOpSurface;
-  G4OpticalSurface* fUnifiedTyvekOpSurface;
-  G4OpticalSurface* fUnifiedIdealTyvekOpSurface;
   G4OpticalSurface* fESROpSurface;
   G4OpticalSurface* fPolishedOpSurface;
   G4OpticalSurface* fIdealPolishedOpSurface;
-  G4OpticalSurface* fMirrorOpSurface;
   G4OpticalSurface* fIdealMirrorOpSurface;
-  G4OpticalSurface* fAbsorbingOpSurface;
-  G4OpticalSurface* fRoughOpSurface;
   G4OpticalSurface* fSiPMSurface;
-
 
   // Pointers for access to Sensitive Detector
   static LYSimPMTSD* fPMTSD;
 
   // Geometry parameters
-  // Important parameters marked with ////
-  G4double RefIndex;// Refractive index of fiber or scint-PMT gap
   G4double angle1;
   G4double angle2;
   G4double angle3;
@@ -173,16 +134,25 @@ private:
   G4double Dx3;
   G4double Dw2;
 
+  // Tile Geometric definitions
   double _tilex;
   double _tiley;
   double _tilez;
+  double _tile_x1;
+  double _tile_x2;
 
-  G4bool _wrapping;// (Tyvek) wrapping around scintillator
-  G4double Photocat_sizeX;
-  G4double Photocat_sizeY;
-  G4double Photocat_thickness;
-  G4double ScintPMT_gap;// thickness of gap between scintillator and PMT
+  // Wrapping Geometry definitions
   G4double wrapgap;// distance between tile and wrapping
+
+
+  // Dimple variables;
+  G4double _dimple_indent;// Depth of dimple
+  G4double _dimple_radius;// Dimple radius
+  G4int _dimple_type;
+
+  G4double _sipm_x;
+  G4double _sipm_y;
+  G4double _sipm_z;
   G4double SiPM_Depth;// SiPM depth
 
 
@@ -190,15 +160,6 @@ private:
   G4double inducedMuTile;// Radiation-induced absorption coefficient (cm^-1)
   G4double Absmultiple;// factor for Abslength manipulation.
 
-  // Dimple variables;
-  G4double _dimple_indent;// Depth of dimple
-  G4double _dimple_radius;// Dimple radius
-  G4int _dimple_type;
-
-  G4ThreeVector corners[8];// stores the corner coordinates of the tile
-  G4ThreeVector readout0, readout1;// location of readout at corner 0/1
-  // G4ThreeVector mirror0, mirror1;     //location of mirrors at corner 0/1
-  G4int readoutCorner;// determines location of fiber readout (0:corner 0, 1:corner 1)
 };
 
 #endif

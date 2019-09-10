@@ -332,20 +332,6 @@ Make_LYSO()
     lysorefindex[i] = sqrt( 1 + pow( n0, 2.0 ) + pow( n1, 2.0 ) / ( 1 - pow( lambda1, 2.0 ) / pow( lysowavelength[i], 2.0 ) ) );
   }
 
-  /*
-  double lysoconstrefindex[nentriesrefindex];
-
-  for( unsigned i = 0; i < nentriesrefindex; i++ ){
-    lysoconstrefindex[i] = 1.82;
-  }
-  */
-
-
-
-  const unsigned nentrieslal      = 2;
-  double energieslal[nentrieslal] = {1.0*eV, 6.0*eV};
-  double lal[nentrieslal]         = {200*cm, 200*cm};
-
   // Light Absorption Length
   // From 1mm sample transmission data
   const unsigned nentrieslysolal          = 10;
@@ -360,23 +346,6 @@ Make_LYSO()
 
 
   // Scintillation emission spectrum (fast component)
-  // Gamma-ray emission
-  static const unsigned nentriesemissiongamma                    = 16;
-  static double lysoenergiesemissiongamma[nentriesemissiongamma] =
-  {
-    3.44*eV, 3.26*eV, 3.18*eV, 3.10*eV, 3.02*eV,
-    2.95*eV, 2.88*eV, 2.82*eV, 2.70*eV, 2.58*eV,
-    2.48*eV, 2.38*eV, 2.30*eV, 2.21*eV, 2.14*eV,
-    1.82*eV
-  };
-  static double lysoemissiongamma[nentriesemissiongamma] =
-  {
-    0.00, 0.06, 0.28, 0.72, 1.40,
-    2.00, 2.20, 2.06, 1.48, 0.94,
-    0.60, 0.40, 0.30, 0.20, 0.10,
-    0.00
-  };
-
   // Photoluminescence (theta = 10 deg)
   static const unsigned nentrieslysoemission               = 21;
   static double lysoenergiesemission[nentrieslysoemission] = {
@@ -586,7 +555,6 @@ Make_SCSN81( const double abslength, const double induced_Mu )
 G4Material*
 Make_EJ200( const double mult )
 {
-  // material = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE"); // H:8.5%; C: 91.5%; density = 1.032 g/cm^3
   G4Material* material = new G4Material( "EJ200", 1.023*g/cm3, 2, kStateSolid );
   material->AddElement( C, 91.53*perCent );
   material->AddElement( H,  8.47*perCent );
@@ -648,18 +616,18 @@ Make_EJ200( const double mult )
   G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable();
   table->AddProperty( "RINDEX",    photonE, refrac_idx, nentries );
   table->AddProperty( "ABSLENGTH", photonE, abs_length, nentries );
-  table->AddConstProperty( "SCINTILLATIONYIELD",         10./keV );
+  table->AddConstProperty( "SCINTILLATIONYIELD",        10./keV );
 
-  table->AddConstProperty( "RESOLUTIONSCALE",            1.0 );
-  table->AddConstProperty( "FASTSCINTILLATIONRISETIME",  0.9*ns );
+  table->AddConstProperty( "RESOLUTIONSCALE",           1.0 );
+  table->AddConstProperty( "FASTSCINTILLATIONRISETIME", 0.9*ns );
 
   // Disabled for CMSSW
-  //table->AddConstProperty( "ELECTRONSCINTILLATIONYIELD", 10./keV );
-  //table->AddConstProperty( "ALPHASCINTILLATIONYIELD",   100./MeV );
-  //table->AddConstProperty( "FASTTIMECONSTANT",           2.1*ns );
-
+  // table->AddConstProperty( "ELECTRONSCINTILLATIONYIELD", 10./keV );
+  // table->AddConstProperty( "ALPHASCINTILLATIONYIELD",   100./MeV );
+  // table->AddConstProperty( "FASTTIMECONSTANT",           2.1*ns );
   // table->AddProperty("FASTCOMPONENT",photonE,Scints,nentries);
-  // table->AddConstProperty("YIELDRATIO",1.0);//Fast component/Tot scint
+  // table->AddConstProperty("YIELDRATIO",1.0);
+
   material->SetMaterialPropertiesTable( table );
 
   // FIXME: Set the Birks Constant for the EJ200 scintillator

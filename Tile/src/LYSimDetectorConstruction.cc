@@ -62,8 +62,6 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   fdetectorMessenger = new LYSimDetectorMessenger( this );
 
   // Set default parameters
-  _wrapping = true;
-
   angle1 = 0*degree;
   angle2 = 0*degree;// for tile
   angle3 = 0*degree;// for wrap
@@ -73,56 +71,43 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
 
   _tilex = 29.65*mm;
   _tiley = 29.65*mm;
-  _tilez = 2.98*mm;// 3.7*mm for SCSN81
+  _tilez = 2.98*mm;
 
-  Photocat_sizeX     = 1.3*mm;
-  Photocat_sizeY     = 1.3*mm;
-  Photocat_thickness = 0.025*mm;// arbitrary thickness for Photocathode
-  ScintPMT_gap       = 2.0*mm;// rough estimate of air gap between scintillator and PMT face
-  wrapgap            = 0.05*mm;
+  _sipm_x = 1.3*mm;
+  _sipm_y = 1.3*mm;
+  _sipm_z = 0.025*mm;// arbitrary thickness for Photocathode
+  wrapgap = 0.05*mm;
 
 
   tileAbsLength = 380*cm;
   inducedMuTile = 1.e-20/cm;
-  readoutCorner = 1;
 
-  Absmultiple    = 1.0;// factor for Abslength manipulation.
-  _dimple_indent = 1.25*1.6*mm;
-  _dimple_radius = 3.5*mm;// 3.4409*mm
-  SiPM_Depth     = 0.0*mm;// SiPM Depth (0.0 is flush with top of tile, don't use anything less than 0.05*mm unless 0.0)
+  Absmultiple = 1.0;// factor for Abslength manipulation.
+  SiPM_Depth  = 0.0*mm;   // SiPM Depth (0.0 is flush with top of tile, don't use anything less than 0.05*mm unless 0.0)
   // Dimple radius (normal is 3.4409*mm)
   // Dimple depth (normal is 1.6*mm)
 
-  _dimple_type = 0;// 0: Normal, 1: Pyramid, 2: Parabolic
-  solidWorld   = NULL;
-  logicWorld   = NULL;
-  physWorld    = NULL;
-  logicWWW     = NULL;
+  // Default Dimple settings
+  _dimple_type   = SPHERICAL;// 0: Normal, 1: Pyramid, 2: Parabolic
+  _dimple_indent = 1.25*1.6*mm;
+  _dimple_radius = 3.5*mm;// 3.4409*mm
 
   // Defining material list.
   fBialkali = Make_Bialkali();
   fEpoxy    = Make_Epoxy();
   fEpoxy2   = Make_Epoxy2();
   fAir      = Make_Custom_Air();
+  fSCSN81   = Make_SCSN81( GetTileAbsLength(), GetInducedMuTile() );
+  fEJ200    = Make_EJ200( Absmultiple );
+  fEJ260    = Make_EJ260( GetTileAbsLength(), GetInducedMuTile() );
 
-  fSCSN81 = Make_SCSN81( GetTileAbsLength(), GetInducedMuTile() );
-  fEJ200  = Make_EJ200( Absmultiple );
-  fEJ260  = Make_EJ260( GetTileAbsLength(), GetInducedMuTile() );
-
-  fTyvekOpSurface             = MakeS_TyvekCrystal();
-  fIdealTyvekOpSurface        = MakeS_IdealTyvekCrystal();
-  fUnifiedTyvekOpSurface      = MakeS_UnifiedTyvek();
-  fUnifiedIdealTyvekOpSurface = MakeS_IdealTyvek();
-  fESROpSurface               = MakeS_ESR();
-  fRoughOpSurface             = MakeS_Rough();
-  fPolishedOpSurface          = MakeS_Polished();
-  fIdealPolishedOpSurface     = MakeS_IdealPolished();
-  fMirrorOpSurface            = MakeS_Mirror();
-  fIdealMirrorOpSurface       = MakeS_IdealMirror();
-  fSiPMSurface                = MakeS_SiPM();
-  fUpdated                    = false;
+  // Defining surface list.
+  fESROpSurface           = MakeS_ESR();
+  fPolishedOpSurface      = MakeS_Polished();
+  fIdealPolishedOpSurface = MakeS_IdealPolished();
+  fIdealMirrorOpSurface   = MakeS_IdealMirror();
+  fSiPMSurface            = MakeS_SiPM();
 }
-
 
 void
 LYSimDetectorConstruction::UpdateGeometry()
@@ -175,16 +160,12 @@ LYSimDetectorConstruction::Construct()
   G4double xdisp  = 0.25*( _tilex-Dx2 );
   G4double xdisp2 = 0.25*( _tilex-Dx3 );
 
-  G4ThreeVector wrapCenter( 0, 0, 0 );
-
-
   G4VSolid* solidWrap = ConstructTileSolid( "TileTrap"
                                           , angle1
                                           , angle3
                                           , Dw2+2*wrapgap
                                           , _tiley+2*wrapgap
-                                          , _tilez+2*wrapgap
-                                          , wrapCenter   );
+                                          , _tilez+2*wrapgap );
 
 
   G4LogicalVolume* logicWrap = new G4LogicalVolume( solidWrap,   fAir,  "Wrap" );
@@ -204,7 +185,6 @@ LYSimDetectorConstruction::Construct()
   ///////////////////////////////////////////////////////
   // Subtracted Dimple Version (dimple sub from tile, WWW = mothervolume of both)
   /////////////////////////////////////////////////////////
-  G4ThreeVector tileCenter( 0, 0, 0 );
   G4ThreeVector TileOffset( 0, 0, 0 );// -xdisp if weak
   G4ThreeVector DimpleOffset = CalcDimpleOffset();
 
@@ -213,8 +193,7 @@ LYSimDetectorConstruction::Construct()
                                           , angle2
                                           , Dx2
                                           , _tiley
-                                          , _tilez
-                                          , tileCenter );
+                                          , _tilez );
 
   G4LogicalVolume* logicTile = new G4LogicalVolume( solidTile
                                                   , fEJ200, "TileLogic" );
@@ -255,14 +234,13 @@ LYSimDetectorConstruction::Construct()
   const double case_z = SiPM_Depth == 0*mm ?  0.5*_tilez+0.025*mm :
                         -SubD+0.025*mm-SiPM_Depth;
   const double sipm_z = SiPM_Depth == 0*mm ?
-                        0.5*_tilez+0.5*Photocat_thickness :
-                        -SubD+0.5*Photocat_thickness-SiPM_Depth;
+                        0.5*_tilez+0.5*_sipm_z :
+                        -SubD+0.5*_sipm_z-SiPM_Depth;
 
   G4ThreeVector CaseOffset( xdisp2, 0, case_z );
   G4ThreeVector transSiPM( xdisp2, 0, sipm_z );
 
-  G4Box* solidSiPM = new G4Box( "SiPM",  0.5*Photocat_sizeX
-                              , 0.5*Photocat_sizeY, 0.5*Photocat_thickness );
+  G4Box* solidSiPM = new G4Box( "SiPM",  0.5*_sipm_x, 0.5*_sipm_y, 0.5*_sipm_z );
 
   G4LogicalVolume* logicSiPM = new G4LogicalVolume( solidSiPM
                                                   , fBialkali,  "SiPM" );
@@ -275,7 +253,7 @@ LYSimDetectorConstruction::Construct()
                             , solidSiPMback
                             , solidSiPM
                             , 0
-                            , G4ThreeVector( 0, 0, 0.5*Photocat_thickness-backthick ) );
+                            , G4ThreeVector( 0, 0, 0.5*_sipm_z-backthick ) );
 
   G4LogicalVolume* logicSiPMCase = new G4LogicalVolume( SiPMCase
                                                       , fEpoxy, "SiPMBack" );
@@ -329,7 +307,6 @@ LYSimDetectorConstruction::Construct()
     G4SDManager* sdman = G4SDManager::GetSDMpointer();
     sdman->AddNewDetector( fPMTSD );
   }
-
   logicSiPM->SetSensitiveDetector( fPMTSD );
 
   // Visual attributes
@@ -370,22 +347,23 @@ LYSimDetectorConstruction::ConstructTileSolid ( const G4String& name,
                                                 G4double        angle2,
                                                 G4double        Dx2,
                                                 G4double        Dy,
-                                                G4double        Dz,
-                                                G4ThreeVector&  center )
+                                                G4double        Dz )
 {
   G4double x2offset = -Dy* tan( angle1 );
   // G4double Dx1 = Dx2 + x2offset;
   G4double Dx1 = Dx2 + x2offset + Dy*tan( angle2 );
 
   G4ThreeVector centerOfGravity( 0, 0, 0 );
-  corners[0] = G4ThreeVector( 0., 0., 0. );
-  corners[1] = G4ThreeVector( Dx1,          0., 0. );
-  corners[2] = G4ThreeVector( x2offset,     Dy, 0. );
-  corners[3] = G4ThreeVector( Dx2+x2offset, Dy, 0. );
-  corners[4] = G4ThreeVector( 0.,           0., Dz );
-  corners[5] = G4ThreeVector( Dx1,          0., Dz );
-  corners[6] = G4ThreeVector( x2offset,     Dy, Dz );
-  corners[7] = G4ThreeVector( Dx2+x2offset, Dy, Dz );
+  G4ThreeVector corners[8] = {
+    G4ThreeVector( 0.,           0., 0. ),
+    G4ThreeVector( Dx1,          0., 0. ),
+    G4ThreeVector( x2offset,     Dy, 0. ),
+    G4ThreeVector( Dx2+x2offset, Dy, 0. ),
+    G4ThreeVector( 0.,           0., Dz ),
+    G4ThreeVector( Dx1,          0., Dz ),
+    G4ThreeVector( x2offset,     Dy, Dz ),
+    G4ThreeVector( Dx2+x2offset, Dy, Dz )
+  };
 
   for( int i = 0; i < 8; i++ ){
     centerOfGravity += corners[i];
@@ -397,11 +375,7 @@ LYSimDetectorConstruction::ConstructTileSolid ( const G4String& name,
     corners[i] -= centerOfGravity;
   }
 
-  center = centerOfGravity;
-
-  G4VSolid* solidTile = new G4Trap( name, corners );
-
-  return solidTile;
+  return new G4Trap( name, corners );
 }
 
 G4VSolid*
@@ -420,11 +394,10 @@ LYSimDetectorConstruction::ConstructParabolicDimpleSolid() const
 {
   const G4double SemiZ = ( 447317/288000 )*mm + _dimple_indent;
   const G4double SemiX = ( 447317/120000 )*mm;
-  const G4double SemiY = SemiX;
 
   return new G4Ellipsoid( "DimpleParabolic",
     SemiX,
-    SemiY,
+    SemiX,
     SemiZ,
     -SemiZ,// must be < SemiZ
     -SemiZ+_dimple_indent );// must be >-SemiZ
