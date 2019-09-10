@@ -89,6 +89,31 @@ LYSimDetectorMessenger::LYSimDetectorMessenger( LYSimDetectorConstruction* Det )
   SetInducedAbsLengthCmd->SetRange( "InducedMuTile>=0." );
   SetInducedAbsLengthCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
+  // Dimple Geometry commands
+  SetDimpleIndentCmd = new G4UIcmdWithADoubleAndUnit(
+    "/LYSim/SetDimpleIndent", this );
+  SetDimpleIndentCmd->SetGuidance(
+    "Setting the reccess depth of the dimple [mm]" );
+  SetDimpleIndentCmd->SetParameterName( "DimpleIndent", false );
+  SetDimpleIndentCmd->SetUnitCategory( "Length" );
+  SetDimpleIndentCmd->SetDefaultUnit( "mm" );
+  SetDimpleIndentCmd->SetRange( "DimpleIndent>=0." );
+  SetDimpleIndentCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+
+  SetDimpleRadiusCmd = new G4UIcmdWithADoubleAndUnit(
+    "/LYSim/SetDimpleRadius", this );
+  SetDimpleRadiusCmd->SetGuidance(
+    "Setting the reccess depth of the dimple [mm]" );
+  SetDimpleRadiusCmd->SetParameterName( "DimpleIndent", false );
+  SetDimpleRadiusCmd->SetUnitCategory( "Length" );
+  SetDimpleRadiusCmd->SetDefaultUnit( "mm" );
+  SetDimpleRadiusCmd->SetRange( "DimpleIndent>=0." );
+  SetDimpleRadiusCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+
+  SetDimpleTypeCmd = new G4UIcmdWithAString("/LYSim/SetDimpleType", this );
+  SetDimpleTypeCmd->SetGuidance( "Setting the type of dimple to use");
+  SetDimpleTypeCmd->SetCandidates( "Spherical Parabolic Pyramid" );
+  SetDimpleTypeCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 }
 
 LYSimDetectorMessenger::~LYSimDetectorMessenger()
@@ -133,5 +158,19 @@ LYSimDetectorMessenger::SetNewValue( G4UIcommand* command, G4String val )
     G4double value = G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val );
     Detector->SetInducedMuTile( 1/value );
     analysis->SetInducedMuTile( 1/value );
+  } else if( command == SetDimpleIndentCmd ){
+    Detector->SetDimpleIndent(
+      G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
+  } else if( command == SetDimpleRadiusCmd ){
+    Detector->SetDimpleRadius(
+      G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
+  } else if( command == SetDimpleTypeCmd ){
+    if( val == "Spherical" ){
+      Detector->SetDimpleType( LYSimDetectorConstruction::SPHERICAL );
+    } else if (val == "Parabolic" ){
+      Detector->SetDimpleType( LYSimDetectorConstruction::PARABOLIC );
+    } else if ( val == "Pyramid" ){
+      Detector->SetDimpleType( LYSimDetectorConstruction::PARABOLIC );
+    }
   }
 }

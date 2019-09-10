@@ -47,6 +47,11 @@ private:
   G4UIcmdWithADoubleAndUnit* SetScintPMTGapThicknessCmd;
   G4UIcmdWithADoubleAndUnit* SetTileAbsLengthCmd;
   G4UIcmdWithADoubleAndUnit* SetInducedAbsLengthCmd;
+
+  // Dimple Geometry commands
+  G4UIcmdWithADoubleAndUnit* SetDimpleIndentCmd;
+  G4UIcmdWithADoubleAndUnit* SetDimpleRadiusCmd;
+  G4UIcmdWithAString*        SetDimpleTypeCmd;
 };
 
 #endif

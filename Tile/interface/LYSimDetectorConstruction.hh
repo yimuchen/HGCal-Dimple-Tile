@@ -72,8 +72,12 @@ public:
   // G
   inline double
   GetDimpleRadius() const { return _dimple_radius; }
+  inline void
+  SetDimpleRadius( const double x ){ _dimple_radius = x ; }
   inline double
   GetDimpleIndent() const { return _dimple_indent; }
+  inline void
+  SetDimpleIndent( const double x ){ _dimple_indent = x ; }
 
   int
   GetDimpleType() const {return _dimple_type; }
