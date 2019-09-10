@@ -100,8 +100,6 @@ public:
 
 private:
   // Subfunctions for cleaner code
-  void               SetDefaults();// *-*Doesn't seem to work right now
-  G4VPhysicalVolume* ConstructDetector();
   G4VSolid*          ConstructTileSolid(
     const G4String& name,
     G4double        angle1, // angle measured ccw from y axis for the side at -x

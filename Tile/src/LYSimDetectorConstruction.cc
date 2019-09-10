@@ -64,16 +64,16 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   // Set default parameters
   _wrapping = true;
 
-  angle1             = 0*degree;
-  angle2             = 0*degree;// for tile
-  angle3             = 0*degree;// for wrap
-  Dx2                = 0*mm;
-  Dx3                = 0*mm;
-  Dw2                = 0*mm;
+  angle1 = 0*degree;
+  angle2 = 0*degree;// for tile
+  angle3 = 0*degree;// for wrap
+  Dx2    = 0*mm;
+  Dx3    = 0*mm;
+  Dw2    = 0*mm;
 
-  _tilex             = 29.65*mm;
-  _tiley             = 29.65*mm;
-  _tilez             = 2.98*mm;// 3.7*mm for SCSN81
+  _tilex = 29.65*mm;
+  _tiley = 29.65*mm;
+  _tilez = 2.98*mm;// 3.7*mm for SCSN81
 
   Photocat_sizeX     = 1.3*mm;
   Photocat_sizeY     = 1.3*mm;
@@ -123,29 +123,32 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   fUpdated                    = false;
 }
 
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void
+LYSimDetectorConstruction::UpdateGeometry()
+{
+  // clean-up previous geometry
+  G4GeometryManager::GetInstance()->OpenGeometry();
+
+  G4PhysicalVolumeStore::GetInstance()->Clean();
+  G4LogicalVolumeStore::GetInstance()->Clean();
+  G4SolidStore::GetInstance()->Clean();
+  G4LogicalSkinSurface::CleanSurfaceTable();
+  G4LogicalBorderSurface::CleanSurfaceTable();
+
+  G4RunManager::GetRunManager()->DefineWorldVolume( Construct() );
+  G4cout << "[LYSim] Setting induced absorption coefficient = "
+         << inducedMuTile << " [cm^-1]" << G4endl;
+  G4RunManager::GetRunManager()->GeometryHasBeenModified();
+}
 
 LYSimDetectorConstruction::~LYSimDetectorConstruction()
 {
   if( fdetectorMessenger ){ delete fdetectorMessenger; }
 }
 
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 G4VPhysicalVolume*
 LYSimDetectorConstruction::Construct()
-{
-  // SetDefaults();
-  return ConstructDetector();
-}
-
-void
-LYSimDetectorConstruction::SetDefaults()
-{
-}
-
-G4VPhysicalVolume*
-LYSimDetectorConstruction::ConstructDetector()
 {
   G4bool checkOverlaps = true;
 
@@ -213,14 +216,14 @@ LYSimDetectorConstruction::ConstructDetector()
                                           , _tilez
                                           , tileCenter );
 
-  G4LogicalVolume* logicCalice = new G4LogicalVolume( solidTile
-                                                    , fEJ200, "TileLogic" );
+  G4LogicalVolume* logicTile = new G4LogicalVolume( solidTile
+                                                  , fEJ200, "TileLogic" );
 
   G4VPhysicalVolume* physTile = new G4PVPlacement( 0
                                                  , TileOffset
-                                                 , logicCalice
+                                                 , logicTile
                                                  , "TilePhysic"
-                                                 , logicWWW
+                                                 , NULL
                                                  , false
                                                  , 0
                                                  , checkOverlaps );
@@ -237,7 +240,7 @@ LYSimDetectorConstruction::ConstructDetector()
                                                   , DimpleOffset
                                                   , logicDimple
                                                   , "Dimple"
-                                                  , logicCalice
+                                                  , logicTile
                                                   , false
                                                   , 0
                                                   , checkOverlaps );
@@ -350,7 +353,7 @@ LYSimDetectorConstruction::ConstructDetector()
   G4VisAttributes* TileVisAtt = new G4VisAttributes( G4Colour( 1., 1., 0. ) );
   TileVisAtt->SetForceWireframe( true );
   TileVisAtt->SetVisibility( true );
-  logicCalice->SetVisAttributes( TileVisAtt );
+  logicTile->SetVisAttributes( TileVisAtt );
 
   G4VisAttributes* WrapVisAtt = new G4VisAttributes( G4Colour( 0., 1., 0. ) );
   WrapVisAtt->SetForceWireframe( true );
@@ -404,15 +407,12 @@ LYSimDetectorConstruction::ConstructTileSolid ( const G4String& name,
 G4VSolid*
 LYSimDetectorConstruction::ConstructSphereDimpleSolid() const
 {
-  G4Sphere* solidDimpleSphere
-    = new G4Sphere( "DimpleSphere"
-                  , 0., GetDimpleSizeRadius()
-                  , 0., 2.*pi
-                  , pi/2., pi );
-
-  G4Box* solidSub = new G4Box( "SubBox",// its name
-    15.0*mm, 15.0*mm, GetDimpleSizeRadius() - _dimple_indent );
-  return new G4SubtractionSolid( "DimpleAir", solidDimpleSphere, solidSub );
+  return new G4Sphere( "DimpleSphere"
+                     , GetDimpleRadius() - GetDimpleIndent()// r_min
+                     , GetDimpleSizeRadius()// r_max
+                     , 0.,  2.*pi// Theta
+                     , pi/2+std::asin( GetDimpleRadius()/GetDimpleSizeRadius() )
+                     , pi );
 }
 
 G4VSolid*
@@ -508,28 +508,4 @@ LYSimDetectorConstruction::LocalTileZ( const double x, const double y ) const
   } else {
     return thickness;
   }
-}
-
-
-void
-LYSimDetectorConstruction::UpdateGeometry()
-{
-  // clean-up previous geometry
-  G4GeometryManager::GetInstance()->OpenGeometry();
-
-  G4PhysicalVolumeStore::GetInstance()->Clean();
-  G4LogicalVolumeStore::GetInstance()->Clean();
-  G4SolidStore::GetInstance()->Clean();
-  G4LogicalSkinSurface::CleanSurfaceTable();
-  G4LogicalBorderSurface::CleanSurfaceTable();
-  // G4SurfaceProperty::CleanSurfacePropertyTable();
-
-  // DefineSurfaces();// Requires redefining since it was cleared.
-  G4RunManager::GetRunManager()->DefineWorldVolume( ConstructDetector() );
-  G4cout << "[LYSim] Setting induced absorption coefficient = "
-         << inducedMuTile << " [cm^-1]" << G4endl;
-  G4RunManager::GetRunManager()->GeometryHasBeenModified();
-  // G4RunManager::GetRunManager()->PhysicsHasBeenModified();
-
-  // G4RegionStore::GetInstance()->UpdateMaterialList(physWorld);
 }
