@@ -61,17 +61,11 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
 {
   fdetectorMessenger = new LYSimDetectorMessenger( this );
 
-  // Set default parameters
-  angle1 = 0*degree;
-  angle2 = 0*degree;// for tile
-  angle3 = 0*degree;// for wrap
-  Dx2    = 0*mm;
-  Dx3    = 0*mm;
-  Dw2    = 0*mm;
-
-  _tilex = 29.65*mm;
-  _tiley = 29.65*mm;
-  _tilez = 2.98*mm;
+  _tilex   = 29.65*mm;
+  _tiley   = 29.65*mm;
+  _tilez   = 2.98*mm;
+  _tile_x1 = 0.0*mm;
+  _tile_x2 = 0.0*mm;
 
   _sipm_x = 1.3*mm;
   _sipm_y = 1.3*mm;
@@ -135,9 +129,11 @@ LYSimDetectorConstruction::~LYSimDetectorConstruction()
 G4VPhysicalVolume*
 LYSimDetectorConstruction::Construct()
 {
-  G4bool checkOverlaps = true;
+  static const bool checkOverlaps = true;
 
-  // World
+  ///////////////////////////////////////////////
+  // World volume
+  /////////////////////////////////////////////////
   G4Box* solidWorld = new G4Box( "World", WorldHalfX()
                                , WorldHalfY(), WorldHalfZ() );
 
@@ -154,26 +150,16 @@ LYSimDetectorConstruction::Construct()
   ///////////////////////////////////////////////
   // wrapping
   /////////////////////////////////////////////////
-  Dx2 = _tilex-tan( angle1 )*_tiley-tan( angle2 )*_tiley;
-  Dx3 = _tilex-tan( angle1 )*_tiley-tan( angle3 )*_tiley;
-  Dw2 = _tilex-tan( angle1 )*_tiley-tan( angle3 )*_tiley;
-  G4double xdisp  = 0.25*( _tilex-Dx2 );
-  G4double xdisp2 = 0.25*( _tilex-Dx3 );
-
-  G4VSolid* solidWrap = ConstructTileSolid( "TileTrap"
-                                          , angle1
-                                          , angle3
-                                          , Dw2+2*wrapgap
-                                          , _tiley+2*wrapgap
-                                          , _tilez+2*wrapgap );
-
+  G4VSolid* solidWrap = ConstructTrapazoidSolid( "TileTrap"
+                                               , _tilex + 2*wrapgap
+                                               , _tiley + 2*wrapgap
+                                               , _tilez + 2*wrapgap
+                                               , 0, 0 );
 
   G4LogicalVolume* logicWrap = new G4LogicalVolume( solidWrap,   fAir,  "Wrap" );
 
-  G4ThreeVector WrapOffset( -xdisp2, 0, 0 );
-
   G4VPhysicalVolume* physWrap = new G4PVPlacement( 0
-                                                 , WrapOffset
+                                                 , G4ThreeVector(0,0,0)
                                                  , logicWrap
                                                  , "Wrap"
                                                  , logicWorld
@@ -185,24 +171,23 @@ LYSimDetectorConstruction::Construct()
   ///////////////////////////////////////////////////////
   // Subtracted Dimple Version (dimple sub from tile, WWW = mothervolume of both)
   /////////////////////////////////////////////////////////
-  G4ThreeVector TileOffset( 0, 0, 0 );// -xdisp if weak
   G4ThreeVector DimpleOffset = CalcDimpleOffset();
 
-  G4VSolid* solidTile = ConstructTileSolid( "TileTrap"
-                                          , angle1
-                                          , angle2
-                                          , Dx2
-                                          , _tiley
-                                          , _tilez );
+  G4VSolid* solidTile = ConstructTrapazoidSolid( "TileTrap"
+                                               , _tilex
+                                               , _tiley
+                                               , _tilez
+                                               , _tile_x1
+                                               , _tile_x2 );
 
   G4LogicalVolume* logicTile = new G4LogicalVolume( solidTile
                                                   , fEJ200, "TileLogic" );
 
   G4VPhysicalVolume* physTile = new G4PVPlacement( 0
-                                                 , TileOffset
+                                                 , G4ThreeVector( 0,0,0 )
                                                  , logicTile
                                                  , "TilePhysic"
-                                                 , NULL
+                                                 , logicWorld
                                                  , false
                                                  , 0
                                                  , checkOverlaps );
@@ -219,7 +204,7 @@ LYSimDetectorConstruction::Construct()
                                                   , DimpleOffset
                                                   , logicDimple
                                                   , "Dimple"
-                                                  , logicTile
+                                                  , logicWorld
                                                   , false
                                                   , 0
                                                   , checkOverlaps );
@@ -237,8 +222,8 @@ LYSimDetectorConstruction::Construct()
                         0.5*_tilez+0.5*_sipm_z :
                         -SubD+0.5*_sipm_z-SiPM_Depth;
 
-  G4ThreeVector CaseOffset( xdisp2, 0, case_z );
-  G4ThreeVector transSiPM( xdisp2, 0, sipm_z );
+  G4ThreeVector CaseOffset( 0, 0, case_z );
+  G4ThreeVector transSiPM( 0, 0, sipm_z );
 
   G4Box* solidSiPM = new G4Box( "SiPM",  0.5*_sipm_x, 0.5*_sipm_y, 0.5*_sipm_z );
 
@@ -262,7 +247,7 @@ LYSimDetectorConstruction::Construct()
                                                    , CaseOffset
                                                    , logicSiPMCase
                                                    , "Case"
-                                                   , logicWrap
+                                                   , logicWorld
                                                    , false
                                                    , 0
                                                    , checkOverlaps );
@@ -271,7 +256,7 @@ LYSimDetectorConstruction::Construct()
                                                  , transSiPM
                                                  , logicSiPM
                                                  , "SiPM"
-                                                 , logicWrap
+                                                 , logicWorld
                                                  , false
                                                  , 0
                                                  , checkOverlaps );
@@ -379,14 +364,41 @@ LYSimDetectorConstruction::ConstructTileSolid ( const G4String& name,
 }
 
 G4VSolid*
+LYSimDetectorConstruction::ConstructTrapazoidSolid(
+  const G4String& name,
+  double          x,
+  double          y,
+  double          z,
+  double          indent_x1,
+  double          indent_x2 ) const
+{
+  const G4ThreeVector corners[8] = {
+    G4ThreeVector( -x/2,           -y/2, -z/2 ),
+    G4ThreeVector( x/2,            -y/2, -z/2 ),
+    G4ThreeVector( -x/2+indent_x2, y/2,  -z/2 ),
+    G4ThreeVector( x/2-indent_x1,  y/2,  -z/2 ),
+    G4ThreeVector( -x/2,           -y/2, z/2 ),
+    G4ThreeVector( x/2,            -y/2, z/2 ),
+    G4ThreeVector( -x/2+indent_x2, y/2,  z/2 ),
+    G4ThreeVector( x/2-indent_x1,  y/2,  z/2 )
+  };
+
+  return new G4Trap( name, corners );
+}
+
+G4VSolid*
 LYSimDetectorConstruction::ConstructSphereDimpleSolid() const
 {
-  return new G4Sphere( "DimpleSphere"
-                     , GetDimpleRadius() - GetDimpleIndent()// r_min
-                     , GetDimpleSizeRadius()// r_max
-                     , 0.,  2.*pi// Theta
-                     , pi/2+std::asin( GetDimpleRadius()/GetDimpleSizeRadius() )
-                     , pi );
+  G4Sphere* solidsphere = new G4Sphere( "DimpleSphere"
+                                      , 0, GetDimpleSizeRadius()
+                                      , 0.,  2.*pi
+                                      , pi/2, pi );
+
+  G4Box* solidsub = new G4Box( "DimpleSphereSubBox"
+                             , GetDimpleSizeRadius(), GetDimpleSizeRadius()
+                             , GetDimpleSizeRadius() - GetDimpleIndent() );
+
+  return new G4SubtractionSolid( "Dimple", solidsphere, solidsub );
 }
 
 G4VSolid*
@@ -427,10 +439,8 @@ LYSimDetectorConstruction::CalcDimpleOffset() const
   } else if( _dimple_type == 2 ){
     return G4ThreeVector( 0, 0, 0.5*_tilez+( 447317/288000 )*mm );
   } else {
-    const double xdisp = 0.25*( _tilex-Dx2 );
-    const double zdisp = 0.5*_tilez
-                         +GetDimpleSizeRadius()-GetDimpleIndent();
-    return G4ThreeVector( xdisp, 0, zdisp );
+    return G4ThreeVector( 0, 0
+                        , 0.5*_tilez+GetDimpleSizeRadius()-GetDimpleIndent() );
   }
 }
 

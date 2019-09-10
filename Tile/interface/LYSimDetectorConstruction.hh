@@ -92,7 +92,15 @@ private:
     G4double        Dx2,    // length along x of side at y=+Dy
     G4double        Dy,     // length along y
     G4double        Dz     // length along z
-    );
+    ) ;
+  G4VSolid* ConstructTrapazoidSolid(
+    const G4String& name,
+    double        x, // Maximum Length along z direction.
+    double        y, // Length along y direction
+    double        z, // length along z direction
+    double        indent_x1, // Indent in x direction
+    double        indent_x2  // indent of corner
+  ) const;
 
   G4VSolid*     ConstructSphereDimpleSolid() const;
   G4VSolid*     ConstructPyramidDimpleSolid() const;
@@ -155,11 +163,9 @@ private:
   G4double _sipm_z;
   G4double SiPM_Depth;// SiPM depth
 
-
   G4double tileAbsLength;
   G4double inducedMuTile;// Radiation-induced absorption coefficient (cm^-1)
   G4double Absmultiple;// factor for Abslength manipulation.
-
 };
 
 #endif
