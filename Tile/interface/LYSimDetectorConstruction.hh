@@ -76,19 +76,26 @@ public:
   GetDimpleIndent() const { return _dimple_indent; }
 
   int
-  Get_dimple_type() const {return _dimple_type; }
+  GetDimpleType() const {return _dimple_type; }
+  inline void
+  SetDimpleType( const int x ){ _dimple_type = x ; }
+
+  enum  DIMPLE_TYPE {
+    SPHERICAL ,
+    PARABOLIC ,
+    PYRAMID
+  };
 
   // Additional geometric factors.
   double WorldHalfX() const ;
   double WorldHalfY() const ;
   double WorldHalfZ() const ;
 
-
   double GetDimpleSizeRadius() const;
+  double LocalTileZ( const double x, const double y ) const ;
 
 private:
   // Subfunctions for cleaner code
-  void               DefineSurfaces();
   void               SetDefaults();// *-*Doesn't seem to work right now
   G4VPhysicalVolume* ConstructDetector();
   G4VSolid*          ConstructTileSolid(

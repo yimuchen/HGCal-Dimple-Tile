@@ -26,7 +26,8 @@
 #include <time.h>
 
 template<typename T>
-T string_to( const std::string& s )
+T
+string_to( const std::string& s )
 {
   T ans;
   std::stringstream ss( s );
@@ -39,9 +40,9 @@ int
 main( int argc, char** argv )
 {
   std::srand( time( NULL ) );
-  const double x_center      = string_to<double>( argv[1] );
-  const double y_center      = string_to<double>( argv[2] );
-  const double width         = string_to<double>( argv[3] );
+  const double x             = string_to<double>( argv[1] );
+  const double y             = string_to<double>( argv[2] );
+  const double w             = string_to<double>( argv[3] );
   const unsigned N           = string_to<unsigned>( argv[4] );
   const std::string filename = argv[5];
 
@@ -73,9 +74,6 @@ main( int argc, char** argv )
   visManager->Initialize();
   G4UImanager* UIManager = G4UImanager::GetUIpointer();
 
-  // Initializing the source only after the detector has been constructed
-  genaction->InitSource();
-
   char cmd[1024];
   UIManager->ApplyCommand( "/control/verbose 1" );
   UIManager->ApplyCommand( "/control/saveHistory" );
@@ -88,10 +86,10 @@ main( int argc, char** argv )
   sprintf( cmd, "/random/setSeeds %d %d", rand(), rand() );
   UIManager->ApplyCommand( cmd );
 
-  for( unsigned i = 0; i < N; ++i ){
-    genaction->MoveSource( x_center,y_center,width );
-    UIManager->ApplyCommand( "/run/beamOn 1" );
-  }
+  genaction->SetBeamX( x );
+  genaction->SetBeamY( y );
+  genaction->SetWidth( w );
+  runManager->BeamOn( N );
 
   // Job termination Free the store: user actions, physics_list and
   // detector_description are owned and deleted by the run manager, so they
@@ -101,4 +99,3 @@ main( int argc, char** argv )
 
   return 0;
 }
-

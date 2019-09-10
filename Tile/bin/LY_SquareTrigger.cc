@@ -114,6 +114,7 @@ main( int argc, char** argv )
     const int np  = CalcNumPhotons( t );
 
 
+
     sprintf( cmd, "/gps/pos/halfz  %.5f mm", t/2 );
     UIManager->ApplyCommand( cmd );
 
@@ -155,7 +156,7 @@ CalcThickness( const LYSimDetectorConstruction* detector,
   const double beam_r    = sqrt( x*x+y*y );
   const double big_r     = detector->GetDimpleSizeRadius();
   const double thickness = detector->GetTileThickness();
-  const int type         = detector->Get_dimple_type();
+  const int type         = detector->GetDimpleType();
 
   if( beam_r <= dimple_r ){
     if( type == 0 ){

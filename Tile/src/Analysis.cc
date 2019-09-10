@@ -81,21 +81,17 @@ Analysis::EndOfEvent( const G4Event* anEvent )
 
   for( G4int i = 0; i < nHits; i++ ){
     G4double HitEnergy = ( *hits )[i]->GetEnergy();
-    G4double HitTime   = ( *hits )[i]->GetTime();
     if( i == 0 ){
       HitCount++;
-      // man->AddNtupleRow(); asdf
     }
 
     assert( ( *hits )[i]->GetPhotonCount() == 1 );
     EventEnergy      += HitEnergy;
     EventPhotonCount += ( *hits )[i]->GetPhotonCount();
     man->FillH1( 1, 1239.842/( HitEnergy/eV ) );
-    man->FillH1( 4, HitTime/ns );
   }
 
   man->FillH1( 2, EventPhotonCount );
-  man->FillH1( 3, EventEnergy/eV );
 }
 
 void

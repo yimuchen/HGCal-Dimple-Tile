@@ -61,6 +61,38 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
 {
   fdetectorMessenger = new LYSimDetectorMessenger( this );
 
+  // Set default parameters
+  _wrapping = true;
+
+  angle1             = 0*degree;
+  angle2             = 0*degree;// for tile
+  angle3             = 0*degree;// for wrap
+  Dx2                = 0*mm;
+  Dx3                = 0*mm;
+  Dw2                = 0*mm;
+
+  _tilex             = 29.65*mm;
+  _tiley             = 29.65*mm;
+  _tilez             = 2.98*mm;// 3.7*mm for SCSN81
+
+  Photocat_sizeX     = 1.3*mm;
+  Photocat_sizeY     = 1.3*mm;
+  Photocat_thickness = 0.025*mm;// arbitrary thickness for Photocathode
+  ScintPMT_gap       = 2.0*mm;// rough estimate of air gap between scintillator and PMT face
+  wrapgap            = 0.05*mm;
+
+
+  tileAbsLength = 380*cm;
+  inducedMuTile = 1.e-20/cm;
+  readoutCorner = 1;
+
+  Absmultiple    = 1.0;// factor for Abslength manipulation.
+  _dimple_indent = 1.25*1.6*mm;
+  _dimple_radius = 3.5*mm;// 3.4409*mm
+  SiPM_Depth     = 0.0*mm;// SiPM Depth (0.0 is flush with top of tile, don't use anything less than 0.05*mm unless 0.0)
+  // Dimple radius (normal is 3.4409*mm)
+  // Dimple depth (normal is 1.6*mm)
+
   _dimple_type = 0;// 0: Normal, 1: Pyramid, 2: Parabolic
   solidWorld   = NULL;
   logicWorld   = NULL;
@@ -103,43 +135,13 @@ LYSimDetectorConstruction::~LYSimDetectorConstruction()
 G4VPhysicalVolume*
 LYSimDetectorConstruction::Construct()
 {
-  SetDefaults();
-  DefineSurfaces();
+  // SetDefaults();
   return ConstructDetector();
 }
 
 void
 LYSimDetectorConstruction::SetDefaults()
 {
-  // Set default parameters
-  _wrapping = true;
-  // Geometry parameters
-  angle1             = 0*degree;
-  angle2             = 0*degree;// for tile
-  angle3             = 0*degree;// for wrap
-  Dx2                = 0*mm;
-  Dx3                = 0*mm;
-  Dw2                = 0*mm;
-  _tilex             = 29.65*mm;
-  _tiley             = 29.65*mm;
-  _tilez             = 2.98*mm;// 3.7*mm for SCSN81
-  Photocat_sizeX     = 1.3*mm;
-  Photocat_sizeY     = 1.3*mm;
-  Photocat_thickness = 0.025*mm;// arbitrary thickness for Photocathode
-  ScintPMT_gap       = 2.0*mm;// rough estimate of air gap between scintillator and PMT face
-  wrapgap            = 0.05*mm;
-
-
-  tileAbsLength = 380*cm;
-  inducedMuTile = 1.e-20/cm;
-  readoutCorner = 1;
-
-  Absmultiple    = 1.0;// factor for Abslength manipulation.
-  _dimple_indent = 1.25*1.6*mm;
-  _dimple_radius = 3.5*mm;// 3.4409*mm
-  SiPM_Depth     = 0.0*mm;// SiPM Depth (0.0 is flush with top of tile, don't use anything less than 0.05*mm unless 0.0)
-  // Dimple radius (normal is 3.4409*mm)
-  // Dimple depth (normal is 1.6*mm)
 }
 
 G4VPhysicalVolume*
@@ -478,9 +480,34 @@ LYSimDetectorConstruction::WorldHalfZ() const
   return _tilez * 10;
 }
 
-void
-LYSimDetectorConstruction::DefineSurfaces()
+double
+LYSimDetectorConstruction::LocalTileZ( const double x, const double y ) const
 {
+  const double dimple_r  = GetDimpleRadius();
+  const double dimple_i  = GetDimpleIndent();
+  const double beam_r    = sqrt( x*x+y*y );
+  const double big_r     = GetDimpleSizeRadius();
+  const double thickness = GetTileZ();
+  const int type         = GetDimpleType();
+
+  if( beam_r <= dimple_r ){
+    if( type == SPHERICAL ){
+      return thickness - ( sqrt( big_r*big_r - beam_r*beam_r ) -
+                           ( big_r - dimple_i ) );
+    } else if( type == PARABOLIC ){//  # Parabolic
+      return thickness - abs( 1.35 * beam_r*beam_r - dimple_i );
+    } else if( type == PYRAMID ){
+      if( fabs( y ) <= fabs( x ) ){
+        return thickness - ( dimple_i - ( dimple_i / dimple_r ) * fabs( x ) );
+      } else {
+        return thickness - ( dimple_i - ( dimple_i / dimple_r ) * fabs( y ) );
+      }
+    }  else {
+      return thickness;
+    }
+  } else {
+    return thickness;
+  }
 }
 
 
@@ -497,7 +524,7 @@ LYSimDetectorConstruction::UpdateGeometry()
   G4LogicalBorderSurface::CleanSurfaceTable();
   // G4SurfaceProperty::CleanSurfacePropertyTable();
 
-  DefineSurfaces();// Requires redefining since it was cleared.
+  // DefineSurfaces();// Requires redefining since it was cleared.
   G4RunManager::GetRunManager()->DefineWorldVolume( ConstructDetector() );
   G4cout << "[LYSim] Setting induced absorption coefficient = "
          << inducedMuTile << " [cm^-1]" << G4endl;

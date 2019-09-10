@@ -45,9 +45,8 @@ LYSimEventAction::BeginOfEventAction( const G4Event* anEvent )
   G4PrimaryVertex* primaryVertex     = anEvent->GetPrimaryVertex();
   G4PrimaryParticle* primaryParticle = primaryVertex->GetPrimary();
   G4double ke                        = primaryParticle->GetKineticEnergy();
-  if( anEvent->GetEventID() % 100 == 0 ){
-    G4cout<<"Starting Event: "<<anEvent->GetEventID()<<G4endl;
-  }
+
+  G4cout<<"Starting Event: "<<anEvent->GetEventID()<<G4endl;
   Analysis::GetInstance()->PrepareNewEvent( anEvent );
 }
 
