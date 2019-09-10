@@ -325,44 +325,6 @@ LYSimDetectorConstruction::Construct()
   return physWorld;
 }
 
-
-G4VSolid*
-LYSimDetectorConstruction::ConstructTileSolid ( const G4String& name,
-                                                G4double        angle1,
-                                                G4double        angle2,
-                                                G4double        Dx2,
-                                                G4double        Dy,
-                                                G4double        Dz )
-{
-  G4double x2offset = -Dy* tan( angle1 );
-  // G4double Dx1 = Dx2 + x2offset;
-  G4double Dx1 = Dx2 + x2offset + Dy*tan( angle2 );
-
-  G4ThreeVector centerOfGravity( 0, 0, 0 );
-  G4ThreeVector corners[8] = {
-    G4ThreeVector( 0.,           0., 0. ),
-    G4ThreeVector( Dx1,          0., 0. ),
-    G4ThreeVector( x2offset,     Dy, 0. ),
-    G4ThreeVector( Dx2+x2offset, Dy, 0. ),
-    G4ThreeVector( 0.,           0., Dz ),
-    G4ThreeVector( Dx1,          0., Dz ),
-    G4ThreeVector( x2offset,     Dy, Dz ),
-    G4ThreeVector( Dx2+x2offset, Dy, Dz )
-  };
-
-  for( int i = 0; i < 8; i++ ){
-    centerOfGravity += corners[i];
-  }
-
-  centerOfGravity /= 8;
-
-  for( int i = 0; i < 8; i++ ){
-    corners[i] -= centerOfGravity;
-  }
-
-  return new G4Trap( name, corners );
-}
-
 G4VSolid*
 LYSimDetectorConstruction::ConstructTrapazoidSolid(
   const G4String& name,

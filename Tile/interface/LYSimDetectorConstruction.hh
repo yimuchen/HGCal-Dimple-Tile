@@ -85,14 +85,6 @@ public:
 
 private:
   // Subfunctions for cleaner code
-  G4VSolid* ConstructTileSolid(
-    const G4String& name,
-    G4double        angle1, // angle measured ccw from y axis for the side at -x
-    G4double        angle2, // angle measured ccw from y axis for the side at +x
-    G4double        Dx2,    // length along x of side at y=+Dy
-    G4double        Dy,     // length along y
-    G4double        Dz     // length along z
-    ) ;
   G4VSolid* ConstructTrapazoidSolid(
     const G4String& name,
     double        x, // Maximum Length along z direction.

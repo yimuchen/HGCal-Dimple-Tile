@@ -1,67 +1,41 @@
+#ifdef CMSSW_GIT_HASH
 #include "HGCalTileSim/Tile/interface/Analysis.hh"
 
-// User initialization
 #include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPhysicsList.hh"
 
-// User action
 #include "HGCalTileSim/Tile/interface/LYSimEventAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPrimaryGeneratorAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimRunAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimSteppingAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimTrackingAction.hh"
+#else
+#include "Analysis.hh"
+
+#include "LYSimDetectorConstruction.hh"
+#include "LYSimPhysicsList.hh"
+
+#include "LYSimEventAction.hh"
+#include "LYSimPrimaryGeneratorAction.hh"
+#include "LYSimRunAction.hh"
+#include "LYSimSteppingAction.hh"
+#include "LYSimTrackingAction.hh"
+#endif
 
 #include "G4RunManager.hh"
 #include "G4UImanager.hh"
 
-#include "G4VisExecutive.hh"
 #include "G4UIExecutive.hh"
-
-#include <cstdlib>
-#include <iostream>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <time.h>
-
-#include "Randomize.hh"
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-template<class T>
-std::string
-toString( const T & value )
-{
-  std::ostringstream os;
-  os << value;
-  return os.str();
-}
-
+#include "G4VisExecutive.hh"
 
 int
 main( int argc, char** argv )
 {
   G4cout << "[LYSIM]\n"
-         << "If first argument exists, it is taken as the execution macro\n"
-         << "If second argument exists, it is taken as the output file name "
-         << "(defaults to Analysis_<RandomInt> if not specifed)\n"
-         << "All other arguments will be ignored.\n"
-         << "\nIf no arguments are provided, start interactive session.\n"
+         << "Interactive session for geometry debugging"
          << G4endl;
 
-  struct timespec ts;
-  clock_gettime( CLOCK_MONOTONIC, &ts );
-  srand( (time_t)ts.tv_nsec );
-  const unsigned rint    = rand() % 100000;
-  const std::string rstr = toString( rint );
-
-  const G4String macfile    = argc > 1 ? argv[1] : "data/macro/init_vis.mac";
-  const G4String outputfile = argc > 2 ? argv[2] : "Analysis" + rstr;
-
-  // Construct the default run manager
-  G4RunManager* runManager = new G4RunManager;
-  // Pointer to GeneratorAction class for access to source properties
-  // Set mandatory initialization classes
+  G4RunManager* runManager            = new G4RunManager;
   LYSimDetectorConstruction* detector = new LYSimDetectorConstruction();
 
   runManager->SetUserInitialization( detector );
@@ -72,19 +46,17 @@ main( int argc, char** argv )
   Analysis::GetInstance()->SetDetector( detector );
   LYSimPrimaryGeneratorAction* genaction
     = new LYSimPrimaryGeneratorAction( detector );
-  Analysis::GetInstance()->SetOutputFile( outputfile + ".txt" );
-  Analysis::GetInstance()->SetROOTFile( outputfile + ".root" );
+  Analysis::GetInstance()->SetOutputFile( "Interactive_Session.txt" );
+  Analysis::GetInstance()->SetROOTFile( "Interactive_Session.root" );
   Analysis::GetInstance()->SetGeneratorAction( genaction );
 
   // Set user action classes
-  // Primary generator action
   runManager->SetUserAction( genaction );
   runManager->SetUserAction( new LYSimRunAction( detector ) );
   runManager->SetUserAction( new LYSimEventAction() );
   runManager->SetUserAction( new LYSimTrackingAction() );
   runManager->SetUserAction( new LYSimSteppingAction() );
 
-  // Initialize G4 kernel
   runManager->Initialize();
   G4VisManager* visManager = new G4VisExecutive( "Quiet" );
   visManager->Initialize();
@@ -92,26 +64,63 @@ main( int argc, char** argv )
   // Get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
 
+  // Starting applying standard commands.
+  UImanager->ApplyCommand( "/control/execute mac/init_vis.mac" );
+  UImanager->ApplyCommand( "/control/verbose 0" );
+  UImanager->ApplyCommand( "/run/verbose 0" );
+  UImanager->ApplyCommand( "/process/setVerbose 0" );
 
-  if( macfile != "data/macro/init_vis.mac" ){
-    G4cout << ">>> Executing file [" << macfile << "]..." << G4endl;
-    const G4String command = "/control/execute " + macfile;
-    UImanager->ApplyCommand( command );
-  } else {
-    G4cout << ">>> Starting interactive session..." << G4endl;
-    G4UIExecutive* ui = new G4UIExecutive( argc, argv );
-    UImanager->ApplyCommand( "/control/execute mac/init_vis.mac" );
-    ui->SessionStart();
-    delete ui;
-  }
+#ifndef CMSSW_GIT_HASH
+  UImanager->ApplyCommand( "/vis/open OGL 800x800-0+0" );
+
+  UImanager->ApplyCommand( "/vis/drawVolume" );
+  UImanager->ApplyCommand( "/vis/viewer/set/viewpointVector -1 0 0" );
+  UImanager->ApplyCommand( "/vis/viewer/set/lightsVector -1 0 0" );
+  UImanager->ApplyCommand( "/vis/viewer/set/style wireframe" );
+  UImanager->ApplyCommand( "/vis/viewer/set/auxiliaryEdge true" );
+  UImanager->ApplyCommand( "/vis/viewer/set/lineSegmentsPerCircle 100" );
+  UImanager->ApplyCommand( "/vis/scene/add/trajectories smooth" );
+  UImanager->ApplyCommand( "/vis/modeling/trajectories/create/drawByCharge" );
+  UImanager->ApplyCommand(
+    "/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true" );
+  UImanager->ApplyCommand(
+    "/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2" );
+  UImanager->ApplyCommand(
+    "#/vis/filtering/trajectories/create/particleFilter" );
+  UImanager->ApplyCommand(
+    "#/vis/filtering/trajectories/particleFilter-0/add gamma" );
+  UImanager->ApplyCommand(
+    "#/vis/filtering/trajectories/particleFilter-0/invert true" );
+  UImanager->ApplyCommand( "/vis/scene/endOfEventAction accumulate" );
+  UImanager->ApplyCommand( "/vis/scene/add/scale" );
+  UImanager->ApplyCommand( "/vis/scene/add/axes" );
+  UImanager->ApplyCommand( "/vis/scene/add/eventID" );
+  UImanager->ApplyCommand( "/vis/scene/add/date" );
+  UImanager->ApplyCommand( "/vis/set/colour red" );
+  UImanager->ApplyCommand( "/vis/set/lineWidth 2" );
+  UImanager->ApplyCommand( "/vis/scene/add/frame" );
+  UImanager->ApplyCommand( "/vis/set/colour" );
+  UImanager->ApplyCommand( "/vis/set/lineWidth" );
+  UImanager->ApplyCommand( "/vis/geometry/set/visibility World 0 false" );
+  UImanager->ApplyCommand( "/vis/viewer/set/style surface" );
+  UImanager->ApplyCommand( "/vis/viewer/set/hiddenMarker true" );
+  UImanager->ApplyCommand( "/vis/viewer/set/viewpointThetaPhi 90 180" );
+  UImanager->ApplyCommand( "#/vis/viewer/zoom 2" );
+  UImanager->ApplyCommand( "/vis/viewer/set/autoRefresh true" );
+  UImanager->ApplyCommand( "/vis/verbose warnings" );
+#endif
+
+
+  // Starting interactive session .
+  G4UIExecutive* ui = new G4UIExecutive( argc, argv );
+  ui->SessionStart();
 
   // Job termination Free the store: user actions, physics_list and
   // detector_description are owned and deleted by the run manager, so they
   // should not be deleted in the main() program !
+  delete ui;
   delete visManager;
   delete runManager;
 
   return 0;
 }
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
