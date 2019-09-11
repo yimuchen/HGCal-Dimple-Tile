@@ -1,48 +1,85 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import os
 import datetime
+import argparse
 
-USER_NAME = os.environ['USER']
-BASE_DIR = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../')
-DATA_DIR = BASE_DIR + '/data/photontest/'
+parser = argparse.ArgumentParser(
+    description='Options for generating condor scripts')
+parser.add_argument('--beamx',
+                    '-x',
+                    type=float,
+                    nargs='+',
+                    required=True,
+                    help='List of x values of beam center')
+parser.add_argument('--beamy',
+                    '-y',
+                    type=float,
+                    nargs='+',
+                    required=True,
+                    help='List of y values of beam center')
+parser.add_argument('--dimplerad',
+                    '-r',
+                    type=float,
+                    nargs='+',
+                    default=[3],
+                    help='List of dimple radius to try out')
+parser.add_argument('--dimpleind',
+                    '-d',
+                    type=float,
+                    nargs='+',
+                    default=[1.5],
+                    help='List of dimple indents to try out')
+
+args = parser.parse_args()
+
+BASE_DIR = os.path.abspath(os.environ['CMSSW_BASE'] + '/src/'
+                           '/HGCalTileSim/condor/')
+DATA_DIR = os.path.abspath(BASE_DIR + '/results/')
 
 CONDOR_JDL_TEMPLATE = """
 universe = vanilla
-Executable = {0}/condor/condor-LYSquareTrigger.sh
+Executable = {0}/condor-LYSquareTrigger_CMSSW.sh
 should_transfer_files = NO
 Requirements = TARGET.FileSystemDomain == "privnet"
-Output = {1}/sce_{2}_{3}_$(cluster)_$(process).stdout
-Error  = {1}/sce_{2}_{3}_$(cluster)_$(process).stderr
-Log    = {1}/sce_{2}_{3}_$(cluster)_$(process).condor
-Arguments = {2} {3} 1.5 10000 {4}
+Output = {1}/sce_{2}_{3}_{4}_{5}_$(cluster)_$(process).stdout
+Error  = {1}/sce_{2}_{3}_{4}_{5}_$(cluster)_$(process).stderr
+Log    = {1}/sce_{2}_{3}_{4}_{5}_$(cluster)_$(process).condor
+Arguments = -x {2} -y {3} -w 1.5 -N 10000 -r {4} -d {5} -o {6}
 Queue
 """
 
-timestr = datetime.datetime.now().strftime("%Y%m%d_%H00")
-#Random Numbers to start with (1: 9 digit, 2: 8 digit) make sure these are in photontest too
-for x in range(15):
-  for y in range(1):
-    save_filename = DATA_DIR + '/output/' + timestr + '/' +  \
-                   'hgcal_tilesim_x{0:.1f}_y{1:.1f}'.format(
-                     x, y ).replace('.', 'p')
+timestr = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+for x, y, r, d in [(x, y, r, d) for x in args.beamx for y in args.beamy
+                   for r in args.dimplerad for d in args.dimpleind]:
 
-    jdl_content = CONDOR_JDL_TEMPLATE.format(
-        BASE_DIR,
-        DATA_DIR + '/log/',
-        x,
-        y,
-        save_filename,
-    )
-    jdl_filename = DATA_DIR + '/condor/' + \
-                  'hgcal_tilesim_x{0:.1f}_y{1:.1f}'.format(
-        x, y,).replace('.', 'p') + '.jdl'
+  save_filename = os.path.abspath(
+      DATA_DIR + '/root/' + timestr +
+      '/' + 'hgcal_tilesim_x{0:.1f}_y{1:.1f}_r{2:.1f}_d{3:.1f}'.format(
+          x, y, r, d).replace('.', 'p') + '.root')
 
-    ## Writing jdl files
-    os.makedirs(os.path.dirname(jdl_filename), exist_ok=True)
-    with open(jdl_filename, 'w') as file:
-      file.write(jdl_content)
+  jdl_content = CONDOR_JDL_TEMPLATE.format(
+      BASE_DIR,
+      os.path.abspath(DATA_DIR + '/log/'),
+      x,
+      y,
+      r,
+      d,
+      save_filename,
+  )
 
-    ## Making directory for output files
-    os.makedirs(os.path.dirname(save_filename), exist_ok=True)
+  jdl_filename = os.path.abspath(
+      DATA_DIR +
+      '/condor/' + 'hgcal_tilesim_x{0:.1f}_y{1:.1f}_r{2:.1f}_d{3:.1f}'.format(
+          x, y, r, d).replace('.', 'p') + '.jdl')
 
-    print(jdl_filename)
+  ## Writing jdl files
+  os.makedirs(os.path.dirname(jdl_filename), exist_ok=True)
+  with open(jdl_filename, 'w') as file:
+    file.write(jdl_content)
+
+  os.makedirs(DATA_DIR + '/log/', exist_ok=True );
+
+  ## Making directory for output files
+  os.makedirs(os.path.dirname(save_filename), exist_ok=True)
+
+  print(jdl_filename)

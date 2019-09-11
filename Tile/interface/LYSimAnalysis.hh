@@ -3,7 +3,6 @@
 
 #include "G4Event.hh"
 #include "G4Run.hh"
-#include "TFile.h"
 
 #include <fstream>
 #include <iostream>
@@ -14,6 +13,10 @@
 class LYSimDetectorConstruction;
 class LYSimPrimaryGeneratorAction;
 class LYSimScintillation;
+class LYSimFormat;
+
+class TTree;
+class TH1D;
 
 class LYSimAnalysis
 {
@@ -22,7 +25,8 @@ public:
   GetInstance()
   {
     if( LYSimAnalysis::singleton == NULL ){
-      LYSimAnalysis::singleton = new LYSimAnalysis();}
+      LYSimAnalysis::singleton = new LYSimAnalysis();
+    }
     return LYSimAnalysis::singleton;
   }
 
@@ -39,7 +43,7 @@ public:
   void
   SetOutputFile( const std::string& x ){ filename = x;}
   std::string
-  GetOutputFile() const { return filename ; }
+  GetOutputFile() const { return filename; }
 
   void PrepareExperiment();
   void PrepareNewRun( const G4Run* aRun );
@@ -47,11 +51,6 @@ public:
   void EndOfEvent( const G4Event* anEvent );
   void EndOfRun( const G4Run* aRun );
   void EndOfExperiment();
-
-  void
-  AddPhotonCount( G4int num ){ PhotonCount += num; }
-  void
-  AddHitCount( G4int num ){ HitCount += num; }
 
   // Embedded class for RunAction handling
   class RunAction : public G4UserRunAction
@@ -87,12 +86,16 @@ private:
 
   LYSimDetectorConstruction* DetectorConstruction;
   LYSimPrimaryGeneratorAction* generatorAction;
-  std::string filename;
 
-  TFile* file;
+  std::string filename;
+  TTree*  tree;
+  LYSimFormat* format;
+  TH1D* photon_energy_hist;
 
   G4int PhotonCount;
   G4int HitCount;
+
+  int GetNPhotons( const G4Event* event );
 };
 
 #endif/* LYSimAnalysis_HH_ */

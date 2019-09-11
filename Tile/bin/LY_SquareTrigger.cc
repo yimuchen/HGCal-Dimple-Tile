@@ -5,64 +5,63 @@
 #include "HGCalTileSim/Tile/interface/LYSimSteppingAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimTrackingAction.hh"
 
+#include "UserUtils/Common/interface/ArgumentExtender.hpp"
+
 #include "G4RunManager.hh"
-#include "G4UImanager.hh"
-
 #include "G4UIExecutive.hh"
+#include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
-
-#include <cstdlib>
-#include <iostream>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <time.h>
-
-double
-stof( const std::string& s )
-{
-  float ans;
-  std::stringstream ss( s );
-  ss >> ans;
-  return ans;
-}
-
-int
-stoi( const std::string& s )
-{
-  int ans;
-  std::stringstream ss( s );
-  ss >> ans;
-  return ans;
-}
 
 int
 main( int argc, char** argv )
 {
-  std::srand( time( NULL ) );
-  const double x_center      = stof( argv[1] );
-  const double y_center      = stof( argv[2] );
-  const double width         = stof( argv[3] );
-  const unsigned N           = stoi( argv[4] );
-  const std::string filename = argv[5];
+  usr::po::options_description desc( "Running a run with a certain geometry" );
+  desc.add_options()
+    ( "beamx,x", usr::po::defvalue<double>( 0 ), "x center of beam [mm]" )
+    ( "beamy,y", usr::po::defvalue<double>( 0 ), "y center of beam [mm]" )
+    ( "beamwidth,w", usr::po::defvalue<double>( 0 ), "width of beam [mm]" )
+    ( "dimplerad,r", usr::po::defvalue<double>( 3.0 ), "Dimple radius [mm]" )
+    ( "dimpleind,d", usr::po::defvalue<double>( 1.5 ), "Dimple indent [mm]" )
+    ( "NRuns,N", usr::po::defvalue<unsigned>( 1 ), "Number of runs to perform" )
+    ( "output,o", usr::po::defvalue<std::string>( "test.root" ), "output file" )
+  ;
 
+  usr::ArgumentExtender args;
+  args.AddOptions( desc );
+  args.ParseOptions( argc, argv );
 
+  const double x_center      = args.Arg<double>( "beamx" );
+  const double y_center      = args.Arg<double>( "beamy" );
+  const double width         = args.Arg<double>( "beamwidth" );
+  const double dimplerad     = args.Arg<double>( "dimplerad" );
+  const double dimpleind     = args.Arg<double>( "dimpleind" );
+  const unsigned N           = args.Arg<unsigned>( "NRuns" );
+  const std::string filename = args.Arg<std::string>( "output" );
+
+  // Must initialize Run Manager first
   G4RunManager* runManager            = new G4RunManager;
-  LYSimDetectorConstruction* detector = new LYSimDetectorConstruction();
-  runManager->SetUserInitialization( detector );
   LYSimPhysicsList* physlist = new LYSimPhysicsList();
+  // Overriding the detector parameters
+  LYSimDetectorConstruction* detector = new LYSimDetectorConstruction();
+  detector->SetDimpleRadius( dimplerad );
+  detector->SetDimpleIndent( dimpleind );
+
+  runManager->SetUserInitialization( detector );
   runManager->SetUserInitialization( physlist );
+
+  // Overriding the generator parameters
+  LYSimPrimaryGeneratorAction* genaction
+    = new LYSimPrimaryGeneratorAction( detector );
+  genaction->SetBeamX( x_center );
+  genaction->SetBeamY( y_center );
+  genaction->SetWidth( width );
 
   // Construct LYSimAnalysis class
   LYSimAnalysis::GetInstance()->SetDetector( detector );
-  LYSimPrimaryGeneratorAction* genaction
-    = new LYSimPrimaryGeneratorAction( detector );
   LYSimAnalysis::GetInstance()->SetOutputFile( filename );
   LYSimAnalysis::GetInstance()->SetGeneratorAction( genaction );
 
-  // Set user action classes
-  // Primary generator action
+
   runManager->SetUserAction( genaction );
   runManager->SetUserAction( new LYSimAnalysis::RunAction() );
   runManager->SetUserAction( new LYSimAnalysis::EventAction() );
@@ -89,9 +88,6 @@ main( int argc, char** argv )
   sprintf( cmd, "/random/setSeeds %d %d", rand(), rand() );
   UIManager->ApplyCommand( cmd );
 
-  genaction->SetBeamX( x_center );
-  genaction->SetBeamY( y_center );
-  genaction->SetWidth( width );
   runManager->BeamOn( N );
 
   LYSimAnalysis::GetInstance()->EndOfExperiment();

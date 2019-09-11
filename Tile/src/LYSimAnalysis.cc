@@ -1,12 +1,14 @@
 #ifdef CMSSW_GIT_HASH
 #include "HGCalTileSim/Tile/interface/LYSimAnalysis.hh"
 #include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimFormat.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPrimaryGeneratorAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimScintillation.hh"
 #include "HGCalTileSim/Tile/interface/LYSimTrajectoryPoint.hh"
 #else
 #include "LYSimAnalysis.hh"
 #include "LYSimDetectorConstruction.hh"
+#include "LYSimFormat.hh"
 #include "LYSimPrimaryGeneratorAction.hh"
 #include "LYSimScintillation.hh"
 #include "LYSimTrajectoryPoint.hh"
@@ -23,8 +25,9 @@
 #include "G4SDManager.hh"
 #include "G4UnitsTable.hh"
 
-// Explicit ROOT file includes can only been done in CMSSW
 #include "TFile.h"
+#include "TH1D.h"
+#include "TTree.h"
 
 using namespace std;
 using namespace CLHEP;
@@ -42,13 +45,10 @@ LYSimAnalysis::~LYSimAnalysis()
 void
 LYSimAnalysis::PrepareExperiment()
 {
-  G4AnalysisManager* man = G4AnalysisManager::Instance();
-  file = TFile::Open(filename.c_str());
-  file->Close();
-
-  // Create histogram(s) (avoid non-integer bins)
-  man->CreateH1( "ogammaE", "Optical photons Wavelength [nm]",      100, 200., 1200. );
-  man->CreateH1( "Ndetect", "Number of detected photons per event", 500,   0.,  500. );
+  tree   = new TTree( "LYSim", "LYSim" );
+  format = new LYSimFormat();
+  format->AddToTree( tree );
+  photon_energy_hist = new TH1D( "PhotonWLE", "", 100, 300., 600. );
 }
 
 void
@@ -62,51 +62,33 @@ LYSimAnalysis::PrepareNewRun( const G4Run* )
 void
 LYSimAnalysis::PrepareNewEvent( const G4Event* event )
 {
-  std::cout << "Starting Event " << event->GetEventID() << std::endl;
+  std::cout << "Starting Event " << event->GetEventID()
+            << "("<< event->GetNumberOfPrimaryVertex()  << ")" << std::endl;
+  std::cout << event->GetPrimaryVertex()->GetX0() << " "
+            << event->GetPrimaryVertex()->GetY0() << std::endl;
+
+  // Saving Event information.
+  format->beam_center_x = generatorAction->GetBeamX();
+  format->beam_center_y = generatorAction->GetBeamY();
+  format->beam_width    = generatorAction->GetWidth();
+
+  // This will be the center of the beam position.
+  format->beam_x = event->GetPrimaryVertex()->GetX0();
+  format->beam_y = event->GetPrimaryVertex()->GetY0();
+
+  format->dimple_radius = DetectorConstruction->GetDimpleRadius();
+  format->dimple_indent = DetectorConstruction->GetDimpleIndent();
+  format->nphotons      = -1;
 }
 
 void
-LYSimAnalysis::EndOfEvent( const G4Event* anEvent )
+LYSimAnalysis::EndOfEvent( const G4Event* event )
 {
-  G4AnalysisManager* man = G4AnalysisManager::Instance();
+  // Update number of photons if exists.
+  format->nphotons = GetNPhotons( event );
 
-  G4String hitCollName   = "PMTHitsCollection";
-  G4SDManager* SDman     = G4SDManager::GetSDMpointer();
-  static G4int hitCollID = -1;
-  if( hitCollID < 0 ){
-    hitCollID = SDman->GetCollectionID( hitCollName );
-  }
-
-  G4HCofThisEvent* hitsCollections = 0;
-  hitsCollections = anEvent->GetHCofThisEvent();
-
-  LYSimPMTHitsCollection* hits = 0;
-  if( hitsCollections ){
-    hits = static_cast<LYSimPMTHitsCollection*>(
-      hitsCollections->GetHC( hitCollID ) );
-  } else {
-    G4cerr << "hitsCollection not found" << G4endl;
-    return;
-  }
-
-  G4double EventEnergy   = 0;
-  G4int EventPhotonCount = 0;
-  G4double nHits         = hits->entries();
-  PhotonCount++;
-
-  for( G4int i = 0; i < nHits; i++ ){
-    G4double HitEnergy = ( *hits )[i]->GetEnergy();
-    if( i == 0 ){
-      HitCount++;
-    }
-
-    assert( ( *hits )[i]->GetPhotonCount() == 1 );
-    EventEnergy      += HitEnergy;
-    EventPhotonCount += ( *hits )[i]->GetPhotonCount();
-    man->FillH1( 1, 1239.842/( HitEnergy/eV ) );
-  }
-
-  man->FillH1( 2, EventPhotonCount );
+  // Filling the three
+  tree->Fill();
 }
 
 
@@ -121,8 +103,42 @@ LYSimAnalysis::EndOfRun( const G4Run* )
 void
 LYSimAnalysis::EndOfExperiment()
 {
-  G4AnalysisManager* man = G4AnalysisManager::Instance();
+  TFile* file = TFile::Open( filename.c_str(), "RECREATE" );
+  tree->Write();
+  photon_energy_hist->Write();
   file->Close();
-  man->Write();
-  man->CloseFile();
+
+  delete tree;
+  delete format;
+  delete photon_energy_hist;
+}
+
+int
+LYSimAnalysis::GetNPhotons( const G4Event* event )
+{
+  static G4SDManager* SDman = G4SDManager::GetSDMpointer();
+  static G4int hitCollID    = SDman->GetCollectionID( "PMTHitsCollection" );
+
+  G4HCofThisEvent* hitsCollections = event->GetHCofThisEvent();
+  if( !hitsCollections ){
+    G4cerr << "hitsCollection not found" << G4endl;
+    return -1;
+  }
+
+  LYSimPMTHitsCollection* hits
+    = static_cast<LYSimPMTHitsCollection*>(
+        hitsCollections->GetHC( hitCollID ) );
+
+  unsigned EventPhotonCount = 0;
+  PhotonCount++;
+
+  for( int i = 0; i < hits->entries(); ++i ){
+    if( i == 0 ){ HitCount++; }
+    const double HitEnergy = ( *hits )[i]->GetEnergy();
+    assert( ( *hits )[i]->GetPhotonCount() == 1 );
+    ++EventPhotonCount;
+    photon_energy_hist->Fill( 1239.842/( HitEnergy/eV ) );
+  }
+
+  return EventPhotonCount;
 }
