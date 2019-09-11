@@ -43,6 +43,7 @@ public:
   SetPhotonMult( const double x ){ _photon_multiplier = x; }
 
   void RandomizePosition();
+  void RandomizePolarization();
 
 private:
   G4GeneralParticleSource* particleSource;

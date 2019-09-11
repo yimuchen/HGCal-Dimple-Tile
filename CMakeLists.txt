@@ -8,6 +8,16 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 add_compile_options("-g")
 add_compile_options("-O3")
 
+# find_package( ROOT REQUIRED)
+
+## Adding ROOT the old fashioned way
+execute_process(COMMAND "root-config" "--cflags"
+                 OUTPUT_VARIABLE  ROOT_CONFIG )
+string(REPLACE " " ";" ROOTCONFIG_LIST ${ROOT_CONFIG})
+foreach(CONFIG ${ROOTCONFIG_LIST})
+  add_compile_options(${CONFIG})
+endforeach()
+
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
 # You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
@@ -27,18 +37,18 @@ configure_file(Tile/src/ProjectPath.cc.in  Tile/src/ProjectPath.cc)
 # Locate sources and headers for this project
 #
 include_directories(${PROJECT_SOURCE_DIR}/Tile/interface
-                    ${Geant4_INCLUDE_DIR}
-                    ${Boost_INCLUDE_DIR}
-                    ${ROOTSYS}/include/)
+                    ${Geant4_INCLUDE_DIR})
 
 file(GLOB Tile_src ${PROJECT_SOURCE_DIR}/Tile/src/*.cc)
 add_library(Tile SHARED ${Tile_src})
-target_link_libraries(Tile ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
+target_link_libraries(Tile ${Geant4_LIBRARIES}
+  "Core"  "Hist" "Tree"
+)
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(LYSim Tile/bin/InteractiveSession.cc)
-target_link_libraries(LYSim Tile)
+target_link_libraries(LYSim Tile ${Geant4_LIBRARIES})
 
 install(TARGETS LYSim DESTINATION bin)

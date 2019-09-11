@@ -1,23 +1,19 @@
 #ifdef CMSSW_GIT_HASH
-#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/LYSimAnalysis.hh"
 
 #include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPhysicsList.hh"
 
-#include "HGCalTileSim/Tile/interface/LYSimEventAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPrimaryGeneratorAction.hh"
-#include "HGCalTileSim/Tile/interface/LYSimRunAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimSteppingAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimTrackingAction.hh"
 #else
-#include "Analysis.hh"
+#include "LYSimAnalysis.hh"
 
 #include "LYSimDetectorConstruction.hh"
 #include "LYSimPhysicsList.hh"
 
-#include "LYSimEventAction.hh"
 #include "LYSimPrimaryGeneratorAction.hh"
-#include "LYSimRunAction.hh"
 #include "LYSimSteppingAction.hh"
 #include "LYSimTrackingAction.hh"
 #endif
@@ -42,18 +38,18 @@ main( int argc, char** argv )
   LYSimPhysicsList* physlist = new LYSimPhysicsList();
   runManager->SetUserInitialization( physlist );
 
-  // Construct Analysis class
-  Analysis::GetInstance()->SetDetector( detector );
+  // Construct LYSimAnalysis class
+  LYSimAnalysis::GetInstance()->SetDetector( detector );
   LYSimPrimaryGeneratorAction* genaction
     = new LYSimPrimaryGeneratorAction( detector );
-  Analysis::GetInstance()->SetOutputFile( "Interactive_Session.txt" );
-  Analysis::GetInstance()->SetROOTFile( "Interactive_Session.root" );
-  Analysis::GetInstance()->SetGeneratorAction( genaction );
+  LYSimAnalysis::GetInstance()->SetOutputFile( "Interactive_Session.root" );
+  LYSimAnalysis::GetInstance()->SetGeneratorAction( genaction );
+  LYSimAnalysis::GetInstance()->PrepareExperiment();
 
   // Set user action classes
   runManager->SetUserAction( genaction );
-  runManager->SetUserAction( new LYSimRunAction( detector ) );
-  runManager->SetUserAction( new LYSimEventAction() );
+  runManager->SetUserAction( new LYSimAnalysis::RunAction() );
+  runManager->SetUserAction( new LYSimAnalysis::EventAction() );
   runManager->SetUserAction( new LYSimTrackingAction() );
   runManager->SetUserAction( new LYSimSteppingAction() );
 
@@ -115,6 +111,7 @@ main( int argc, char** argv )
   G4UIExecutive* ui = new G4UIExecutive( argc, argv );
   ui->SessionStart();
 
+  LYSimAnalysis::GetInstance()->EndOfExperiment();
   // Job termination Free the store: user actions, physics_list and
   // detector_description are owned and deleted by the run manager, so they
   // should not be deleted in the main() program !

@@ -49,11 +49,6 @@ using std::atan;
 using std::exp;
 using namespace CLHEP;
 
-
-// static Helper methods for computed extended geometry dimension.
-
-
-
 LYSimPMTSD* LYSimDetectorConstruction::fPMTSD = NULL;
 
 LYSimDetectorConstruction::LYSimDetectorConstruction()

@@ -1,8 +1,8 @@
 #ifdef CMSSW_GIT_HASH
-#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/LYSimAnalysis.hh"
 #include "HGCalTileSim/Tile/interface/LYSimScintillation.hh"
 #else
-#include "Analysis.hh"
+#include "LYSimAnalysis.hh"
 #include "LYSimScintillation.hh"
 #endif
 

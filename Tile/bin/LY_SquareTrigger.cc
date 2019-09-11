@@ -1,9 +1,7 @@
-#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/LYSimAnalysis.hh"
 #include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPhysicsList.hh"
-#include "HGCalTileSim/Tile/interface/LYSimEventAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPrimaryGeneratorAction.hh"
-#include "HGCalTileSim/Tile/interface/LYSimRunAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimSteppingAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimTrackingAction.hh"
 
@@ -20,6 +18,7 @@
 #include <stdlib.h>
 #include <string>
 #include <time.h>
+
 double
 stof( const std::string& s )
 {
@@ -55,21 +54,23 @@ main( int argc, char** argv )
   LYSimPhysicsList* physlist = new LYSimPhysicsList();
   runManager->SetUserInitialization( physlist );
 
-  // Construct Analysis class
-  Analysis::GetInstance()->SetDetector( detector );
+  // Construct LYSimAnalysis class
+  LYSimAnalysis::GetInstance()->SetDetector( detector );
   LYSimPrimaryGeneratorAction* genaction
     = new LYSimPrimaryGeneratorAction( detector );
-  Analysis::GetInstance()->SetOutputFile( filename + ".txt" );
-  Analysis::GetInstance()->SetROOTFile( filename + ".root" );
-  Analysis::GetInstance()->SetGeneratorAction( genaction );
+  LYSimAnalysis::GetInstance()->SetOutputFile( filename );
+  LYSimAnalysis::GetInstance()->SetGeneratorAction( genaction );
 
   // Set user action classes
   // Primary generator action
   runManager->SetUserAction( genaction );
-  runManager->SetUserAction( new LYSimRunAction( detector ) );
-  runManager->SetUserAction( new LYSimEventAction() );
+  runManager->SetUserAction( new LYSimAnalysis::RunAction() );
+  runManager->SetUserAction( new LYSimAnalysis::EventAction() );
   runManager->SetUserAction( new LYSimTrackingAction() );
   runManager->SetUserAction( new LYSimSteppingAction() );
+
+  // Preparing the LYSimAnalysis
+  LYSimAnalysis::GetInstance()->PrepareExperiment();
 
   // Initialize G4 kernel
   runManager->Initialize();
@@ -79,7 +80,6 @@ main( int argc, char** argv )
 
   char cmd[1024];
   UIManager->ApplyCommand( "/control/verbose 1" );
-  UIManager->ApplyCommand( "/control/saveHistory" );
   UIManager->ApplyCommand( "/run/verbose 0" );
   UIManager->ApplyCommand( "/process/setVerbose 0" );
   UIManager->ApplyCommand( "/tracking/verbose 0" );
@@ -93,6 +93,8 @@ main( int argc, char** argv )
   genaction->SetBeamY( y_center );
   genaction->SetWidth( width );
   runManager->BeamOn( N );
+
+  LYSimAnalysis::GetInstance()->EndOfExperiment();
 
   // Job termination Free the store: user actions, physics_list and
   // detector_description are owned and deleted by the run manager, so they

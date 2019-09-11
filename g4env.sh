@@ -12,5 +12,6 @@ source geant4make.sh
 ## Must be done like this... wierd...
 cd      /cvmfs/sft.cern.ch/lcg/external/ROOT/5.34.00/${ARCH}/root/
 source ./bin/thisroot.sh
+LIBRARY_PATH=$LIBRARY_PATH:$PWD/lib
 
 cd ${USERBASE}

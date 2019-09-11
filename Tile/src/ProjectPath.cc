@@ -1,6 +1,6 @@
 #ifdef CMSSW_GIT_HASH
 #include "HGCalTileSim/Tile/interface/ProjectPath.hh"
-#include "UserUtils/Common/interface/STLUtils/FileSystem.hpp"
+#include "UserUtils/Common/interface/STLUtils/Filesystem.hpp"
 #else
 #include "ProjectPath.hh"
 #endif

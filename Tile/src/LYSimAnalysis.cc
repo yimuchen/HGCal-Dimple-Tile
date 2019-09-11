@@ -1,16 +1,12 @@
 #ifdef CMSSW_GIT_HASH
-#include "HGCalTileSim/Tile/interface/Analysis.hh"
-#include "HGCalTileSim/Tile/interface/AnalysisMessenger.hh"
+#include "HGCalTileSim/Tile/interface/LYSimAnalysis.hh"
 #include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
-#include "HGCalTileSim/Tile/interface/LYSimEventAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPrimaryGeneratorAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimScintillation.hh"
 #include "HGCalTileSim/Tile/interface/LYSimTrajectoryPoint.hh"
 #else
-#include "Analysis.hh"
-#include "AnalysisMessenger.hh"
+#include "LYSimAnalysis.hh"
 #include "LYSimDetectorConstruction.hh"
-#include "LYSimEventAction.hh"
 #include "LYSimPrimaryGeneratorAction.hh"
 #include "LYSimScintillation.hh"
 #include "LYSimTrajectoryPoint.hh"
@@ -27,31 +23,50 @@
 #include "G4SDManager.hh"
 #include "G4UnitsTable.hh"
 
+// Explicit ROOT file includes can only been done in CMSSW
+#include "TFile.h"
 
 using namespace std;
 using namespace CLHEP;
 
-Analysis* Analysis::singleton = 0;
+LYSimAnalysis* LYSimAnalysis::singleton = 0;
 
-Analysis::Analysis()
+LYSimAnalysis::LYSimAnalysis()
 {
-  fMessenger = new AnalysisMessenger( this );
-  G4AnalysisManager::Instance();
-
 }
 
-Analysis::~Analysis()
-{
-  if( fMessenger ){ delete fMessenger;}
-}
-
-void
-Analysis::PrepareNewEvent( const G4Event* )
+LYSimAnalysis::~LYSimAnalysis()
 {
 }
 
 void
-Analysis::EndOfEvent( const G4Event* anEvent )
+LYSimAnalysis::PrepareExperiment()
+{
+  G4AnalysisManager* man = G4AnalysisManager::Instance();
+  file = TFile::Open(filename.c_str());
+  file->Close();
+
+  // Create histogram(s) (avoid non-integer bins)
+  man->CreateH1( "ogammaE", "Optical photons Wavelength [nm]",      100, 200., 1200. );
+  man->CreateH1( "Ndetect", "Number of detected photons per event", 500,   0.,  500. );
+}
+
+void
+LYSimAnalysis::PrepareNewRun( const G4Run* )
+{
+  // Reset variables relative to the run
+  PhotonCount = 0;
+  HitCount    = 0;
+}
+
+void
+LYSimAnalysis::PrepareNewEvent( const G4Event* event )
+{
+  std::cout << "Starting Event " << event->GetEventID() << std::endl;
+}
+
+void
+LYSimAnalysis::EndOfEvent( const G4Event* anEvent )
 {
   G4AnalysisManager* man = G4AnalysisManager::Instance();
 
@@ -94,22 +109,20 @@ Analysis::EndOfEvent( const G4Event* anEvent )
   man->FillH1( 2, EventPhotonCount );
 }
 
-void
-Analysis::PrepareNewRun( const G4Run* )
-{
-  // Reset variables relative to the run
-  PhotonCount = 0;
-  HitCount    = 0;
-}
-
 
 void
-Analysis::EndOfRun( const G4Run* )
+LYSimAnalysis::EndOfRun( const G4Run* )
 {
   G4double detEff = PhotonCount > 0 ? (double)HitCount/(double)PhotonCount :
                     0.0;
   G4cout << "Efficiency in this run is " << detEff  << G4endl;
-  G4cout << inducedMuTile << "\t"
-         << inducedMuFiber << "\t"
-         << detEff <<  G4endl;
+}
+
+void
+LYSimAnalysis::EndOfExperiment()
+{
+  G4AnalysisManager* man = G4AnalysisManager::Instance();
+  file->Close();
+  man->Write();
+  man->CloseFile();
 }

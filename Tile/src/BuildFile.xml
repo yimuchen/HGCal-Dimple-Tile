@@ -1,5 +1,7 @@
 <use name="root"/>
 <use name="geant4core"/>
+<use name="UserUtils/Common"/>
+
 
 <flags CXXFLAGS="-g"/>
 

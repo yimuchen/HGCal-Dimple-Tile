@@ -1,10 +1,10 @@
 #ifdef CMSSW_GIT_HASH
-#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/LYSimAnalysis.hh"
 #include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPrimaryGeneratorAction.hh"
 #include "HGCalTileSim/Tile/interface/ProjectPath.hh"
 #else
-#include "Analysis.hh"
+#include "LYSimAnalysis.hh"
 #include "LYSimDetectorConstruction.hh"
 #include "LYSimPrimaryGeneratorAction.hh"
 #include "ProjectPath.hh"
@@ -65,7 +65,7 @@ LYSimPrimaryGeneratorAction::LYSimPrimaryGeneratorAction( LYSimDetectorConstruct
   std::cout << project_base << std::endl;//
   G4SPSEneDistribution* ene = particleSource->GetCurrentSource()->GetEneDist();
   ene->SetEnergyDisType( "Arb" );
-  ene->ArbEnergyHistoFile( project_base + "/Tile/data/PhotonSpectrum.dat" );
+  ene->ArbEnergyHistoFile( project_base + "/data/PhotonSpectrum.dat" );
   ene->ArbInterpolate( "Lin" );
 
 }
@@ -83,18 +83,7 @@ LYSimPrimaryGeneratorAction::GeneratePrimaries( G4Event* anEvent )
 
   // Randomize Source Position;
   RandomizePosition();
-
-  // Randomizing the photon polarization for each event
-  const double angle = G4UniformRand() * 360.0*deg;
-  const G4ThreeVector normal( 1., 0., 0. );
-  const G4ThreeVector kphoton   = particleSource->GetParticleMomentumDirection();
-  const G4ThreeVector product   = normal.cross( kphoton );
-  const double modul2           = product*product;
-  const G4ThreeVector e_perpend = ( 1./std::sqrt( modul2 ) )*product;
-  const G4ThreeVector e_paralle = e_perpend.cross( kphoton );
-  const G4ThreeVector polar     = std::cos( angle )*e_paralle
-                                  + std::sin( angle )*e_perpend;
-  particleSource->SetParticlePolarization( polar );
+  RandomizePolarization();
 
   // We still need to generate the primary vertex.
   particleSource->GeneratePrimaryVertex( anEvent );
@@ -113,7 +102,23 @@ LYSimPrimaryGeneratorAction::RandomizePosition()
   pos->SetHalfZ( t/2 );
   pos->SetCentreCoords( G4ThreeVector( x, y, t/2 ) );
   particleSource->GetCurrentSource()
-    ->SetNumberOfParticles( _photon_multiplier*np );
+  ->SetNumberOfParticles( _photon_multiplier*np );
+}
+
+void
+LYSimPrimaryGeneratorAction::RandomizePolarization()
+{
+  // Randomizing the photon polarization for each event
+  const double angle = G4UniformRand() * 360.0*deg;
+  const G4ThreeVector normal( 1., 0., 0. );
+  const G4ThreeVector kphoton   = particleSource->GetParticleMomentumDirection();
+  const G4ThreeVector product   = normal.cross( kphoton );
+  const double modul2           = product*product;
+  const G4ThreeVector e_perpend = ( 1./std::sqrt( modul2 ) )*product;
+  const G4ThreeVector e_paralle = e_perpend.cross( kphoton );
+  const G4ThreeVector polar     = std::cos( angle )*e_paralle
+                                  + std::sin( angle )*e_perpend;
+  particleSource->SetParticlePolarization( polar );
 }
 
 double

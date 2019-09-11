@@ -2,10 +2,10 @@
 #define LYSimDetectorMessenger_h
 
 #ifdef CMSSW_GIT_HASH
-#include "HGCalTileSim/Tile/interface/Analysis.hh"
+#include "HGCalTileSim/Tile/interface/LYSimAnalysis.hh"
 #include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
 #else
-#include "Analysis.hh"
+#include "LYSimAnalysis.hh"
 #include "LYSimDetectorConstruction.hh"
 #endif
 
@@ -34,7 +34,6 @@ public:
 private:
 
   LYSimDetectorConstruction* Detector;
-  Analysis* analysis;
 
   G4UIdirectory* detDir;
 

@@ -15,8 +15,6 @@
 LYSimDetectorMessenger::LYSimDetectorMessenger( LYSimDetectorConstruction* Det )
   : Detector( Det )
 {
-  analysis = Analysis::GetInstance();
-
   detDir = new G4UIdirectory( "/LYSim/" );
   detDir->SetGuidance( " Geometry Setup " );
 
@@ -128,7 +126,6 @@ LYSimDetectorMessenger::SetNewValue( G4UIcommand* command, G4String val )
   } else if( command == SetInducedAbsLengthCmd ){
     G4double value = G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val );
     Detector->SetInducedMuTile( 1/value );
-    analysis->SetInducedMuTile( 1/value );
   } else if( command == SetDimpleIndentCmd ){
     Detector->SetDimpleIndent(
       G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
