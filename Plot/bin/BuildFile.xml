@@ -1,0 +1,6 @@
+<use name="UserUtils/Common"/>
+<use name="UserUtils/PlotUtils"/>
+
+<flags CXXFLAGS="-g"/>
+<bin name="LYSim_MakeLYvXGraph" file="MakeLYvXGraph.cc"/>
+<bin name="LYSim_PlotLYvXGraph" file="PlotLYvXGraph.cc"/>
