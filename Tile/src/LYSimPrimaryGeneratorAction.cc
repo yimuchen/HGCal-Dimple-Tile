@@ -93,14 +93,15 @@ void
 LYSimPrimaryGeneratorAction::RandomizePosition()
 {
   // Randomizing position of the the source for each event.
-  const float x = 2*G4UniformRand()*_width + _beamx - _width;
-  const float y = 2*G4UniformRand()*_width + _beamy - _width;
-  const float t = fDetector->LocalTileZ( x, y );
+  const double x = 2*G4UniformRand()*_width + _beamx - _width;
+  const double y = 2*G4UniformRand()*_width + _beamy - _width;
+  const double z = fDetector->GetTileZ();
+  const double t = fDetector->LocalTileZ( x, y );
   const int np  = CalcNumPhotons( t );
 
   G4SPSPosDistribution* pos = particleSource->GetCurrentSource()->GetPosDist();
   pos->SetHalfZ( t/2 );
-  pos->SetCentreCoords( G4ThreeVector( x, y, t/2 ) );
+  pos->SetCentreCoords( G4ThreeVector( x, y, -z/2 + t/2 ) );
   particleSource->GetCurrentSource()
   ->SetNumberOfParticles( _photon_multiplier*np );
 }
