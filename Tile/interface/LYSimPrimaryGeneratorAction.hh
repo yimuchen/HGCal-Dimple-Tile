@@ -22,7 +22,6 @@ public:
   LYSimPrimaryGeneratorAction( LYSimDetectorConstruction* );
   ~LYSimPrimaryGeneratorAction();
 
-  void InitSource();
   void GeneratePrimaries( G4Event* );
 
   inline double
@@ -43,11 +42,11 @@ public:
   SetPhotonMult( const double x ){ _photon_multiplier = x; }
 
   void RandomizePosition();
-  void RandomizePolarization();
 
 private:
   G4GeneralParticleSource* particleSource;
   LYSimDetectorConstruction* fDetector;
+  LYSimPrimaryGeneratorMessenger* messenger;
 
   // Defining the particle source geometry.
   double _beamx;
