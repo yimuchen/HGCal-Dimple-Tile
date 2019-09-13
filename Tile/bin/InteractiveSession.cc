@@ -1,18 +1,18 @@
 #ifdef CMSSW_GIT_HASH
 #include "HGCalTileSim/Tile/interface/LYSimAnalysis.hh"
 
+#include "HGCalTileSim/Tile/interface/LYSimDebugGeneratorAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPhysicsList.hh"
-
 #include "HGCalTileSim/Tile/interface/LYSimPrimaryGeneratorAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimSteppingAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimTrackingAction.hh"
 #else
 #include "LYSimAnalysis.hh"
 
+#include "LYSimDebugGeneratorAction.hh"
 #include "LYSimDetectorConstruction.hh"
 #include "LYSimPhysicsList.hh"
-
 #include "LYSimPrimaryGeneratorAction.hh"
 #include "LYSimSteppingAction.hh"
 #include "LYSimTrackingAction.hh"
@@ -46,8 +46,16 @@ main( int argc, char** argv )
   LYSimAnalysis::GetInstance()->SetGeneratorAction( genaction );
   LYSimAnalysis::GetInstance()->PrepareExperiment();
 
+  LYSimDebugGeneratorAction* debug_gen
+    = new LYSimDebugGeneratorAction();
+
+  G4VUserPrimaryGeneratorAction* op_gen
+    = argc == 2 && std::string( argv[1] ) == "DEBUG" ?
+      (G4VUserPrimaryGeneratorAction*)debug_gen :
+      (G4VUserPrimaryGeneratorAction*)genaction;
+
   // Set user action classes
-  runManager->SetUserAction( genaction );
+  runManager->SetUserAction( op_gen );
   runManager->SetUserAction( new LYSimAnalysis::RunAction() );
   runManager->SetUserAction( new LYSimAnalysis::EventAction() );
   runManager->SetUserAction( new LYSimTrackingAction() );

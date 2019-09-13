@@ -15,7 +15,7 @@ parser.add_argument('--beamy',
                     '-y',
                     type=float,
                     nargs='+',
-                    required=True,
+                    default=0,
                     help='List of y values of beam center')
 parser.add_argument('--dimplerad',
                     '-r',
@@ -29,10 +29,20 @@ parser.add_argument('--dimpleind',
                     nargs='+',
                     default=[1.5],
                     help='List of dimple indents to try out')
+parser.add_argument('--absmult',
+                    '-a',
+                    type=float,
+                    nargs='+',
+                    default=[10.],
+                    help='List of tile absorption length multiple')
+parser.add_argument('--prefix',
+                    type=str,
+                    default='',
+                    help='Additional string to place in filename')
 
 args = parser.parse_args()
 
-BASE_DIR = os.path.abspath(os.environ['CMSSW_BASE'] + '/src/'
+BASE_DIR = os.path.abspath(os.environ['CMSSW_BASE'] + '/src/' +
                            '/HGCalTileSim/condor/')
 DATA_DIR = os.path.abspath(BASE_DIR + '/results/')
 
@@ -44,13 +54,14 @@ Requirements = TARGET.FileSystemDomain == "privnet"
 Output = {1}/sce_{2}_{3}_{4}_{5}_$(cluster)_$(process).stdout
 Error  = {1}/sce_{2}_{3}_{4}_{5}_$(cluster)_$(process).stderr
 Log    = {1}/sce_{2}_{3}_{4}_{5}_$(cluster)_$(process).condor
-Arguments = -x {2} -y {3} -w 1.5 -N 1000 -r {4} -d {5} -o {6}
+Arguments = -x {2} -y {3} -w 1.5 -N 1000 -r {4} -d {5} -a {6} -o {7}
 Queue
 """
 
 timestr = datetime.datetime.now().strftime("%Y%m%d_%H%M")
-for x, y, r, d in [(x, y, r, d) for x in args.beamx for y in args.beamy
-                   for r in args.dimplerad for d in args.dimpleind]:
+for x, y, r, d, a in [(x, y, r, d, a) for x in args.beamx for y in args.beamy
+                      for r in args.dimplerad for d in args.dimpleind
+                      for a in args.absmult]:
 
   save_filename = os.path.abspath(
       DATA_DIR + '/root/' +
@@ -64,6 +75,7 @@ for x, y, r, d in [(x, y, r, d) for x in args.beamx for y in args.beamy
       y,
       r,
       d,
+      a,
       os.path.abspath(save_filename),
   )
 

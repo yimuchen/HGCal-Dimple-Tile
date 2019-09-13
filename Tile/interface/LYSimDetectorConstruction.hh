@@ -87,10 +87,14 @@ private:
     double        indent_x2  // indent of corner
   ) const;
 
+  G4VSolid* ConstructHollowWrapSolid() const;
+
   G4VSolid*     ConstructSphereDimpleSolid() const;
   G4VSolid*     ConstructPyramidDimpleSolid() const;
   G4VSolid*     ConstructParabolicDimpleSolid() const;
+
   G4ThreeVector CalcDimpleOffset() const;
+  G4ThreeVector CalcSiPMDimpleOffset() const;
 
   // Pointer to detector messenger class
   LYSimDetectorMessenger* fdetectorMessenger;
@@ -117,14 +121,6 @@ private:
   // Pointers for access to Sensitive Detector
   static LYSimPMTSD* fPMTSD;
 
-  // Geometry parameters
-  G4double angle1;
-  G4double angle2;
-  G4double angle3;
-  G4double Dx2;
-  G4double Dx3;
-  G4double Dw2;
-
   // Tile Geometric definitions
   double _tilex;
   double _tiley;
@@ -137,14 +133,15 @@ private:
 
 
   // Dimple variables;
-  G4double _dimple_indent;// Depth of dimple
-  G4double _dimple_radius;// Dimple radius
-  G4int _dimple_type;
+  double _dimple_indent;// Depth of dimple
+  double _dimple_radius;// Dimple radius
+  int _dimple_type;
 
-  G4double _sipm_x;
-  G4double _sipm_y;
-  G4double _sipm_z;
-  G4double SiPM_Depth;// SiPM depth
+  double _sipm_x;
+  double _sipm_y;
+  double _sipm_z;
+  double _sipm_depth;// SiPM depth
+  double _sipm_rimwidth;
 };
 
 #endif

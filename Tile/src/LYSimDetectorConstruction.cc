@@ -61,14 +61,13 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   _tilez   = 2.98*mm;
   _tile_x1 = 0.0*mm;
   _tile_x2 = 0.0*mm;
+  wrapgap  = 0.0*mm;
 
-  _sipm_x = 1.3*mm;
-  _sipm_y = 1.3*mm;
-  _sipm_z = 0.025*mm;// arbitrary thickness for Photocathode
-  wrapgap = 0.05*mm;
-
-
-  SiPM_Depth  = 0.0*mm;   // SiPM Depth (0.0 is flush with top of tile, don't use anything less than 0.05*mm unless 0.0)
+  _sipm_x        = 1.3*mm;
+  _sipm_y        = 1.3*mm;
+  _sipm_z        = 0.5*mm;// arbitrary thickness for Photocathode
+  _sipm_depth    = 0.0*mm;
+  _sipm_rimwidth = 0.1*mm;
 
   // Default Dimple settings
   _dimple_type   = SPHERICAL;// 0: Normal, 1: Pyramid, 2: Parabolic
@@ -116,9 +115,10 @@ LYSimDetectorConstruction::Construct()
 {
   static const bool checkOverlaps = true;
 
-  ///////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
   // World volume
-  /////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
+  std::cout << "Constructing World Volume" << std::endl;
   G4Box* solidWorld = new G4Box( "World", WorldHalfX()
                                , WorldHalfY(), WorldHalfZ() );
 
@@ -132,19 +132,17 @@ LYSimDetectorConstruction::Construct()
                                                   , false
                                                   , 0
                                                   , checkOverlaps );
-  ///////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
   // wrapping
-  /////////////////////////////////////////////////
-  G4VSolid* solidWrap = ConstructTrapazoidSolid( "TileTrap"
-                                               , _tilex + 2*wrapgap
-                                               , _tiley + 2*wrapgap
-                                               , _tilez + 2*wrapgap
-                                               , 0, 0 );
+  ///////////////////////////////////////////////////////////////////////////////
+  std::cout << "Constructing Wrapping stuff" << std::endl;
+  G4VSolid* solidWrap = ConstructHollowWrapSolid();
 
-  G4LogicalVolume* logicWrap = new G4LogicalVolume( solidWrap,   fAir,  "Wrap" );
+  // The matrial of the wrap isn't as important as the surface
+  G4LogicalVolume* logicWrap = new G4LogicalVolume( solidWrap, fEpoxy,  "Wrap" );
 
   G4VPhysicalVolume* physWrap = new G4PVPlacement( 0
-                                                 , G4ThreeVector(0,0,0)
+                                                 , G4ThreeVector( 0, 0, 0 )
                                                  , logicWrap
                                                  , "Wrap"
                                                  , logicWorld
@@ -152,10 +150,11 @@ LYSimDetectorConstruction::Construct()
                                                  , 0
                                                  , checkOverlaps );
 
-
-  ///////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
   // Subtracted Dimple Version (dimple sub from tile, WWW = mothervolume of both)
-  /////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
+  std::cout << "Constructing Solid physical tile" << std::endl;
+
   G4ThreeVector DimpleOffset = CalcDimpleOffset();
 
   G4VSolid* solidTile = ConstructTrapazoidSolid( "TileTrap"
@@ -165,11 +164,20 @@ LYSimDetectorConstruction::Construct()
                                                , _tile_x1
                                                , _tile_x2 );
 
-  G4LogicalVolume* logicTile = new G4LogicalVolume( solidTile
+  G4VSolid* solidDimple
+    = _dimple_type == PYRAMID ? ConstructPyramidDimpleSolid() :
+      _dimple_type == PARABOLIC ? ConstructParabolicDimpleSolid() :
+      ConstructSphereDimpleSolid();
+
+  G4VSolid* hollowedTile = new G4SubtractionSolid( "TileSolid"
+                                                 , solidTile, solidDimple
+                                                 , 0, CalcDimpleOffset() );
+
+  G4LogicalVolume* logicTile = new G4LogicalVolume( hollowedTile
                                                   , fEJ200, "TileLogic" );
 
   G4VPhysicalVolume* physTile = new G4PVPlacement( 0
-                                                 , G4ThreeVector( 0,0,0 )
+                                                 , G4ThreeVector( 0, 0, 0 )
                                                  , logicTile
                                                  , "TilePhysic"
                                                  , logicWorld
@@ -177,75 +185,82 @@ LYSimDetectorConstruction::Construct()
                                                  , 0
                                                  , checkOverlaps );
 
-
-  G4VSolid* solidDimple = _dimple_type == 1 ? ConstructPyramidDimpleSolid() :
-                          _dimple_type == 2 ? ConstructParabolicDimpleSolid() :
-                          ConstructSphereDimpleSolid();
-
-  G4LogicalVolume* logicDimple = new G4LogicalVolume( solidDimple
-                                                    , fAir, "Dimple" );
-
-  G4VPhysicalVolume* DimpleRod = new G4PVPlacement( 0
-                                                  , DimpleOffset
-                                                  , logicDimple
-                                                  , "Dimple"
-                                                  , logicWorld
-                                                  , false
-                                                  , 0
-                                                  , checkOverlaps );
-
-
-  ////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
   // SiPM
-  ////////////////////////////////////////////
-  const double SubD      = GetDimpleSizeRadius() - GetDimpleIndent();
-  const double backthick = 0.025*mm;
+  ///////////////////////////////////////////////////////////////////////////////
+  std::cout << "Constructing Solid SiPM" << std::endl;
 
-  const double case_z = SiPM_Depth == 0*mm ?  0.5*_tilez+0.025*mm :
-                        -SubD+0.025*mm-SiPM_Depth;
-  const double sipm_z = SiPM_Depth == 0*mm ?
-                        0.5*_tilez+0.5*_sipm_z :
-                        -SubD+0.5*_sipm_z-SiPM_Depth;
+  static const double sipm_sensor_z = 0.025*mm;
 
-  G4ThreeVector CaseOffset( 0, 0, case_z );
-  G4ThreeVector transSiPM( 0, 0, sipm_z );
+  G4Box* solidSiPMInner = new G4Box( "SiPMInner"
+                                   , 0.5*_sipm_x, 0.5*_sipm_y, sipm_sensor_z );
 
-  G4Box* solidSiPM = new G4Box( "SiPM",  0.5*_sipm_x, 0.5*_sipm_y, 0.5*_sipm_z );
+  G4Box* solidSiPMOuter = new G4Box( "SiPMOuter"
+                                   , 0.5*_sipm_x + _sipm_rimwidth
+                                   , 0.5*_sipm_y + _sipm_rimwidth
+                                   , 0.5*_sipm_z );
 
-  G4LogicalVolume* logicSiPM = new G4LogicalVolume( solidSiPM
+  G4VSolid* solidSiPMCase
+    = new G4SubtractionSolid( "SiPMCase"
+                            , solidSiPMOuter, solidSiPMInner
+                            , 0
+                            , G4ThreeVector( 0, 0
+                                           , -0.5*_sipm_z + sipm_sensor_z ) );
+
+  G4LogicalVolume* logicSiPM = new G4LogicalVolume( solidSiPMInner
                                                   , fBialkali,  "SiPM" );
 
-  G4Box* solidSiPMback = new G4Box( "SiPMBack"
-                                  , 0.5*2.1*mm, 0.5*2.1*mm, backthick );
-
-  G4SubtractionSolid* SiPMCase
-    = new G4SubtractionSolid( "SiPMCase"
-                            , solidSiPMback
-                            , solidSiPM
-                            , 0
-                            , G4ThreeVector( 0, 0, 0.5*_sipm_z-backthick ) );
-
-  G4LogicalVolume* logicSiPMCase = new G4LogicalVolume( SiPMCase
+  G4LogicalVolume* logicSiPMCase = new G4LogicalVolume( solidSiPMCase
                                                       , fEpoxy, "SiPMBack" );
 
-  G4VPhysicalVolume* SiPMCasing = new G4PVPlacement( 0
-                                                   , CaseOffset
-                                                   , logicSiPMCase
-                                                   , "Case"
-                                                   , logicWorld
-                                                   , false
-                                                   , 0
-                                                   , checkOverlaps );
+  const double caseoffset_z = +0.5*_tilez - 0.5 * _sipm_z - _sipm_depth;
+  const double sipmoffset_z = +0.5*_tilez - _sipm_z + sipm_sensor_z
+                              - _sipm_depth;
+  const G4ThreeVector CaseOffset( 0, 0, caseoffset_z );
+  const G4ThreeVector SiPMOffset( 0, 0, sipmoffset_z );
+
+  G4VPhysicalVolume* physSiPMCase = new G4PVPlacement( 0
+                                                     , CaseOffset
+                                                     , logicSiPMCase
+                                                     , "Case"
+                                                     , logicWorld
+                                                     , false
+                                                     , 0
+                                                     , checkOverlaps );
 
   G4VPhysicalVolume* physSiPM = new G4PVPlacement( 0
-                                                 , transSiPM
+                                                 , SiPMOffset
                                                  , logicSiPM
                                                  , "SiPM"
                                                  , logicWorld
                                                  , false
                                                  , 0
                                                  , checkOverlaps );
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // Placing dimple into physical world to enable a surface construction.
+  ///////////////////////////////////////////////////////////////////////////////
+  std::cout << "Constructing Physical Dimple volume" << std::endl;
+  G4VSolid* hollowedDimple = new G4SubtractionSolid( "DimpleAir"
+                                                   , solidDimple, solidSiPMOuter
+                                                   , 0, CalcSiPMDimpleOffset() );
+
+  G4LogicalVolume* logicDimple = new G4LogicalVolume( hollowedDimple
+                                                    , fAir, "Dimple" );
+
+  G4VPhysicalVolume* physDimple = new G4PVPlacement( 0
+                                                   , DimpleOffset
+                                                   , logicDimple
+                                                   , "Dimple"
+                                                   , logicWorld
+                                                   , false
+                                                   , 0
+                                                   , checkOverlaps );
+  ///////////////////////////////////////////////////////////////////////////////
   // Defining surfaces
+  ///////////////////////////////////////////////////////////////////////////////
+  std::cout << "Defining surfaces" << std::endl;
+
   G4LogicalBorderSurface* WrapAirSurface =
     new G4LogicalBorderSurface( "WrapAirSurface"
                               , physWrap
@@ -258,7 +273,7 @@ LYSimDetectorConstruction::Construct()
                               , fPolishedOpSurface );
   G4LogicalBorderSurface* DimpleAirSurface =
     new G4LogicalBorderSurface( "DimpleSurface"
-                              , DimpleRod
+                              , physDimple
                               , physTile
                               , fIdealPolishedOpSurface );
   G4LogicalSkinSurface* CaseSurface
@@ -266,7 +281,7 @@ LYSimDetectorConstruction::Construct()
                               , logicSiPMCase
                               , fIdealMirrorOpSurface );
   // Must be declared again (NOT Sure why)
-  fSiPMSurface = MakeS_SiPM();
+  // fSiPMSurface = MakeS_SiPM();
   G4LogicalSkinSurface* SiPMSurface = new G4LogicalSkinSurface( "SiPMSurface"
                                                               , logicSiPM
                                                               , fSiPMSurface );
@@ -334,6 +349,22 @@ LYSimDetectorConstruction::ConstructTrapazoidSolid(
 }
 
 G4VSolid*
+LYSimDetectorConstruction::ConstructHollowWrapSolid() const
+{
+  G4VSolid* wrapOuter = ConstructTrapazoidSolid( "WrapOuter"
+                                               , _tilex + 2*wrapgap + 0.5*mm
+                                               , _tiley + 2*wrapgap + 0.5*mm
+                                               , _tilez + 2*wrapgap + 0.5*mm
+                                               , 0, 0 );
+  G4VSolid* wrapInner = ConstructTrapazoidSolid( "WrapInner"
+                                               , _tilex + 2*wrapgap
+                                               , _tiley + 2*wrapgap
+                                               , _tilez + 2*wrapgap
+                                               , 0, 0 );
+  return new G4SubtractionSolid( "WrapSolid", wrapOuter, wrapInner );
+}
+
+G4VSolid*
 LYSimDetectorConstruction::ConstructSphereDimpleSolid() const
 {
   G4Sphere* solidsphere = new G4Sphere( "DimpleSphere"
@@ -381,13 +412,26 @@ LYSimDetectorConstruction::GetDimpleSizeRadius() const
 G4ThreeVector
 LYSimDetectorConstruction::CalcDimpleOffset() const
 {
-  if( _dimple_type == 1 ){
+  if( _dimple_type == PYRAMID ){
     return G4ThreeVector( 0, 0, 0.5*_tilez-0.5*_dimple_indent );
-  } else if( _dimple_type == 2 ){
+  } else if( _dimple_type == PARABOLIC ){
     return G4ThreeVector( 0, 0, 0.5*_tilez+( 447317/288000 )*mm );
   } else {
     return G4ThreeVector( 0, 0
                         , 0.5*_tilez+GetDimpleSizeRadius()-GetDimpleIndent() );
+  }
+}
+
+G4ThreeVector
+LYSimDetectorConstruction::CalcSiPMDimpleOffset() const
+{
+  if( _dimple_type == PYRAMID ){
+    return G4ThreeVector( 0, 0, 0.5*_dimple_indent - 0.5*_sipm_z );
+  } else if( _dimple_type == PARABOLIC ){
+    return G4ThreeVector( 0, 0, 0 );// TO-DO!!
+  } else {
+    return G4ThreeVector( 0, 0,
+      -GetDimpleSizeRadius() + GetDimpleIndent()- 0.5*_sipm_z );
   }
 }
 

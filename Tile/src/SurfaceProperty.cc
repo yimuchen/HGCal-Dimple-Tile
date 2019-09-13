@@ -153,7 +153,8 @@ MakeS_Polished()
   G4OpticalSurface* surface = new G4OpticalSurface( "PolishedOpSurface" );
   surface->SetType( dielectric_dielectric );
   surface->SetModel( unified );
-  surface->SetFinish( ground );// necessary even for polished surfaces to enable UNIFIED code
+  surface->SetFinish( ground );
+  // necessary even for polished surfaces to enable UNIFIED code
   surface->SetSigmaAlpha( 1.3 * degree );// Janecek2010 (1.3 * degree)
 
   G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable();

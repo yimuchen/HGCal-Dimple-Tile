@@ -22,7 +22,9 @@ main( int argc, char** argv )
     ( "beamwidth,w", usr::po::defvalue<double>( 0 ), "width of beam [mm]" )
     ( "dimplerad,r", usr::po::defvalue<double>( 3.0 ), "Dimple radius [mm]" )
     ( "dimpleind,d", usr::po::defvalue<double>( 1.5 ), "Dimple indent [mm]" )
-    ( "NRuns,N", usr::po::defvalue<unsigned>( 1 ), "Number of runs to perform" )
+    ( "absmult,a",   usr::po::defvalue<double>( 10 ),
+    "Multple of inbuilt absorption length" )
+    ( "NEvents,N", usr::po::defvalue<unsigned>( 1 ), "Number of events to run" )
     ( "output,o", usr::po::defvalue<std::string>( "test.root" ), "output file" )
   ;
 
@@ -39,7 +41,7 @@ main( int argc, char** argv )
   const std::string filename = args.Arg<std::string>( "output" );
 
   // Must initialize Run Manager first
-  G4RunManager* runManager            = new G4RunManager;
+  G4RunManager* runManager   = new G4RunManager;
   LYSimPhysicsList* physlist = new LYSimPhysicsList();
   // Overriding the detector parameters
   LYSimDetectorConstruction* detector = new LYSimDetectorConstruction();
