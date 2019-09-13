@@ -37,7 +37,7 @@ main( int argc, char** argv )
   const double width         = args.Arg<double>( "beamwidth" );
   const double dimplerad     = args.Arg<double>( "dimplerad" );
   const double dimpleind     = args.Arg<double>( "dimpleind" );
-  const unsigned N           = args.Arg<unsigned>( "NRuns" );
+  const unsigned N           = args.Arg<unsigned>( "NEvents" );
   const std::string filename = args.Arg<std::string>( "output" );
 
   // Must initialize Run Manager first

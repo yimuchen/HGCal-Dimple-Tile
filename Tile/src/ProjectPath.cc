@@ -9,5 +9,5 @@
 extern const std::string project_base
   = usr::subpkgpath("HGCalTileSim","Tile" ).string();
 #else
-extern const std::string project_base = "/home/ensc/Homework/UMDCMS/HGCalTileSim";
+extern const std::string project_base = std::string("/home/ensc/Homework/UMDCMS/HGCalTileSim") + std::string("/Tile/");
 #endif

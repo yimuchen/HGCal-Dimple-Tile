@@ -16,12 +16,8 @@
 
 #include "g4root.hh"
 #include "G4Event.hh"
-#include "G4EventManager.hh"
-#include "G4GeneralParticleSource.hh"
 #include "G4ios.hh"
 #include "G4PhysicalConstants.hh"
-#include "G4PrimaryVertex.hh"
-#include "G4RootAnalysisManager.hh"
 #include "G4SDManager.hh"
 #include "G4UnitsTable.hh"
 
@@ -104,6 +100,8 @@ LYSimAnalysis::EndOfEvent( const G4Event* event )
 
   // Filling the three
   tree->Fill();
+
+  std::cout << "\rFinishing Event " << tree->GetEntries()  << std::flush ;
 }
 
 
@@ -119,6 +117,8 @@ void
 LYSimAnalysis::EndOfExperiment()
 {
   TFile* file = TFile::Open( filename.c_str(), "RECREATE" );
+  std::cout << "Writing to file " << filename << "("
+            << tree->GetEntries() << ")" << std::endl;
   tree->Write();
   photon_energy_hist->Write();
   file->Close();

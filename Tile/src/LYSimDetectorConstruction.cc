@@ -61,11 +61,11 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   _tilez   = 2.98*mm;
   _tile_x1 = 0.0*mm;
   _tile_x2 = 0.0*mm;
-  wrapgap  = 0.0*mm;
+  wrapgap  = 0.1*mm;
 
   _sipm_x        = 1.3*mm;
   _sipm_y        = 1.3*mm;
-  _sipm_z        = 0.5*mm;// arbitrary thickness for Photocathode
+  _sipm_z        = 0.3*mm;// arbitrary thickness for Photocathode
   _sipm_depth    = 0.0*mm;
   _sipm_rimwidth = 0.1*mm;
 
@@ -155,8 +155,6 @@ LYSimDetectorConstruction::Construct()
   ///////////////////////////////////////////////////////////////////////////////
   std::cout << "Constructing Solid physical tile" << std::endl;
 
-  G4ThreeVector DimpleOffset = CalcDimpleOffset();
-
   G4VSolid* solidTile = ConstructTrapazoidSolid( "TileTrap"
                                                , _tilex
                                                , _tiley
@@ -164,13 +162,16 @@ LYSimDetectorConstruction::Construct()
                                                , _tile_x1
                                                , _tile_x2 );
 
-  G4VSolid* solidDimple
-    = _dimple_type == PYRAMID ? ConstructPyramidDimpleSolid() :
-      _dimple_type == PARABOLIC ? ConstructParabolicDimpleSolid() :
-      ConstructSphereDimpleSolid();
+  G4VSolid* solidTileSubtract = new G4Sphere( "TileSub", 0, GetDimpleSizeRadius()
+                                            , 0, 2* pi, 0, pi );
+
+  //G4VSolid* solidDimple
+  //  = _dimple_type == PYRAMID ? ConstructPyramidDimpleSolid() :
+  //    _dimple_type == PARABOLIC ? ConstructParabolicDimpleSolid() :
+  //    ConstructSphereDimpleSolid();
 
   G4VSolid* hollowedTile = new G4SubtractionSolid( "TileSolid"
-                                                 , solidTile, solidDimple
+                                                 , solidTile, solidTileSubtract
                                                  , 0, CalcDimpleOffset() );
 
   G4LogicalVolume* logicTile = new G4LogicalVolume( hollowedTile
@@ -190,7 +191,7 @@ LYSimDetectorConstruction::Construct()
   ///////////////////////////////////////////////////////////////////////////////
   std::cout << "Constructing Solid SiPM" << std::endl;
 
-  static const double sipm_sensor_z = 0.025*mm;
+  static const double sipm_sensor_z = 0.0025*mm;
 
   G4Box* solidSiPMInner = new G4Box( "SiPMInner"
                                    , 0.5*_sipm_x, 0.5*_sipm_y, sipm_sensor_z );
@@ -240,22 +241,24 @@ LYSimDetectorConstruction::Construct()
   ///////////////////////////////////////////////////////////////////////////////
   // Placing dimple into physical world to enable a surface construction.
   ///////////////////////////////////////////////////////////////////////////////
-  std::cout << "Constructing Physical Dimple volume" << std::endl;
-  G4VSolid* hollowedDimple = new G4SubtractionSolid( "DimpleAir"
+  /*
+     std::cout << "Constructing Physical Dimple volume" << std::endl;
+     G4VSolid* hollowedDimple = new G4SubtractionSolid( "DimpleAir"
                                                    , solidDimple, solidSiPMOuter
                                                    , 0, CalcSiPMDimpleOffset() );
 
-  G4LogicalVolume* logicDimple = new G4LogicalVolume( hollowedDimple
+     G4LogicalVolume* logicDimple = new G4LogicalVolume( hollowedDimple
                                                     , fAir, "Dimple" );
 
-  G4VPhysicalVolume* physDimple = new G4PVPlacement( 0
-                                                   , DimpleOffset
+     G4VPhysicalVolume* physDimple = new G4PVPlacement( 0
+                                                   , CalcDimpleOffset()
                                                    , logicDimple
                                                    , "Dimple"
                                                    , logicWorld
                                                    , false
                                                    , 0
                                                    , checkOverlaps );
+   */
   ///////////////////////////////////////////////////////////////////////////////
   // Defining surfaces
   ///////////////////////////////////////////////////////////////////////////////
@@ -270,21 +273,25 @@ LYSimDetectorConstruction::Construct()
     new G4LogicalBorderSurface( "TileSurface"
                               , physTile
                               , physWorld
-                              , fPolishedOpSurface );
-  G4LogicalBorderSurface* DimpleAirSurface =
-    new G4LogicalBorderSurface( "DimpleSurface"
-                              , physDimple
-                              , physTile
                               , fIdealPolishedOpSurface );
+  // G4LogicalBorderSurface* DimpleTileSurface =
+  //   new G4LogicalBorderSurface( "DimpleTileSurface"
+  //                             , physDimple
+  //                             , physTile
+  //                             , fIdealPolishedOpSurface );
+  // G4LogicalBorderSurface* DimpleAirSurface =
+  //  new G4LogicalBorderSurface( "DimpleAirSurface"
+  //                            , physDimple
+  //                            , physWorld
+  //                            , fIdealPolishedOpSurface );
   G4LogicalSkinSurface* CaseSurface
     = new G4LogicalSkinSurface( "SiPMCaseSurface"
                               , logicSiPMCase
                               , fIdealMirrorOpSurface );
-  // Must be declared again (NOT Sure why)
-  // fSiPMSurface = MakeS_SiPM();
-  G4LogicalSkinSurface* SiPMSurface = new G4LogicalSkinSurface( "SiPMSurface"
-                                                              , logicSiPM
-                                                              , fSiPMSurface );
+  G4LogicalSkinSurface* SiPMSurface
+    = new G4LogicalSkinSurface( "SiPMSurface"
+                              , logicSiPM
+                              , fSiPMSurface );
 
   // Setting the sensitive detector
   if( !fPMTSD ){
@@ -307,10 +314,10 @@ LYSimDetectorConstruction::Construct()
   CaseVisAtt->SetVisibility( true );
   logicSiPMCase->SetVisAttributes( CaseVisAtt );
 
-  G4VisAttributes* DimpleVisAtt = new G4VisAttributes( G4Colour( 0., 1., 1. ) );
-  DimpleVisAtt->SetForceWireframe( true );
-  DimpleVisAtt->SetVisibility( true );
-  logicDimple->SetVisAttributes( DimpleVisAtt );
+  // G4VisAttributes* DimpleVisAtt = new G4VisAttributes( G4Colour( 0., 1., 1. ) );
+  // DimpleVisAtt->SetForceWireframe( true );
+  // DimpleVisAtt->SetVisibility( false );
+  // logicDimple->SetVisAttributes( DimpleVisAtt );
 
   G4VisAttributes* TileVisAtt = new G4VisAttributes( G4Colour( 1., 1., 0. ) );
   TileVisAtt->SetForceWireframe( true );

@@ -16,15 +16,9 @@
 
 #include "G4Event.hh"
 #include "G4GeneralParticleSource.hh"
-#include "G4ParticleDefinition.hh"
-#include "G4ParticleTable.hh"
 #include "G4ParticleTypes.hh"
-#include "G4RandomDirection.hh"
 #include "G4SystemOfUnits.hh"
-#include "G4TransportationManager.hh"
-#include "G4UnitsTable.hh"
 
-#include <CLHEP/Units/PhysicalConstants.h>
 
 // Static helper functions.
 static double CalcNumPhotons( const double thickness );
@@ -40,39 +34,8 @@ LYSimPrimaryGeneratorAction::LYSimPrimaryGeneratorAction( LYSimDetectorConstruct
 {
   std::cout << "[LYSIM] entering LYSIMPrimaryGeneratorAction" << std::endl;
 
-  /**
-   * This particle source will be directly controlled via the /gps commands In
-   * user scripts and the ApplyCommand calls in the main function. We are going
-   * to set up the common stuff here. For setting the via the interactive
-   * session, look at:
-   * http://geant4-userdoc.web.cern.ch/geant4-userdoc/UsersGuides/
-   * ForApplicationDeveloper/html/GettingStarted/generalParticleSource.html
-   */
-  //  particleSource->SetParticleDefinition(
-  //    G4OpticalPhoton::OpticalPhotonDefinition() );
+  // For our use case, we will need to randomize on a event by event basis
   particleSource->SetMultipleVertex( true );
-
-  /*
-  // Setting default spacial distribution
-  G4SPSPosDistribution* pos = particleSource->GetCurrentSource()->GetPosDist();
-  pos->SetPosDisType( "Volume" );
-  pos->SetPosDisShape( "Cylinder" );
-  pos->SetRadius( 0.0001*CLHEP::mm );
-  // Be default, move source to center of tile with no spread adjustments.
-  pos->SetHalfZ( 1*CLHEP::mm );
-  pos->SetCentreCoords( G4ThreeVector( _beamx, _beamy, 0 ) );
-
-  // Setting default angular distrution of particle  (isotropic)
-  G4SPSAngDistribution* ang = particleSource->GetCurrentSource()->GetAngDist();
-  ang->SetAngDistType( "iso" );
-
-  // Energy distribution.
-  std::cout << project_base << std::endl;//
-  G4SPSEneDistribution* ene = particleSource->GetCurrentSource()->GetEneDist();
-  ene->SetEnergyDisType( "Arb" );
-  ene->ArbEnergyHistoFile( project_base + "/data/PhotonSpectrum.dat" );
-  ene->ArbInterpolate( "Lin" );
-  */
 }
 
 LYSimPrimaryGeneratorAction::~LYSimPrimaryGeneratorAction()
@@ -95,6 +58,14 @@ LYSimPrimaryGeneratorAction::GeneratePrimaries( G4Event* anEvent )
 void
 LYSimPrimaryGeneratorAction::RandomizePosition()
 {
+  /**
+   * This particle source will be directly controlled via the /gps commands In
+   * user scripts and the ApplyCommand calls in the main function. We are going
+   * to set up the common stuff here. For setting the via the interactive
+   * session, look at:
+   * http://geant4-userdoc.web.cern.ch/geant4-userdoc/UsersGuides/
+   * ForApplicationDeveloper/html/GettingStarted/generalParticleSource.html
+   */
   particleSource->ClearAll();
   // Randomizing position of the the source for each event.
   const double x = ( 2*G4UniformRand()-1 )*_width + _beamx;
@@ -131,7 +102,8 @@ LYSimPrimaryGeneratorAction::RandomizePosition()
     // Randomizing the polarization.
     const double angle = G4UniformRand() * 360.0*deg;
     const G4ThreeVector normal( 1., 0., 0. );
-    const G4ThreeVector kphoton   = particleSource->GetParticleMomentumDirection();
+    const G4ThreeVector kphoton
+      = particleSource->GetParticleMomentumDirection();
     const G4ThreeVector product   = normal.cross( kphoton );
     const double modul2           = product*product;
     const G4ThreeVector e_perpend = ( 1./std::sqrt( modul2 ) )*product;

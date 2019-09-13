@@ -12,7 +12,6 @@
 #include "G4GeneralParticleSource.hh"
 #include "G4ParticleTypes.hh"
 #include "G4SystemOfUnits.hh"
-#include "G4UnitsTable.hh"
 
 LYSimDebugGeneratorAction::LYSimDebugGeneratorAction() :
   particleSource( new G4GeneralParticleSource() ),
@@ -44,7 +43,6 @@ LYSimDebugGeneratorAction::LYSimDebugGeneratorAction() :
   ang->SetMaxPhi( 0 );
 
   // Energy distribution.
-  std::cout << project_base << std::endl;//
   G4SPSEneDistribution* ene = particleSource->GetCurrentSource()->GetEneDist();
   ene->SetEnergyDisType( "Arb" );
   ene->ArbEnergyHistoFile( project_base + "/data/PhotonSpectrum.dat" );
@@ -76,10 +74,10 @@ void
 LYSimDebugGeneratorAction::SetParticleDirection( const G4ThreeVector& v )
 {
   G4SPSAngDistribution* ang = particleSource->GetCurrentSource()->GetAngDist();
-  ang->SetMinTheta( v.theta() );
-  ang->SetMaxTheta( v.theta() );
-  ang->SetMinPhi( v.phi() );
-  ang->SetMaxPhi( v.phi() );
+  ang->SetMinTheta( (-v).theta() );
+  ang->SetMaxTheta( (-v).theta() );
+  ang->SetMinPhi( (-v).phi() );
+  ang->SetMaxPhi( (-v).phi() );
 
   // Randomizing the polarization.
   const double angle = G4UniformRand() * 360.0*deg;

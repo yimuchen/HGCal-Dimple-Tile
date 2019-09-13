@@ -141,11 +141,9 @@ MakeS_IdealTyvek()
 G4OpticalSurface*
 MakeS_Polished()
 {
-  const unsigned nentries        = 2;
-  double phoE[nentries]          = {1.0*eV, 6.0*eV};
-  double specularlobe[nentries]  = {1.0, 1.0};
-  double specularspike[nentries] = {0., 0.};
-  double backscatter[nentries]   = {0., 0.};
+  static const unsigned nentries        = 2;
+  static double phoE[nentries]          = {1.0*eV, 6.0*eV};
+  static double specularlobe[nentries]  = {1.0, 1.0};
 
   //////////////////////////////////
   // Realistic polished surface
