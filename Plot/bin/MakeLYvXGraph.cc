@@ -3,6 +3,7 @@
 #include "UserUtils/Common/interface/ArgumentExtender.hpp"
 #include "UserUtils/Common/interface/Maths.hpp"
 #include "UserUtils/Common/interface/STLUtils/StringUtils.hpp"
+#include "UserUtils/Common/interface/STLUtils/Filesystem.hpp"
 
 #include "TChain.h"
 #include "TFile.h"
@@ -21,7 +22,7 @@ main( int argc, char** argv )
     ( "dimpleind,d", usr::po::multivalue<double>(),
     "List of different dimple indents, different indent values will be saved "
     "to different plot" )
-    ( "inputfiles,f", usr::po::multivalue<double>(),
+    ( "inputfiles,f", usr::po::multivalue<std::string>(),
     "List of input root files" )
     ( "output,o", usr::po::defvalue<std::string>(
     (usr::resultpath( "HGCalTileSim", "Plot" )/"LYvX.root").string() ),
@@ -35,11 +36,11 @@ main( int argc, char** argv )
   const std::string output = args.Arg<std::string>( "output" );
   const double y           = args.Arg<double>( "beamy" );
   const std::vector<double> rlist
-    = args.Arg<std::vector<double> >( "dimplerad" );
+    = args.ArgList<double>( "dimplerad" );
   const std::vector<double> dlist
-    = args.Arg<std::vector<double> >( "dimpleind" );
+    = args.ArgList<double>( "dimpleind" );
   const std::vector<std::string> filelist
-    = args.Arg<std::vector<std::string> >( "inputfiles" );
+    = args.ArgList<std::string >( "inputfiles" );
 
   // Loading input files
   TChain tree( "LYSim", "LYSim" );
@@ -60,6 +61,7 @@ main( int argc, char** argv )
   // Creating the List of results in memory
   for( int i = 0; i < tree.GetEntries(); ++i ){
     tree.GetEntry( i );
+    std::cout << "\rEntry: " << i << std::flush;
 
     if( format.beam_center_y != y ){continue;}
 
@@ -69,6 +71,7 @@ main( int argc, char** argv )
       for( const auto d : dlist ){
         if( format.dimple_indent != d ){ continue; }
         results[r][d][format.beam_center_x].push_back( format.nphotons );
+        results[r][d][-format.beam_center_x].push_back( format.nphotons );
         if( i != 0 && format.beam_width != width ){
           std::cout << "Warning! Different beam width detected! "
                        "Make sure this is what you want!" << std::endl;
@@ -92,7 +95,7 @@ main( int argc, char** argv )
       for( const auto p : results[r][d] ){
         x_list.push_back( p.first );
         v_list.push_back( usr::Mean( p.second ) );
-        unc_list.push_back( usr::StdDev( p.second ) );
+        unc_list.push_back( usr::StdDev( p.second )/sqrt(p.second.size()) );
         w_list.push_back( width );
       }
 
@@ -105,7 +108,6 @@ main( int argc, char** argv )
   }
 
   file->Close();
-
 
   return 0;
 }
