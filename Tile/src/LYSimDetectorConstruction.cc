@@ -68,13 +68,7 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   wrapgap = 0.05*mm;
 
 
-  tileAbsLength = 380*cm;
-  inducedMuTile = 1.e-20/cm;
-
-  Absmultiple = 1.0;// factor for Abslength manipulation.
   SiPM_Depth  = 0.0*mm;   // SiPM Depth (0.0 is flush with top of tile, don't use anything less than 0.05*mm unless 0.0)
-  // Dimple radius (normal is 3.4409*mm)
-  // Dimple depth (normal is 1.6*mm)
 
   // Default Dimple settings
   _dimple_type   = SPHERICAL;// 0: Normal, 1: Pyramid, 2: Parabolic
@@ -86,9 +80,7 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   fEpoxy    = Make_Epoxy();
   fEpoxy2   = Make_Epoxy2();
   fAir      = Make_Custom_Air();
-  fSCSN81   = Make_SCSN81( GetTileAbsLength(), GetInducedMuTile() );
-  fEJ200    = Make_EJ200( Absmultiple );
-  fEJ260    = Make_EJ260( GetTileAbsLength(), GetInducedMuTile() );
+  fEJ200    = Make_EJ200();
 
   // Defining surface list.
   fESROpSurface           = MakeS_ESR();
@@ -111,8 +103,6 @@ LYSimDetectorConstruction::UpdateGeometry()
   G4LogicalBorderSurface::CleanSurfaceTable();
 
   G4RunManager::GetRunManager()->DefineWorldVolume( Construct() );
-  G4cout << "[LYSim] Setting induced absorption coefficient = "
-         << inducedMuTile << " [cm^-1]" << G4endl;
   G4RunManager::GetRunManager()->GeometryHasBeenModified();
 }
 
@@ -448,4 +438,11 @@ LYSimDetectorConstruction::LocalTileZ( const double x, const double y ) const
   } else {
     return thickness;
   }
+}
+
+
+void
+LYSimDetectorConstruction::UpdateAbs( const double mult )
+{
+  Update_EJ200_AbsLength( fEJ200, mult );
 }

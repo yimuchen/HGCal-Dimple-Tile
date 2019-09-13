@@ -2,10 +2,12 @@
 #include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPMTSD.hh"
 #include "HGCalTileSim/Tile/interface/LYSimSteppingAction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimSteppingMessenger.hh"
 #else
 #include "LYSimDetectorConstruction.hh"
 #include "LYSimPMTSD.hh"
 #include "LYSimSteppingAction.hh"
+#include "LYSimSteppingMessenger.hh"
 #endif
 
 #include "G4EventManager.hh"
@@ -16,38 +18,18 @@
 #include "G4UnitsTable.hh"
 
 using namespace CLHEP;
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-LYSimSteppingAction* LYSimSteppingAction::fgInstance = 0;
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-LYSimSteppingAction*
-LYSimSteppingAction::Instance()
-{
-  // Static acces function via G4RunManager
-
-  return fgInstance;
-}
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 LYSimSteppingAction::LYSimSteppingAction()
   : G4UserSteppingAction(),
-  fVolume( 0 ),
-  PhotonHitCount( 0 )
+  maxtracklength( 5000.*mm ),
+  messenger( new LYSimSteppingMessenger( this ) )
 {
-  fgInstance = this;
 }
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 LYSimSteppingAction::~LYSimSteppingAction()
 {
-  fgInstance = 0;
+  delete messenger;
 }
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void
 LYSimSteppingAction::UserSteppingAction( const G4Step* step )
@@ -70,38 +52,32 @@ LYSimSteppingAction::UserSteppingAction( const G4Step* step )
     }
   }
 
-  if( boundary ){
-    boundaryStatus = boundary->GetStatus();
+  boundaryStatus = boundary->GetStatus();
 
-    switch( boundaryStatus ){
-    case Detection:
-      // Note, this assumes that the volume causing detection is the photocathode
-      // because it is the only one with non-zero efficiency. Trigger sensitive
-      // detector manually since photon is absorbed but status was Detection
-    {
-      G4EventManager::GetEventManager()->KeepTheCurrentEvent();
-      G4SDManager* SDman = G4SDManager::GetSDMpointer();
-      G4String sdName    = "/LYSimPMT";
-      LYSimPMTSD* pmtSD  = (LYSimPMTSD*)SDman->FindSensitiveDetector( sdName );
-      if( pmtSD ){pmtSD->ProcessHits_constStep( step, NULL );}
-      break;
+  switch( boundaryStatus ){
+  case Detection:
+    // Note, this assumes that the volume causing detection is the photocathode
+    // because it is the only one with non-zero efficiency. Trigger sensitive
+    // detector manually since photon is absorbed but status was Detection
+  {
+    G4EventManager::GetEventManager()->KeepTheCurrentEvent();
+    G4SDManager* SDman = G4SDManager::GetSDMpointer();
+    LYSimPMTSD* pmtSD
+      = (LYSimPMTSD*)SDman->FindSensitiveDetector( "/LYSimPMT" );
+    if( pmtSD ){
+      pmtSD->ProcessHits_constStep( step, NULL );
     }
-    default:
-      break;
-    }
+    break;
   }
+  default:
+    break;
+  }
+
   // kill tracks with length > 5000mm
   G4double tracklength = step->GetTrack()->GetTrackLength();
-  if( tracklength > 5000.*mm ){
-    G4cout << "Track length exceeded limit of 5000 mm" << G4endl;
+  if( tracklength > maxtracklength ){
+    G4cout << "Track length exceeded limit of " << maxtracklength/mm
+           << "mm" << G4endl;
     step->GetTrack()->SetTrackStatus( fStopAndKill );
   }
-}
-
-// ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void
-LYSimSteppingAction::Reset()
-{
-  PhotonHitCount = 0;
 }

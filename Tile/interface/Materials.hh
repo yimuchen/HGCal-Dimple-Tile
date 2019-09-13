@@ -11,9 +11,8 @@ extern G4Material* Make_LYSO();
 extern G4Material* Make_FiberCore();
 extern G4Material* Make_FiberInner();
 extern G4Material* Make_FiberOuter();
-extern G4Material* Make_SCSN81( const double, const double );
-extern G4Material* Make_EJ200( const double );
-extern G4Material* Make_EJ260( const double, const double );
+extern G4Material* Make_EJ200();
+extern void        Update_EJ200_AbsLength( G4Material*, const double x );
 
 extern G4Material* Make_Custom_Air();
 extern G4Material* Make_Custom_SiO2();

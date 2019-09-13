@@ -44,7 +44,7 @@ Requirements = TARGET.FileSystemDomain == "privnet"
 Output = {1}/sce_{2}_{3}_{4}_{5}_$(cluster)_$(process).stdout
 Error  = {1}/sce_{2}_{3}_{4}_{5}_$(cluster)_$(process).stderr
 Log    = {1}/sce_{2}_{3}_{4}_{5}_$(cluster)_$(process).condor
-Arguments = -x {2} -y {3} -w 1.5 -N 10000 -r {4} -d {5} -o {6}
+Arguments = -x {2} -y {3} -w 1.5 -N 1000 -r {4} -d {5} -o {6}
 Queue
 """
 
@@ -53,8 +53,8 @@ for x, y, r, d in [(x, y, r, d) for x in args.beamx for y in args.beamy
                    for r in args.dimplerad for d in args.dimpleind]:
 
   save_filename = os.path.abspath(
-      DATA_DIR + '/root/' + timestr +
-      '/' + 'hgcal_tilesim_x{0:.1f}_y{1:.1f}_r{2:.1f}_d{3:.1f}'.format(
+      DATA_DIR + '/root/' +
+      timestr + '/hgcal_tilesim_x{0:.1f}_y{1:.1f}_r{2:.1f}_d{3:.1f}'.format(
           x, y, r, d).replace('.', 'p') + '.root')
 
   jdl_content = CONDOR_JDL_TEMPLATE.format(
@@ -64,12 +64,12 @@ for x, y, r, d in [(x, y, r, d) for x in args.beamx for y in args.beamy
       y,
       r,
       d,
-      save_filename,
+      os.path.abspath(save_filename),
   )
 
   jdl_filename = os.path.abspath(
-      DATA_DIR +
-      '/condor/' + 'hgcal_tilesim_x{0:.1f}_y{1:.1f}_r{2:.1f}_d{3:.1f}'.format(
+      DATA_DIR + '/condor/' +
+      timestr + '/hgcal_tilesim_x{0:.1f}_y{1:.1f}_r{2:.1f}_d{3:.1f}'.format(
           x, y, r, d).replace('.', 'p') + '.jdl')
 
   ## Writing jdl files
@@ -77,7 +77,7 @@ for x, y, r, d in [(x, y, r, d) for x in args.beamx for y in args.beamy
   with open(jdl_filename, 'w') as file:
     file.write(jdl_content)
 
-  os.makedirs(DATA_DIR + '/log/', exist_ok=True );
+  os.makedirs(DATA_DIR + '/log/', exist_ok=True)
 
   ## Making directory for output files
   os.makedirs(os.path.dirname(save_filename), exist_ok=True)

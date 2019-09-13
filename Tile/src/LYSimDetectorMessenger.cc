@@ -48,25 +48,13 @@ LYSimDetectorMessenger::LYSimDetectorMessenger( LYSimDetectorConstruction* Det )
   SetTileZCmd->SetRange( "TileZ>=0." );
   SetTileZCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
-  SetTileAbsLengthCmd = new G4UIcmdWithADoubleAndUnit(
-    "/LYSim/SetTileAbsLength", this );
-  SetTileAbsLengthCmd->SetGuidance(
-    "Set the light attenuation length in the tile" );
-  SetTileAbsLengthCmd->SetParameterName( "TileAbsLength", false );
-  SetTileAbsLengthCmd->SetUnitCategory( "Length" );
-  SetTileAbsLengthCmd->SetDefaultUnit( "cm" );
-  SetTileAbsLengthCmd->SetRange( "TileAbsLength>=0." );
-  SetTileAbsLengthCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
-
-  SetInducedAbsLengthCmd = new G4UIcmdWithADoubleAndUnit(
-    "/LYSim/SetInducedAbsLength", this );
-  SetInducedAbsLengthCmd->SetGuidance(
-    "Set the induced absorption length (cm)" );
-  SetInducedAbsLengthCmd->SetParameterName( "InducedMuTile", false );
-  SetInducedAbsLengthCmd->SetUnitCategory( "Length" );
-  SetInducedAbsLengthCmd->SetDefaultUnit( "cm" );
-  SetInducedAbsLengthCmd->SetRange( "InducedMuTile>=0." );
-  SetInducedAbsLengthCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+  SetTileAbsMultCmd = new G4UIcmdWithADouble(
+    "/LYSim/SetTileAbsMult", this );
+  SetTileAbsMultCmd->SetGuidance(
+    "Set the light attenuation length multiplier" );
+  SetTileAbsMultCmd->SetParameterName( "TileAbsMult", false );
+  SetTileAbsMultCmd->SetRange( "TileAbsMult>=0." );
+  SetTileAbsMultCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
   // Dimple Geometry commands
   SetDimpleIndentCmd = new G4UIcmdWithADoubleAndUnit(
@@ -102,8 +90,11 @@ LYSimDetectorMessenger::~LYSimDetectorMessenger()
   delete SetTileZCmd;
   delete SetTileXCmd;
   delete SetTileYCmd;
-  delete SetTileAbsLengthCmd;
-  delete SetInducedAbsLengthCmd;
+  delete SetTileAbsMultCmd;
+
+  delete SetDimpleIndentCmd;
+  delete SetDimpleRadiusCmd;
+  delete SetDimpleTypeCmd;
 }
 
 void
@@ -120,12 +111,8 @@ LYSimDetectorMessenger::SetNewValue( G4UIcommand* command, G4String val )
   } else if( command == SetTileYCmd ){
     Detector->SetTileY(
       G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
-  } else if( command == SetTileAbsLengthCmd ){
-    Detector->SetTileAbsLength(
-      G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
-  } else if( command == SetInducedAbsLengthCmd ){
-    G4double value = G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val );
-    Detector->SetInducedMuTile( 1/value );
+  } else if( command == SetTileAbsMultCmd ){
+    Detector->UpdateAbs( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
   } else if( command == SetDimpleIndentCmd ){
     Detector->SetDimpleIndent(
       G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );

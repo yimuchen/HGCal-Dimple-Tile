@@ -29,8 +29,18 @@
 #include "TH1D.h"
 #include "TTree.h"
 
+#include <signal.h>
+
 using namespace std;
 using namespace CLHEP;
+
+static void
+CloseAll( int signal )
+{
+  LYSimAnalysis::GetInstance()->EndOfExperiment();
+  std::exit( signal );
+}
+
 
 LYSimAnalysis* LYSimAnalysis::singleton = 0;
 
@@ -49,6 +59,14 @@ LYSimAnalysis::PrepareExperiment()
   format = new LYSimFormat();
   format->AddToTree( tree );
   photon_energy_hist = new TH1D( "PhotonWLE", "", 100, 300., 600. );
+
+  // Preparing the signal termination function
+  signal( SIGABRT, CloseAll );
+  //signal( SIGFPE,  CloseAll );
+  //signal( SIGILL,  CloseAll );
+  signal( SIGINT,  CloseAll );
+  //signal( SIGSEGV, CloseAll );
+  signal( SIGTERM, CloseAll );
 }
 
 void
@@ -57,16 +75,13 @@ LYSimAnalysis::PrepareNewRun( const G4Run* )
   // Reset variables relative to the run
   PhotonCount = 0;
   HitCount    = 0;
+  // generatorAction->RandomizePosition();
+  // generatorAction->RandomizePolarization();
 }
 
 void
 LYSimAnalysis::PrepareNewEvent( const G4Event* event )
 {
-  std::cout << "Starting Event " << event->GetEventID()
-            << "("<< event->GetNumberOfPrimaryVertex()  << ")" << std::endl;
-  std::cout << event->GetPrimaryVertex()->GetX0() << " "
-            << event->GetPrimaryVertex()->GetY0() << std::endl;
-
   // Saving Event information.
   format->beam_center_x = generatorAction->GetBeamX();
   format->beam_center_y = generatorAction->GetBeamY();

@@ -528,32 +528,8 @@ Make_FiberOuter()
   return material;
 }
 
-
 G4Material*
-Make_SCSN81( const double abslength, const double induced_Mu )
-{
-  G4Material* material
-    = G4NistManager::Instance()->FindOrBuildMaterial( "G4_POLYSTYRENE" );
-  const unsigned nentries     = 2;
-  double photonE[nentries]    = {1.0*eV, 6.0*eV};
-  double refrac_idx[nentries] = {1.59, 1.59};
-
-  double mu              = 1/abslength + induced_Mu;
-  double total_absLength = 1 / mu;
-
-  double abs_length[nentries] = {total_absLength, total_absLength};
-  // Add entries into properties table
-  G4MaterialPropertiesTable* MPT = new G4MaterialPropertiesTable();
-  MPT->AddProperty( "RINDEX",    photonE, refrac_idx, nentries );
-  MPT->AddProperty( "ABSLENGTH", photonE, abs_length, nentries );
-  material->SetMaterialPropertiesTable( MPT );
-
-  return material;
-}
-
-
-G4Material*
-Make_EJ200( const double mult )
+Make_EJ200()
 {
   G4Material* material = new G4Material( "EJ200", 1.023*g/cm3, 2, kStateSolid );
   material->AddElement( C, 91.53*perCent );
@@ -588,6 +564,55 @@ Make_EJ200( const double mult )
     1.58, 1.58
   };
 
+  // Add entries into properties table
+  G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable();
+  table->AddProperty( "RINDEX",    photonE, refrac_idx, nentries );
+  // table->AddProperty( "ABSLENGTH", photonE, abs_length, nentries );
+  table->AddConstProperty( "SCINTILLATIONYIELD",        10./keV );
+
+  table->AddConstProperty( "RESOLUTIONSCALE",           1.0 );
+  table->AddConstProperty( "FASTSCINTILLATIONRISETIME", 0.9*ns );
+
+  // Disabled for CMSSW
+  // table->AddConstProperty( "ELECTRONSCINTILLATIONYIELD", 10./keV );
+  // table->AddConstProperty( "ALPHASCINTILLATIONYIELD",   100./MeV );
+  // table->AddConstProperty( "FASTTIMECONSTANT",           2.1*ns );
+  // table->AddProperty("FASTCOMPONENT",photonE,Scints,nentries);
+  // table->AddConstProperty("YIELDRATIO",1.0);
+
+  material->SetMaterialPropertiesTable( table );
+
+  // FIXME: Set the Birks Constant for the EJ200 scintillator
+  material->GetIonisation()->SetBirksConstant( 0.126*mm/MeV );
+
+  Update_EJ200_AbsLength( material, 1 );
+
+  return material;
+}
+
+void
+Update_EJ200_AbsLength( G4Material* material , const double mult )
+{
+  static const unsigned nentries = 57;
+  // ~350 to 550nm
+  static double photonE[nentries] = {
+    3.542405514*eV, 3.492512479*eV, 3.444005361*eV, 3.396827205*eV,
+    3.350924135*eV, 3.306245147*eV, 3.262741921*eV, 3.220368649*eV,
+    3.179081872*eV, 3.170951228*eV, 3.162862066*eV, 3.154814071*eV,
+    3.146806929*eV, 3.138840329*eV, 3.130913965*eV, 3.123027531*eV,
+    3.115180729*eV, 3.107373258*eV, 3.099604825*eV, 3.091875137*eV,
+    3.084183905*eV, 3.076530844*eV, 3.068915668*eV, 3.061338099*eV,
+    3.053797857*eV, 3.046294668*eV, 3.038828260*eV, 3.031398362*eV,
+    3.024004707*eV, 2.987570916*eV, 2.952004595*eV, 2.917275129*eV,
+    2.883353326*eV, 2.850211333*eV, 2.817822568*eV, 2.786161640*eV,
+    2.755204289*eV, 2.724927319*eV, 2.695308543*eV, 2.666326731*eV,
+    2.637961553*eV, 2.610193537*eV, 2.583004021*eV, 2.556375113*eV,
+    2.530289653*eV, 2.504731172*eV, 2.479683860*eV, 2.455132535*eV,
+    2.431062608*eV, 2.407460058*eV, 2.384311404*eV, 2.361603676*eV,
+    2.339324396*eV, 2.317461551*eV, 2.296003574*eV, 2.274939321*eV,
+    2.254258055*eV
+  };
+
   static double Normabs_length[nentries] = {
     0.5743617028*mm, 0.5767800495*mm,  0.5773794872*mm,   0.5780135803*mm,
     0.5789505759*mm, 0.582016903*mm,   0.5830349115*mm,   0.5975989105*mm,
@@ -608,65 +633,13 @@ Make_EJ200( const double mult )
 
   double abs_length[nentries];
 
-  for( unsigned i = 0; i < nentries; i++ ){
+  for( unsigned i = 0 ; i < nentries ; ++i ){
     abs_length[i] = Normabs_length[i] * mult;
   }
 
   // Add entries into properties table
-  G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable();
-  table->AddProperty( "RINDEX",    photonE, refrac_idx, nentries );
+  G4MaterialPropertiesTable* table = material->GetMaterialPropertiesTable();
+  table->RemoveProperty( "ABSLENGTH" );
   table->AddProperty( "ABSLENGTH", photonE, abs_length, nentries );
-  table->AddConstProperty( "SCINTILLATIONYIELD",        10./keV );
-
-  table->AddConstProperty( "RESOLUTIONSCALE",           1.0 );
-  table->AddConstProperty( "FASTSCINTILLATIONRISETIME", 0.9*ns );
-
-  // Disabled for CMSSW
-  // table->AddConstProperty( "ELECTRONSCINTILLATIONYIELD", 10./keV );
-  // table->AddConstProperty( "ALPHASCINTILLATIONYIELD",   100./MeV );
-  // table->AddConstProperty( "FASTTIMECONSTANT",           2.1*ns );
-  // table->AddProperty("FASTCOMPONENT",photonE,Scints,nentries);
-  // table->AddConstProperty("YIELDRATIO",1.0);
-
-  material->SetMaterialPropertiesTable( table );
-
-  // FIXME: Set the Birks Constant for the EJ200 scintillator
-  material->GetIonisation()->SetBirksConstant( 0.126*mm/MeV );
-
-  return material;
 }
 
-G4Material*
-Make_EJ260( const double abs, const double induced_mu )
-{
-  G4Material* material = new G4Material( "EJ260", 1.023*g/cm3, 2, kStateSolid );
-  material->AddElement( C, 91.49*perCent );
-  material->AddElement( H,  8.51*perCent );
-
-  static const unsigned nentries     = 2;
-  static double photonE[nentries]    = {1.0*eV, 6.0*eV};
-  static double refrac_idx[nentries] = {1.58, 1.58};
-
-  double total_mu  = 1/abs + induced_mu;
-  double absLength = 1 / total_mu;
-
-  double abs_length[nentries]      = {absLength, absLength};
-  G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable();
-  table->AddProperty( "RINDEX",    photonE, refrac_idx, nentries );
-  table->AddProperty( "ABSLENGTH", photonE, abs_length, nentries );
-  table->AddConstProperty( "SCINTILLATIONYIELD",        9.2/keV );  // ELJEN
-  table->AddConstProperty( "RESOLUTIONSCALE",           1.0 );
-  table->AddConstProperty( "FASTSCINTILLATIONRISETIME", 1.3*ns );// Rise time
-
-  // Disabled for CMSSW
-  // table->AddConstProperty( "FASTIMECONSTANT",           9.2*ns );
-  // table->AddConstProperty("ELECTRONSCINTILLATIONYIELD",9.2/keV);
-  // table->AddConstProperty("ALPHASCINTILLATIONYIELD",10.12/keV);
-
-  material->SetMaterialPropertiesTable( table );
-
-  // FIXME: Set the Birks Constant for the EJ260 scintillator
-  material->GetIonisation()->SetBirksConstant( 0.126*mm/MeV );
-
-  return material;
-}

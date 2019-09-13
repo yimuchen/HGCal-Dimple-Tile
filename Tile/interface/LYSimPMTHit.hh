@@ -5,13 +5,6 @@
 #include "G4THitsCollection.hh"
 #include "G4VHit.hh"
 
-#include "G4RotationMatrix.hh"
-#include "G4ThreeVector.hh"
-#include "G4Transform3D.hh"
-
-#include "G4LogicalVolume.hh"
-#include "G4VPhysicalVolume.hh"
-
 class G4VTouchable;
 
 // --------------------------------------------------

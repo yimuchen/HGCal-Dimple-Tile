@@ -61,7 +61,6 @@ main( int argc, char** argv )
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
 
   // Starting applying standard commands.
-  UImanager->ApplyCommand( "/control/execute mac/init_vis.mac" );
   UImanager->ApplyCommand( "/control/verbose 0" );
   UImanager->ApplyCommand( "/run/verbose 0" );
   UImanager->ApplyCommand( "/process/setVerbose 0" );
@@ -74,7 +73,7 @@ main( int argc, char** argv )
   UImanager->ApplyCommand( "/vis/viewer/set/lightsVector -1 0 0" );
   UImanager->ApplyCommand( "/vis/viewer/set/style wireframe" );
   UImanager->ApplyCommand( "/vis/viewer/set/auxiliaryEdge true" );
-  UImanager->ApplyCommand( "/vis/viewer/set/lineSegmentsPerCircle 100" );
+  UImanager->ApplyCommand( "/vis/viewer/set/lineSegmentsPerCircle 20" );
   UImanager->ApplyCommand( "/vis/scene/add/trajectories smooth" );
   UImanager->ApplyCommand( "/vis/modeling/trajectories/create/drawByCharge" );
   UImanager->ApplyCommand(
@@ -88,8 +87,6 @@ main( int argc, char** argv )
   UImanager->ApplyCommand(
     "#/vis/filtering/trajectories/particleFilter-0/invert true" );
   UImanager->ApplyCommand( "/vis/scene/endOfEventAction accumulate" );
-  UImanager->ApplyCommand( "/vis/scene/add/scale" );
-  UImanager->ApplyCommand( "/vis/scene/add/axes" );
   UImanager->ApplyCommand( "/vis/scene/add/eventID" );
   UImanager->ApplyCommand( "/vis/scene/add/date" );
   UImanager->ApplyCommand( "/vis/set/colour red" );

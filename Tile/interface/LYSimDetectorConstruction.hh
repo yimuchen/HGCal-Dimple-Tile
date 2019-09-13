@@ -43,16 +43,6 @@ public:
   inline G4double
   GetTileY() const {return _tiley;}
 
-  inline void
-  SetTileAbsLength ( const G4double x ){tileAbsLength = x;}
-  inline G4double
-  GetTileAbsLength() const {return tileAbsLength;}
-
-  inline void
-  SetInducedMuTile( const G4double x ){inducedMuTile = x;}
-  inline G4double
-  GetInducedMuTile() const {return inducedMuTile;}
-
   // G
   inline double
   GetDimpleRadius() const { return _dimple_radius; }
@@ -83,6 +73,9 @@ public:
   double GetDimpleSizeRadius() const;
   double LocalTileZ( const double x, const double y ) const;
 
+  // Material updating functions
+  void UpdateAbs( const double x );
+
 private:
   // Subfunctions for cleaner code
   G4VSolid* ConstructTrapazoidSolid(
@@ -109,9 +102,7 @@ private:
 
   // Pointers to materials
   G4Material* fAir;
-  G4Material* fSCSN81;
   G4Material* fEJ200;
-  G4Material* fEJ260;
   G4Material* fBialkali;
   G4Material* fEpoxy;
   G4Material* fEpoxy2;
@@ -154,10 +145,6 @@ private:
   G4double _sipm_y;
   G4double _sipm_z;
   G4double SiPM_Depth;// SiPM depth
-
-  G4double tileAbsLength;
-  G4double inducedMuTile;// Radiation-induced absorption coefficient (cm^-1)
-  G4double Absmultiple;// factor for Abslength manipulation.
 };
 
 #endif
