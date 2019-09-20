@@ -68,14 +68,17 @@ main( int argc, char** argv )
   // Get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
 
+  // Starting interactive session instance
+  G4UIExecutive* ui = new G4UIExecutive( argc, argv );
+
   // Starting applying standard commands.
   UImanager->ApplyCommand( "/control/verbose 0" );
   UImanager->ApplyCommand( "/run/verbose 0" );
   UImanager->ApplyCommand( "/process/setVerbose 0" );
 
 #ifndef CMSSW_GIT_HASH
-  UImanager->ApplyCommand( "/vis/open OGL 800x800-0+0" );
-
+  std::cout << "Starting default settings!" << std::endl;
+  UImanager->ApplyCommand( "/vis/open OGL" );
   UImanager->ApplyCommand( "/vis/drawVolume" );
   UImanager->ApplyCommand( "/vis/viewer/set/viewpointVector -1 0 0" );
   UImanager->ApplyCommand( "/vis/viewer/set/lightsVector -1 0 0" );
@@ -111,10 +114,9 @@ main( int argc, char** argv )
   UImanager->ApplyCommand( "/vis/verbose warnings" );
 #endif
 
-
-  // Starting interactive session .
-  G4UIExecutive* ui = new G4UIExecutive( argc, argv );
   ui->SessionStart();
+
+
 
   LYSimAnalysis::GetInstance()->EndOfExperiment();
   // Job termination Free the store: user actions, physics_list and
