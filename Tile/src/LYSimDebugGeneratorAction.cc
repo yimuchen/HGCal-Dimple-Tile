@@ -8,10 +8,10 @@
 #include "ProjectPath.hh"
 #endif
 
-#include "Randomize.hh"
 #include "G4GeneralParticleSource.hh"
 #include "G4ParticleTypes.hh"
 #include "G4SystemOfUnits.hh"
+#include "Randomize.hh"
 
 LYSimDebugGeneratorAction::LYSimDebugGeneratorAction() :
   particleSource( new G4GeneralParticleSource() ),
@@ -37,8 +37,8 @@ LYSimDebugGeneratorAction::LYSimDebugGeneratorAction() :
 
   G4SPSAngDistribution* ang = particleSource->GetCurrentSource()->GetAngDist();
   ang->SetAngDistType( "iso" );
-  ang->SetMinTheta( 1 );
-  ang->SetMaxTheta( 1 );
+  ang->SetMinTheta( 0 );
+  ang->SetMaxTheta( 0 );
   ang->SetMinPhi( 0 );
   ang->SetMaxPhi( 0 );
 
@@ -74,14 +74,15 @@ void
 LYSimDebugGeneratorAction::SetParticleDirection( const G4ThreeVector& v )
 {
   G4SPSAngDistribution* ang = particleSource->GetCurrentSource()->GetAngDist();
-  ang->SetMinTheta( (-v).theta() );
-  ang->SetMaxTheta( (-v).theta() );
-  ang->SetMinPhi( (-v).phi() );
-  ang->SetMaxPhi( (-v).phi() );
+  ang->SetMinTheta( ( -v ).theta() );
+  ang->SetMaxTheta( ( -v ).theta() );
+  ang->SetMinPhi( ( -v ).phi() );
+  ang->SetMaxPhi( ( -v ).phi() );
 
   // Randomizing the polarization.
   const double angle = G4UniformRand() * 360.0*deg;
-  const G4ThreeVector normal( 1., 0., 0. );
+  const G4ThreeVector normal(
+    G4UniformRand(), G4UniformRand(), G4UniformRand() );
   const G4ThreeVector kphoton   = v.unit();
   const G4ThreeVector product   = normal.cross( kphoton );
   const double modul2           = product*product;

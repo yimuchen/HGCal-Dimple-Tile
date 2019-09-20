@@ -40,6 +40,14 @@ LYSimPrimaryGeneratorMessenger::LYSimPrimaryGeneratorMessenger( LYSimPrimaryGene
   SetWidthCmd->SetRange( "BeamWidth>=0" );
   SetWidthCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
+  SetOpenAngleCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetOpenAngle", this );
+  SetOpenAngleCmd->SetGuidance( "Set Width of Beam" );
+  SetOpenAngleCmd->SetParameterName( "OpenAngle", false );
+  SetOpenAngleCmd->SetUnitCategory( "Angle" );
+  SetOpenAngleCmd->SetDefaultUnit( "deg" );
+  SetOpenAngleCmd->SetRange( "OpenAngle>=0" );
+  SetOpenAngleCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+
   SetPhotonMultCmd = new G4UIcmdWithADouble( "/LYSim/SetPhotonMult", this );
   SetPhotonMultCmd->SetGuidance(
     "Set Photon count multipliter (for visualization)" );
@@ -53,6 +61,7 @@ LYSimPrimaryGeneratorMessenger::~LYSimPrimaryGeneratorMessenger()
   delete SetBeamXCmd;
   delete SetBeamYCmd;
   delete SetWidthCmd;
+  delete SetOpenAngleCmd;
   delete SetPhotonMultCmd;
 }
 
@@ -67,5 +76,8 @@ LYSimPrimaryGeneratorMessenger::SetNewValue( G4UIcommand* command, G4String val 
     genaction->SetWidth( G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
   } else if( command == SetPhotonMultCmd ){
     genaction->SetPhotonMult( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
+  } else if( command == SetOpenAngleCmd ){
+    genaction->SetOpenAngle(
+      G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
   }
 }

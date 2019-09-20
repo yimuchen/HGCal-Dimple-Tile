@@ -58,10 +58,10 @@ LYSimAnalysis::PrepareExperiment()
 
   // Preparing the signal termination function
   signal( SIGABRT, CloseAll );
-  //signal( SIGFPE,  CloseAll );
-  //signal( SIGILL,  CloseAll );
+  // signal( SIGFPE,  CloseAll );
+  // signal( SIGILL,  CloseAll );
   signal( SIGINT,  CloseAll );
-  //signal( SIGSEGV, CloseAll );
+  // signal( SIGSEGV, CloseAll );
   signal( SIGTERM, CloseAll );
 }
 
@@ -71,6 +71,9 @@ LYSimAnalysis::PrepareNewRun( const G4Run* )
   // Reset variables relative to the run
   PhotonCount = 0;
   HitCount    = 0;
+  std::cout << "Average number of generated photons: "
+            << generatorAction->NPhotons() << std::endl;
+
   // generatorAction->RandomizePosition();
   // generatorAction->RandomizePolarization();
 }
@@ -83,25 +86,33 @@ LYSimAnalysis::PrepareNewEvent( const G4Event* event )
   format->beam_center_y = generatorAction->GetBeamY();
   format->beam_width    = generatorAction->GetWidth();
 
-  // This will be the center of the beam position.
+  // All primary vertex's in the event share the same x,y values
   format->beam_x = event->GetPrimaryVertex()->GetX0();
   format->beam_y = event->GetPrimaryVertex()->GetY0();
 
+  format->abs_mult = DetectorConstruction->GetTileAbsMult();
+  format->wrap_reflect = DetectorConstruction->GetWrapReflect();
+
   format->dimple_radius = DetectorConstruction->GetDimpleRadius();
   format->dimple_indent = DetectorConstruction->GetDimpleIndent();
-  format->nphotons      = -1;
+
+  format->nphotons = -1;
 }
 
 void
 LYSimAnalysis::EndOfEvent( const G4Event* event )
 {
   // Update number of photons if exists.
-  format->nphotons = GetNPhotons( event );
+  format->genphotons = generatorAction->NSources();
+  format->nphotons   = GetNPhotons( event );
 
   // Filling the three
   tree->Fill();
 
-  std::cout << "\rFinishing Event " << tree->GetEntries()  << std::flush ;
+  std::cout << "\rFinishing Event " << tree->GetEntries()
+            << " | Detected/Generated:"
+            << format->nphotons << "/" << format->genphotons
+            << std::flush;
 }
 
 

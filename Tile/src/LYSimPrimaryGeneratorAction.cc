@@ -30,7 +30,8 @@ LYSimPrimaryGeneratorAction::LYSimPrimaryGeneratorAction( LYSimDetectorConstruct
   _beamx( 0 ),
   _beamy( 0 ),
   _width( 0 ),
-  _photon_multiplier( 1 )
+  _photon_multiplier( 1 ),
+  _open_angle( CLHEP::pi )
 {
   std::cout << "[LYSIM] entering LYSIMPrimaryGeneratorAction" << std::endl;
 
@@ -79,7 +80,7 @@ LYSimPrimaryGeneratorAction::RandomizePosition()
     particleSource->AddaSource( 1 );
     particleSource->GetCurrentSource()->SetNumberOfParticles( 1 );
     particleSource->GetCurrentSource()->SetParticleDefinition(
-    G4OpticalPhoton::OpticalPhotonDefinition() );
+      G4OpticalPhoton::OpticalPhotonDefinition() );
 
     // Setting default spacial distribution
     G4SPSPosDistribution* pos = particleSource->GetCurrentSource()->GetPosDist();
@@ -92,6 +93,8 @@ LYSimPrimaryGeneratorAction::RandomizePosition()
     // Setting default angular distrution of particle  (isotropic)
     G4SPSAngDistribution* ang = particleSource->GetCurrentSource()->GetAngDist();
     ang->SetAngDistType( "iso" );
+    ang->SetMinTheta( CLHEP::pi - _open_angle );
+    ang->SetMaxTheta( CLHEP::pi );
 
     // Energy distribution.
     G4SPSEneDistribution* ene = particleSource->GetCurrentSource()->GetEneDist();
@@ -100,19 +103,27 @@ LYSimPrimaryGeneratorAction::RandomizePosition()
     ene->ArbInterpolate( "Lin" );
 
     // Randomizing the polarization.
-    const double angle = G4UniformRand() * 360.0*deg;
-    const G4ThreeVector normal( 1., 0., 0. );
+    const G4ThreeVector normal(
+      G4UniformRand(), G4UniformRand(), G4UniformRand() );
     const G4ThreeVector kphoton
       = particleSource->GetParticleMomentumDirection();
-    const G4ThreeVector product   = normal.cross( kphoton );
-    const double modul2           = product*product;
-    const G4ThreeVector e_perpend = ( 1./std::sqrt( modul2 ) )*product;
-    const G4ThreeVector e_paralle = e_perpend.cross( kphoton );
-    const G4ThreeVector polar     = std::cos( angle )*e_paralle
-                                    + std::sin( angle )*e_perpend;
-    particleSource->SetParticlePolarization( polar );
+    const G4ThreeVector product = normal.cross( kphoton.unit() );
+    particleSource->SetParticlePolarization( product.unit() );
   }
 
+}
+
+double
+LYSimPrimaryGeneratorAction::NPhotons() const
+{
+  const double t = fDetector->LocalTileZ( _beamx, _beamy );
+  return _photon_multiplier * CalcNumPhotons( t );
+}
+
+unsigned
+LYSimPrimaryGeneratorAction::NSources() const
+{
+  return particleSource->GetNumberofSource();
 }
 
 double

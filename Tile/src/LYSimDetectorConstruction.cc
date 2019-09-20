@@ -63,6 +63,9 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   _tile_x2 = 0.0*mm;
   wrapgap  = 0.1*mm;
 
+  _absmult      = 1;
+  _wrap_reflect = 1;
+
   _sipm_x        = 1.3*mm;
   _sipm_y        = 1.3*mm;
   _sipm_z        = 0.3*mm;// arbitrary thickness for Photocathode
@@ -80,13 +83,15 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   fEpoxy2   = Make_Epoxy2();
   fAir      = Make_Custom_Air();
   fEJ200    = Make_EJ200();
+  UpdateAbs( _absmult );
 
   // Defining surface list.
-  fESROpSurface           = MakeS_ESR();
+  fESROpSurface           = MakeS_Rough();
   fPolishedOpSurface      = MakeS_Polished();
   fIdealPolishedOpSurface = MakeS_IdealPolished();
   fIdealMirrorOpSurface   = MakeS_IdealMirror();
   fSiPMSurface            = MakeS_SiPM();
+  SetWrapReflect( _wrap_reflect );
 }
 
 void
@@ -165,7 +170,7 @@ LYSimDetectorConstruction::Construct()
   G4VSolid* solidTileSubtract = new G4Sphere( "TileSub", 0, GetDimpleSizeRadius()
                                             , 0, 2* pi, 0, pi );
 
-  //G4VSolid* solidDimple
+  // G4VSolid* solidDimple
   //  = _dimple_type == PYRAMID ? ConstructPyramidDimpleSolid() :
   //    _dimple_type == PARABOLIC ? ConstructParabolicDimpleSolid() :
   //    ConstructSphereDimpleSolid();
@@ -266,8 +271,8 @@ LYSimDetectorConstruction::Construct()
 
   G4LogicalBorderSurface* WrapAirSurface =
     new G4LogicalBorderSurface( "WrapAirSurface"
-                              , physWrap
                               , physWorld
+                              , physWrap
                               , fESROpSurface );
   G4LogicalBorderSurface* TileSurface =
     new G4LogicalBorderSurface( "TileSurface"
@@ -495,5 +500,19 @@ LYSimDetectorConstruction::LocalTileZ( const double x, const double y ) const
 void
 LYSimDetectorConstruction::UpdateAbs( const double mult )
 {
-  Update_EJ200_AbsLength( fEJ200, mult );
+  _absmult = mult;
+  Update_EJ200_AbsLength( fEJ200, _absmult );
+}
+
+void
+LYSimDetectorConstruction::SetWrapReflect( const double r )
+{
+  // Add entries into properties table
+  static const unsigned nentries      = 2;
+  static double phoE[nentries]  = {1.0*eV, 6.0*eV};
+  double reflectivity[nentries] = {r, r};
+
+  G4MaterialPropertiesTable* table = fESROpSurface->GetMaterialPropertiesTable();
+  table->RemoveProperty( "REFLECTIVITY" );
+  table->AddProperty( "REFLECTIVITY", phoE, reflectivity, nentries );
 }
