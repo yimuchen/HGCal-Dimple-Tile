@@ -566,7 +566,7 @@ Make_EJ200()
 
   // Add entries into properties table
   G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable();
-  table->AddProperty( "RINDEX",    photonE, refrac_idx, nentries );
+  table->AddProperty( "RINDEX", photonE, refrac_idx, nentries );
   // table->AddProperty( "ABSLENGTH", photonE, abs_length, nentries );
   table->AddConstProperty( "SCINTILLATIONYIELD",        10./keV );
 
@@ -591,7 +591,7 @@ Make_EJ200()
 }
 
 void
-Update_EJ200_AbsLength( G4Material* material , const double mult )
+Update_EJ200_AbsLength( G4Material* material, const double mult )
 {
   static const unsigned nentries = 57;
   // ~350 to 550nm
@@ -613,27 +613,28 @@ Update_EJ200_AbsLength( G4Material* material , const double mult )
     2.254258055*eV
   };
 
-  static double Normabs_length[nentries] = {
-    0.5743617028*mm, 0.5767800495*mm,  0.5773794872*mm,   0.5780135803*mm,
-    0.5789505759*mm, 0.582016903*mm,   0.5830349115*mm,   0.5975989105*mm,
-    0.729882704*mm,  0.7881381067*mm,  0.8633691117*mm,   0.9585952443*mm,
-    1.079257244*mm,  1.228571927*mm,   1.419603272*mm,    1.660828418*mm,
-    1.972327621*mm,  2.372104668*mm,   2.896569657*mm,    3.584178546*mm,
-    4.500608885*mm,  5.707467479*mm,   7.335457013*mm,    9.476300059*mm,
-    12.39047472*mm,  16.11698146*mm,   21.00255358*mm,    26.86579025*mm,
-    34.26737294*mm,  76.31922807*mm,   105.842978*mm,     125.2249369*mm,
-    137.1644668*mm,  145.9649899*mm,   152.6773991*mm,    162.9471828*mm,
-    170.5827376*mm,  177.8360165*mm,   188.3857227*mm,    203.2702981*mm,
-    206.9511627*mm,  209.597121*mm,    218.800288*mm,     228.2574561*mm,
-    241.3501381*mm,  252.1649689*mm,   267.0613552*mm,    280.9645483*mm,
-    293.2338149*mm,  304.009777*mm,    324.5206616*mm,    339.7711016*mm,
-    357.9664491*mm,  370.3212829*mm,   393.1346279*mm,    426.5560315*mm,
-    434.4316833*mm
+  static double Normabs_length[nentries] =
+  {
+    17.42923195*mm, 17.50261763*mm, 17.52080780*mm, 17.54004961*mm,
+    17.56848311*mm, 17.66153201*mm, 17.69242388*mm, 18.13437416*mm,
+    22.14857794*mm, 23.91636107*mm, 26.19927553*mm, 29.08895000*mm,
+    32.75048588*mm, 37.28149870*mm, 43.07842006*mm, 50.39849206*mm,
+    59.85105799*mm, 71.98244983*mm, 87.89754636*mm, 108.7633087*mm,
+    136.5727481*mm, 173.1953472*mm, 222.5973304*mm, 287.5620553*mm,
+    375.9938324*mm, 489.0761462*mm, 637.3307552*mm, 815.2529798*mm,
+    1039.856920*mm, 2315.937016*mm, 3211.846828*mm, 3800.000000*mm,
+    4162.309734*mm, 4429.365072*mm, 4633.055771*mm, 4944.696400*mm,
+    5176.400316*mm, 5396.503919*mm, 5716.638906*mm, 6168.317205*mm,
+    6280.014490*mm, 6360.307136*mm, 6639.580861*mm, 6926.562350*mm,
+    7323.864938*mm, 7652.045236*mm, 8104.081942*mm, 8525.979809*mm,
+    8898.295533*mm, 9225.296344*mm, 9847.707211*mm, 10310.48782*mm,
+    10862.63280*mm, 11237.54509*mm, 11929.82503*mm, 12944.01067*mm,
+    13183.00043*mm
   };
 
   double abs_length[nentries];
 
-  for( unsigned i = 0 ; i < nentries ; ++i ){
+  for( unsigned i = 0; i < nentries; ++i ){
     abs_length[i] = Normabs_length[i] * mult;
   }
 
@@ -642,4 +643,3 @@ Update_EJ200_AbsLength( G4Material* material , const double mult )
   table->RemoveProperty( "ABSLENGTH" );
   table->AddProperty( "ABSLENGTH", photonE, abs_length, nentries );
 }
-

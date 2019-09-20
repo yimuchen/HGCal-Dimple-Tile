@@ -248,7 +248,7 @@ MakeS_Rough()
   // Rough surface
   //////////////////////////////////
   G4OpticalSurface* surface = new G4OpticalSurface( "RoughOpSurface" );
-  surface->SetType( dielectric_dielectric );
+  surface->SetType( dielectric_metal );
   surface->SetFinish( ground );
   surface->SetModel( unified );
 
