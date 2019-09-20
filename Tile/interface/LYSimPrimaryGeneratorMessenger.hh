@@ -36,6 +36,7 @@ private:
   G4UIcmdWithADoubleAndUnit* SetBeamXCmd;
   G4UIcmdWithADoubleAndUnit* SetBeamYCmd;
   G4UIcmdWithADoubleAndUnit* SetWidthCmd;
+  G4UIcmdWithADoubleAndUnit* SetOpenAngleCmd;
   G4UIcmdWithADouble*        SetPhotonMultCmd;
 };
 

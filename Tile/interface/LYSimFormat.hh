@@ -12,6 +12,10 @@ public:
   double beam_x;
   double beam_y;
 
+  double abs_mult;
+  double wrap_reflect;
+
+  unsigned genphotons;
   unsigned nphotons;
 
   void
@@ -24,10 +28,15 @@ public:
     tree->Branch( "DimpleIndent", &dimple_indent );
     tree->Branch( "BeamX",        &beam_x        );
     tree->Branch( "BeamY",        &beam_y        );
+    tree->Branch( "absmult",      &abs_mult      );
+    tree->Branch( "Reflectivity", &wrap_reflect  );
+    tree->Branch( "genphotons",   &genphotons    );
     tree->Branch( "nphotons",     &nphotons      );
   }
 
-  void LoadBranches( TTree* tree ){
+  void
+  LoadBranches( TTree* tree )
+  {
     tree->SetBranchAddress( "BeamCenterX",  &beam_center_x );
     tree->SetBranchAddress( "BeamCenterY",  &beam_center_y );
     tree->SetBranchAddress( "BeamWidth",    &beam_width    );
@@ -35,6 +44,9 @@ public:
     tree->SetBranchAddress( "DimpleIndent", &dimple_indent );
     tree->SetBranchAddress( "BeamX",        &beam_x        );
     tree->SetBranchAddress( "BeamY",        &beam_y        );
+    tree->SetBranchAddress( "absmult",      &abs_mult      );
+    tree->SetBranchAddress( "Reflectivity", &wrap_reflect  );
+    tree->SetBranchAddress( "genphtons",    &genphotons    );
     tree->SetBranchAddress( "nphotons",     &nphotons      );
   }
 };

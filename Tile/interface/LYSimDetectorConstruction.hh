@@ -27,23 +27,21 @@ public:
   virtual G4VPhysicalVolume* Construct();
   void                       UpdateGeometry();
 
-  // Get set functions of geometric variables.
+  // Get/Set functions of tile geometry parameters
   inline void
   SetTileZ ( const G4double x ){ _tilez = x;}
   inline G4double
   GetTileZ() const {return _tilez;}
-
   inline void
   SetTileX ( const G4double x ){_tilex = x;}
   inline G4double
   GetTileX() const {return _tilex;}
-
   inline void
   SetTileY ( const G4double y ){_tiley = y;}
   inline G4double
   GetTileY() const {return _tiley;}
 
-  // G
+  // Get/Set functions of dimple geometry paramters
   inline double
   GetDimpleRadius() const { return _dimple_radius; }
   inline void
@@ -52,7 +50,6 @@ public:
   GetDimpleIndent() const { return _dimple_indent; }
   inline void
   SetDimpleIndent( const double x ){ _dimple_indent = x; }
-
   int
   GetDimpleType() const {return _dimple_type; }
   inline void
@@ -75,6 +72,16 @@ public:
 
   // Material updating functions
   void UpdateAbs( const double x );
+  inline double
+  GetTileAbsMult() const { return _absmult; }
+
+  void SetWrapReflect( const double x );
+  inline double
+  GetWrapReflect() const { return _wrap_reflect; }
+
+  // Accesing Custom Materials
+  inline G4Material* GetEJ200(){ return fEJ200; }
+  inline G4OpticalSurface* GetSiPMSurface(){ return fSiPMSurface; }
 
 private:
   // Subfunctions for cleaner code
@@ -98,11 +105,6 @@ private:
 
   // Pointer to detector messenger class
   LYSimDetectorMessenger* fdetectorMessenger;
-
-  // Contains the minimum and maximum Z-position of the previously defined volume
-  // Use this variable to define volume successively along the z-axis
-  // (max for +z direction, min for -z direction)
-  // Set value after defining a physical volume
 
   // Pointers to materials
   G4Material* fAir;
@@ -129,8 +131,11 @@ private:
   double _tile_x2;
 
   // Wrapping Geometry definitions
-  G4double wrapgap;// distance between tile and wrapping
+  double wrapgap;// distance between tile and wrapping
 
+  // Absorption length multiplier
+  double _absmult;
+  double _wrap_reflect;
 
   // Dimple variables;
   double _dimple_indent;// Depth of dimple

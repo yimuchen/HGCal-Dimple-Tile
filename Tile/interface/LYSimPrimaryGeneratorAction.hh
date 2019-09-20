@@ -40,8 +40,14 @@ public:
   GetPhotonMult() const { return _photon_multiplier; }
   inline void
   SetPhotonMult( const double x ){ _photon_multiplier = x; }
+  inline double
+  GetOpenAngle() const { return _open_angle; }
+  inline void
+  SetOpenAngle( const double x ){ _open_angle = x ; }
 
   void RandomizePosition();
+  double NPhotons() const ;
+  unsigned NSources() const ;
 
 private:
   G4GeneralParticleSource* particleSource;
@@ -53,6 +59,7 @@ private:
   double _beamy;
   double _width;
   double _photon_multiplier;
+  double _open_angle;
 };
 
 #endif/*LYSimPrimaryGeneratorAction_h*/
