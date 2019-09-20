@@ -9,14 +9,23 @@ add_compile_options("-g")
 add_compile_options("-O3")
 
 # find_package( ROOT REQUIRED)
-
-## Adding ROOT the old fashioned way
-execute_process(COMMAND "root-config" "--cflags"
+execute_process(COMMAND "root-config" "--version"
+                OUTPUT_VARIABLE ROOTCONFIG_VERSION)
+string(SUBSTRING ${ROOTCONFIG_VERSION} 0 1 ROOTCONFIG_MAJOR_VERSION)
+if( ${ROOTCONFIG_MAJOR_VERSION} STREQUAL "6" )
+  message("BUILDING WITH ROOT.CMAKE ")
+  find_package(ROOT REQUIRED)
+  include_directories(${ROOT_INCLUDE_DIRS})
+  add_compile_options("-std=c++17")
+else()
+  ## Adding ROOT the old fashioned way
+  execute_process(COMMAND "root-config" "--cflags"
                  OUTPUT_VARIABLE  ROOT_CONFIG )
-string(REPLACE " " ";" ROOTCONFIG_LIST ${ROOT_CONFIG})
-foreach(CONFIG ${ROOTCONFIG_LIST})
-  add_compile_options(${CONFIG})
-endforeach()
+  string(REPLACE " " ";" ROOTCONFIG_LIST ${ROOT_CONFIG})
+  foreach(CONFIG ${ROOTCONFIG_LIST})
+    add_compile_options(${CONFIG})
+  endforeach()
+endif()
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
@@ -32,18 +41,19 @@ include(${Geant4_USE_FILE})
 ## Passing source directory to file to enable data file finding.
 configure_file(Tile/src/ProjectPath.cc.in  Tile/src/ProjectPath.cc)
 
-
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
-#
 include_directories(${PROJECT_SOURCE_DIR}/Tile/interface
                     ${Geant4_INCLUDE_DIR})
 
 file(GLOB Tile_src ${PROJECT_SOURCE_DIR}/Tile/src/*.cc)
 add_library(Tile SHARED ${Tile_src})
-target_link_libraries(Tile ${Geant4_LIBRARIES}
-  "Core"  "Hist" "Tree"
-)
+
+if( ${ROOTCONFIG_MAJOR_VERSION} STREQUAL "6" )
+  target_link_libraries(Tile ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
+else()
+  target_link_libraries(Tile ${Geant4_LIBRARIES}  "Core"  "Hist" "Tree")
+endif()
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
