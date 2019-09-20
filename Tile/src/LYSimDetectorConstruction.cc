@@ -83,7 +83,7 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   fEpoxy2   = Make_Epoxy2();
   fAir      = Make_Custom_Air();
   fEJ200    = Make_EJ200();
-  UpdateAbs( _absmult );
+  SetTileAbsMult( _absmult );
 
   // Defining surface list.
   fESROpSurface           = MakeS_Rough();
@@ -498,7 +498,7 @@ LYSimDetectorConstruction::LocalTileZ( const double x, const double y ) const
 
 
 void
-LYSimDetectorConstruction::UpdateAbs( const double mult )
+LYSimDetectorConstruction::SetTileAbsMult( const double mult )
 {
   _absmult = mult;
   Update_EJ200_AbsLength( fEJ200, _absmult );
@@ -513,6 +513,12 @@ LYSimDetectorConstruction::SetWrapReflect( const double r )
   double reflectivity[nentries] = {r, r};
 
   G4MaterialPropertiesTable* table = fESROpSurface->GetMaterialPropertiesTable();
-  table->RemoveProperty( "REFLECTIVITY" );
-  table->AddProperty( "REFLECTIVITY", phoE, reflectivity, nentries );
+  if( table ){
+    table->RemoveProperty( "REFLECTIVITY" );
+    table->AddProperty( "REFLECTIVITY", phoE, reflectivity, nentries );
+  } else {
+    table = new G4MaterialPropertiesTable();
+    table->AddProperty( "REFLECTIVITY", phoE, reflectivity, nentries );
+    fESROpSurface->SetMaterialPropertiesTable( table );
+  }
 }

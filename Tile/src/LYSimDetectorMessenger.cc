@@ -48,13 +48,17 @@ LYSimDetectorMessenger::LYSimDetectorMessenger( LYSimDetectorConstruction* Det )
   SetTileZCmd->SetRange( "TileZ>=0." );
   SetTileZCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
-  SetTileAbsMultCmd = new G4UIcmdWithADouble(
-    "/LYSim/SetTileAbsMult", this );
-  SetTileAbsMultCmd->SetGuidance(
-    "Set the light attenuation length multiplier" );
+  SetTileAbsMultCmd = new G4UIcmdWithADouble( "/LYSim/SetTileAbsMult", this );
+  SetTileAbsMultCmd->SetGuidance( "Set the light absorption length multiplier" );
   SetTileAbsMultCmd->SetParameterName( "TileAbsMult", false );
   SetTileAbsMultCmd->SetRange( "TileAbsMult>=0." );
   SetTileAbsMultCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+
+  SetWrapReflectCmd = new G4UIcmdWithADouble( "/LYSim/SetWrapReflect", this );
+  SetWrapReflectCmd->SetGuidance( "Set Wrap reflectivity" );
+  SetWrapReflectCmd->SetParameterName( "WrapReflect", false );
+  SetWrapReflectCmd->SetRange( "WrapReflect>=0." );
+  SetWrapReflectCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
   // Dimple Geometry commands
   SetDimpleIndentCmd = new G4UIcmdWithADoubleAndUnit(
@@ -77,8 +81,8 @@ LYSimDetectorMessenger::LYSimDetectorMessenger( LYSimDetectorConstruction* Det )
   SetDimpleRadiusCmd->SetRange( "DimpleIndent>=0." );
   SetDimpleRadiusCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
-  SetDimpleTypeCmd = new G4UIcmdWithAString("/LYSim/SetDimpleType", this );
-  SetDimpleTypeCmd->SetGuidance( "Setting the type of dimple to use");
+  SetDimpleTypeCmd = new G4UIcmdWithAString( "/LYSim/SetDimpleType", this );
+  SetDimpleTypeCmd->SetGuidance( "Setting the type of dimple to use" );
   SetDimpleTypeCmd->SetCandidates( "Spherical Parabolic Pyramid" );
   SetDimpleTypeCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 }
@@ -90,7 +94,9 @@ LYSimDetectorMessenger::~LYSimDetectorMessenger()
   delete SetTileZCmd;
   delete SetTileXCmd;
   delete SetTileYCmd;
+
   delete SetTileAbsMultCmd;
+  delete SetWrapReflectCmd;
 
   delete SetDimpleIndentCmd;
   delete SetDimpleRadiusCmd;
@@ -112,7 +118,9 @@ LYSimDetectorMessenger::SetNewValue( G4UIcommand* command, G4String val )
     Detector->SetTileY(
       G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
   } else if( command == SetTileAbsMultCmd ){
-    Detector->UpdateAbs( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
+    Detector->SetTileAbsMult( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
+  } else if( command == SetWrapReflectCmd ){
+    Detector->SetWrapReflect( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
   } else if( command == SetDimpleIndentCmd ){
     Detector->SetDimpleIndent(
       G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
@@ -122,9 +130,9 @@ LYSimDetectorMessenger::SetNewValue( G4UIcommand* command, G4String val )
   } else if( command == SetDimpleTypeCmd ){
     if( val == "Spherical" ){
       Detector->SetDimpleType( LYSimDetectorConstruction::SPHERICAL );
-    } else if (val == "Parabolic" ){
+    } else if( val == "Parabolic" ){
       Detector->SetDimpleType( LYSimDetectorConstruction::PARABOLIC );
-    } else if ( val == "Pyramid" ){
+    } else if( val == "Pyramid" ){
       Detector->SetDimpleType( LYSimDetectorConstruction::PARABOLIC );
     }
   }

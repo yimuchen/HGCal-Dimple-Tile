@@ -43,6 +43,7 @@ private:
   G4UIcmdWithADoubleAndUnit* SetTileZCmd;
 
   G4UIcmdWithADouble* SetTileAbsMultCmd;
+  G4UIcmdWithADouble* SetWrapReflectCmd;
 
   // Dimple Geometry commands
   G4UIcmdWithADoubleAndUnit* SetDimpleIndentCmd;

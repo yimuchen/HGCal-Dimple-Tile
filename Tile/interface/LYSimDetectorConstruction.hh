@@ -71,7 +71,7 @@ public:
   double LocalTileZ( const double x, const double y ) const;
 
   // Material updating functions
-  void UpdateAbs( const double x );
+  void SetTileAbsMult( const double x );
   inline double
   GetTileAbsMult() const { return _absmult; }
 

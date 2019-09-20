@@ -22,8 +22,10 @@ main( int argc, char** argv )
     ( "beamwidth,w", usr::po::defvalue<double>( 0 ), "width of beam [mm]" )
     ( "dimplerad,r", usr::po::defvalue<double>( 3.0 ), "Dimple radius [mm]" )
     ( "dimpleind,d", usr::po::defvalue<double>( 1.5 ), "Dimple indent [mm]" )
-    ( "absmult,a",   usr::po::defvalue<double>( 10 ),
+    ( "absmult,a",   usr::po::defvalue<double>( 1 ),
     "Multple of inbuilt absorption length" )
+    ( "wrapreflect,m", usr::pot::defvalue<double>(1),
+    "Wrap reflectivity")
     ( "NEvents,N", usr::po::defvalue<unsigned>( 1 ), "Number of events to run" )
     ( "output,o", usr::po::defvalue<std::string>( "test.root" ), "output file" )
   ;
@@ -32,12 +34,13 @@ main( int argc, char** argv )
   args.AddOptions( desc );
   args.ParseOptions( argc, argv );
 
-  const double x_center      = args.Arg<double>( "beamx" );
-  const double y_center      = args.Arg<double>( "beamy" );
-  const double width         = args.Arg<double>( "beamwidth" );
-  const double dimplerad     = args.Arg<double>( "dimplerad" );
-  const double dimpleind     = args.Arg<double>( "dimpleind" );
-  const double absmult       = args.Arg<double>( "absmult" );
+  const double x_center      = args.Arg<double>( "beamx"       );
+  const double y_center      = args.Arg<double>( "beamy"       );
+  const double width         = args.Arg<double>( "beamwidth"   );
+  const double dimplerad     = args.Arg<double>( "dimplerad"   );
+  const double dimpleind     = args.Arg<double>( "dimpleind"   );
+  const double absmult       = args.Arg<double>( "absmult"     );
+  const double wrapref       = args.Arg<double>( "wrapreflect" );
   const unsigned N           = args.Arg<unsigned>( "NEvents" );
   const std::string filename = args.Arg<std::string>( "output" );
 
@@ -49,6 +52,7 @@ main( int argc, char** argv )
   detector->SetDimpleRadius( dimplerad );
   detector->SetDimpleIndent( dimpleind );
   detector->UpdateAbs( absmult );
+  detector->SetWrapReflect( wrapref );
 
   runManager->SetUserInitialization( detector );
   runManager->SetUserInitialization( physlist );
