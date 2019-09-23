@@ -24,7 +24,7 @@ main( int argc, char** argv )
     ( "dimpleind,d", usr::po::defvalue<double>( 1.5 ), "Dimple indent [mm]" )
     ( "absmult,a",   usr::po::defvalue<double>( 1 ),
     "Multple of inbuilt absorption length" )
-    ( "wrapreflect,m", usr::pot::defvalue<double>(1),
+    ( "wrapreflect,m", usr::po::defvalue<double>(1),
     "Wrap reflectivity")
     ( "NEvents,N", usr::po::defvalue<unsigned>( 1 ), "Number of events to run" )
     ( "output,o", usr::po::defvalue<std::string>( "test.root" ), "output file" )
@@ -51,7 +51,7 @@ main( int argc, char** argv )
   LYSimDetectorConstruction* detector = new LYSimDetectorConstruction();
   detector->SetDimpleRadius( dimplerad );
   detector->SetDimpleIndent( dimpleind );
-  detector->UpdateAbs( absmult );
+  detector->SetTileAbsMult( absmult );
   detector->SetWrapReflect( wrapref );
 
   runManager->SetUserInitialization( detector );
