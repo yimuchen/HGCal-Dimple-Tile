@@ -15,7 +15,7 @@ parser.add_argument('--beamy',
                     '-y',
                     type=float,
                     nargs='+',
-                    default=0,
+                    default=[0],
                     help='List of y values of beam center')
 parser.add_argument('--dimplerad',
                     '-r',
@@ -37,6 +37,7 @@ parser.add_argument('--absmult',
                     help='List of tile absorption length multiple')
 parser.add_argument('--wrapreflect',
                     '-w',
+                    type=float,
                     nargs='+',
                     default=[1.],
                     help='List of wrap reflectivity')
@@ -59,7 +60,7 @@ Requirements = TARGET.FileSystemDomain == "privnet"
 Output = {1}/sce_{2}_{3}_{4}_{5}_{6}_{7}_$(cluster)_$(process).stdout
 Error  = {1}/sce_{2}_{3}_{4}_{5}_{6}_{7}_$(cluster)_$(process).stderr
 Log    = {1}/sce_{2}_{3}_{4}_{5}_{6}_{7}_$(cluster)_$(process).condor
-Arguments = -x {2} -y {3} -w 1.5 -N 10000 -r {4} -d {5} -a {6} -b {7} -o {8}
+Arguments = -x {2} -y {3} -w 1.5 -N 10000 -r {4} -d {5} -a {6} -m {7} -o {8}
 Queue
 """
 
@@ -89,7 +90,7 @@ for x, y, r, d, a, w in [(x, y, r, d, a, w) for x in args.beamx
   )
 
   jdl_filename = os.path.abspath(
-      DATA_DIR + '/condor/' + timestr + make_str('hgcal_tilesim') + '.jdl')
+      DATA_DIR + '/condor/' + timestr + '/' + make_str('hgcal_tilesim') + '.jdl')
 
   ## Writing jdl files
   os.makedirs(os.path.dirname(jdl_filename), exist_ok=True)
