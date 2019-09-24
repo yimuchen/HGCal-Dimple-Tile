@@ -21,7 +21,7 @@ using namespace CLHEP;
 
 LYSimSteppingAction::LYSimSteppingAction()
   : G4UserSteppingAction(),
-  maxtracklength( 5000.*mm ),
+  maxtracklength( 50000.*mm ),
   messenger( new LYSimSteppingMessenger( this ) )
 {
 }
