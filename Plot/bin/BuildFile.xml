@@ -1,6 +1,7 @@
 <use name="UserUtils/Common"/>
 <use name="UserUtils/PlotUtils"/>
 <use name="HGCalTileSim/Tile"/>
+<use name="HGCalTileSim/Plot"/>
 <use name="geant4"/>
 
 <flags CXXFLAGS="-g"/>
