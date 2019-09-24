@@ -1,3 +1,6 @@
+#ifndef LYSIMFORMAT_HH
+#define LYSIMFORMAT_HH
+
 #include "TTree.h"
 
 class LYSimFormat
@@ -46,7 +49,9 @@ public:
     tree->SetBranchAddress( "BeamY",        &beam_y        );
     tree->SetBranchAddress( "absmult",      &abs_mult      );
     tree->SetBranchAddress( "Reflectivity", &wrap_reflect  );
-    tree->SetBranchAddress( "genphtons",    &genphotons    );
+    tree->SetBranchAddress( "genphotons",   &genphotons    );
     tree->SetBranchAddress( "nphotons",     &nphotons      );
   }
 };
+
+#endif
