@@ -41,6 +41,11 @@ parser.add_argument('--wrapreflect',
                     nargs='+',
                     default=[1.],
                     help='List of wrap reflectivity')
+parser.add_argument('--NEvents',
+                    '-N',
+                    type=int,
+                    default=100,
+                    help='Number of events to run')
 parser.add_argument('--prefix',
                     type=str,
                     default='',
@@ -60,22 +65,22 @@ Requirements = TARGET.FileSystemDomain == "privnet"
 Output = {1}/sce_{2}_{3}_{4}_{5}_{6}_{7}_$(cluster)_$(process).stdout
 Error  = {1}/sce_{2}_{3}_{4}_{5}_{6}_{7}_$(cluster)_$(process).stderr
 Log    = {1}/sce_{2}_{3}_{4}_{5}_{6}_{7}_$(cluster)_$(process).condor
-Arguments = -x {2} -y {3} -w 1.5 -N 10000 -r {4} -d {5} -a {6} -m {7} -o {8}
+Arguments = -x {2} -y {3} -w 1.5 -r {4} -d {5} -a {6} -m {7} -o {8} -N {9}
 Queue
 """
 
-timestr = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 for x, y, r, d, a, w in [(x, y, r, d, a, w) for x in args.beamx
                          for y in args.beamy for r in args.dimplerad
                          for d in args.dimpleind for a in args.absmult
                          for w in args.wrapreflect]:
 
   def make_str(prefix):
-      return prefix+'_x{0:.1f}_y{1:.1f}_r{2:.1f}_d{3:.1f}_a{4:.1f}_w{5:.1f}'.format(
-          x, y, r, d, a*100, w*100).replace('.', 'p')
+    return prefix+args.prefix+ \
+         '_x{0:.1f}_y{1:.1f}_r{2:.1f}_d{3:.1f}_a{4:.1f}_w{5:.1f}'.format(
+        x, y, r, d, a*100, w*100).replace('.', 'p')
 
-  save_filename = os.path.abspath(
-      DATA_DIR + '/root/' + timestr + '/' + make_str('hgcal_tilesim') + '.root')
+  save_filename = os.path.abspath(DATA_DIR + '/root/' + '/' +
+                                  make_str('hgcal_tilesim') + '.root')
 
   jdl_content = CONDOR_JDL_TEMPLATE.format(
       BASE_DIR,
@@ -87,10 +92,11 @@ for x, y, r, d, a, w in [(x, y, r, d, a, w) for x in args.beamx
       a,
       w,
       os.path.abspath(save_filename),
+      args.NEvents,
   )
 
-  jdl_filename = os.path.abspath(
-      DATA_DIR + '/condor/' + timestr + '/' + make_str('hgcal_tilesim') + '.jdl')
+  jdl_filename = os.path.abspath(DATA_DIR + '/condor/' + '/' +
+                                 make_str('hgcal_tilesim') + '.jdl')
 
   ## Writing jdl files
   os.makedirs(os.path.dirname(jdl_filename), exist_ok=True)

@@ -42,7 +42,8 @@ main( int argc, char** argv )
   const double absmult       = args.Arg<double>( "absmult"     );
   const double wrapref       = args.Arg<double>( "wrapreflect" );
   const unsigned N           = args.Arg<unsigned>( "NEvents" );
-  const std::string filename = args.Arg<std::string>( "output" );
+  std::string filename = args.Arg<std::string>( "output" );
+  filename.insert(filename.length()-5, "_" + usr::RandomString(6) );
 
   // Must initialize Run Manager first
   G4RunManager* runManager   = new G4RunManager;

@@ -21,7 +21,7 @@ using namespace CLHEP;
 
 LYSimSteppingAction::LYSimSteppingAction()
   : G4UserSteppingAction(),
-  maxtracklength( 50000.*mm ),
+  maxtracklength( 500000.*mm ),
   messenger( new LYSimSteppingMessenger( this ) )
 {
 }
@@ -73,7 +73,6 @@ LYSimSteppingAction::UserSteppingAction( const G4Step* step )
     break;
   }
 
-  // kill tracks with length > 5000mm
   G4double tracklength = step->GetTrack()->GetTrackLength();
   if( tracklength > maxtracklength ){
     G4cout << "Track length exceeded limit of " << maxtracklength/mm
