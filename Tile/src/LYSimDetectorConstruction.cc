@@ -508,9 +508,10 @@ void
 LYSimDetectorConstruction::SetWrapReflect( const double r )
 {
   // Add entries into properties table
+  _wrap_reflect = r;
   static const unsigned nentries      = 2;
   static double phoE[nentries]  = {1.0*eV, 6.0*eV};
-  double reflectivity[nentries] = {r, r};
+  double reflectivity[nentries] = {_wrap_reflect, _wrap_reflect};
 
   G4MaterialPropertiesTable* table = fESROpSurface->GetMaterialPropertiesTable();
   if( table ){
