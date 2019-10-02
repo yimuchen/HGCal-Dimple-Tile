@@ -92,6 +92,17 @@ main( int argc, char const* argv[] )
       usr::plt::TextColor( usr::plt::col::darkgreen )  );
   }
 
+  c.Pad().DrawVLine( 425,
+      usr::plt::LineColor( usr::plt::col::darkgray ),
+      usr::plt::LineStyle( usr::plt::sty::lindotted ) );
+  c.Pad().DrawHLine( 3800 / absscale,
+      usr::plt::LineColor( usr::plt::col::darkgray ),
+      usr::plt::LineStyle( usr::plt::sty::lindotted ) );
+  c.Pad().WriteAtData(
+    xmin, 3800/absscale, usr::fstr( "%.0lfmm", 3800 ),
+    usr::plt::TextColor( usr::plt::col::red )  );
+
+
   c.Pad().Yaxis().SetLabelSize(0);
   c.Pad().Xaxis().SetTitle("Optical photon wavelength [nm]");
 

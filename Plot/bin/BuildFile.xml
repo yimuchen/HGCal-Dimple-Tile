@@ -5,6 +5,7 @@
 <use name="geant4"/>
 
 <flags CXXFLAGS="-g"/>
+<bin name="LYSim_CorrectRoot"   file="CorrectRoot.cc"/>
 <bin name="LYSim_MakeLYvXGraph" file="MakeLYvXGraph.cc"/>
 <bin name="LYSim_PlotLYvXGraph" file="PlotLYvXGraph.cc"/>
 <bin name="LYSim_PlotMaterial"  file="PlotMaterialProperties.cc"/>

@@ -38,7 +38,8 @@ main( int argc, char** argv )
     tree.Add( file.c_str() );
   }
 
-  typedef std::map<double, std::vector<double> >                    SinglePointResult;
+  typedef std::map<double, std::vector<double> > SinglePointResult;
+
   typedef std::map<LYSimFormat, SinglePointResult, LYFormatCompare> ResultsMap;
   ResultsMap nphotons( &LYGraphCompare );
   ResultsMap genphotons( &LYGraphCompare );
@@ -49,7 +50,7 @@ main( int argc, char** argv )
   // Creating the List of results in memory
   for( int i = 0; i < tree.GetEntries(); ++i ){
     tree.GetEntry( i );
-    std::cout << "\rEntry: " << i << std::flush;
+    std::cout << "\rEntry: " << i+1 << std::flush;
 
     nphotons[format][ format.beam_center_x].push_back( format.nphotons );
     nphotons[format][-format.beam_center_x].push_back( format.nphotons );
