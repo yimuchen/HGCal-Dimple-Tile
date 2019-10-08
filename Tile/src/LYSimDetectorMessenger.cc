@@ -74,6 +74,14 @@ LYSimDetectorMessenger::LYSimDetectorMessenger( LYSimDetectorConstruction* Det )
   SetSiPMRimCmd->SetRange( "SiPMRim>=0." );
   SetSiPMRimCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
+  SetSiPMStandCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetSiPMStand", this );
+  SetSiPMStandCmd->SetGuidance( "Set the SiPM transverse dimensions" );
+  SetSiPMStandCmd->SetParameterName( "SiPMStand", false );
+  SetSiPMStandCmd->SetUnitCategory( "Length" );
+  SetSiPMStandCmd->SetDefaultUnit( "mm" );
+  SetSiPMStandCmd->SetRange( "SiPMStand>=0." );
+  SetSiPMStandCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+
   // Optical setting commands
   SetTileAbsMultCmd = new G4UIcmdWithADouble( "/LYSim/SetTileAbsMult", this );
   SetTileAbsMultCmd->SetGuidance( "Set the light absorption length multiplier" );
@@ -150,6 +158,9 @@ LYSimDetectorMessenger::SetNewValue( G4UIcommand* command, G4String val )
     Detector->SetSiPMY( G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
   } else if( command == SetSiPMRimCmd ){
     Detector->SetSiPMRim( G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
+  } else if( command == SetSiPMStandCmd ){
+    Detector->SetSiPMStand(
+      G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
   } else if( command == SetTileAbsMultCmd ){
     Detector->SetTileAbsMult( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
   } else if( command == SetWrapReflectCmd ){
