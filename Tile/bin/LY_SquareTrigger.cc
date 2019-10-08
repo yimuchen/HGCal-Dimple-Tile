@@ -22,9 +22,12 @@ main( int argc, char** argv )
     ( "beamwidth,w", usr::po::defvalue<double>( 0 ), "width of beam [mm]" )
     ( "dimplerad,r", usr::po::defvalue<double>( 3.0 ), "Dimple radius [mm]" )
     ( "dimpleind,d", usr::po::defvalue<double>( 1.5 ), "Dimple indent [mm]" )
+    ( "sipmwidth,W" , usr::po::defvalue<double>(1.4), "SiPM active width [mm]")
+    ( "sipmrim,R",    usr::po::defvalue<double>(0.4), "SiPM Rim width [mm]" )
+    ( "sipmstand,S",  usr::po::defvalue<double>(0.3), "SiPM Stand height [mm]")
     ( "absmult,a",   usr::po::defvalue<double>( 1 ),
     "Multple of inbuilt absorption length" )
-    ( "wrapreflect,m", usr::po::defvalue<double>(1),
+    ( "wrapreflect,m", usr::po::defvalue<double>( 0.985 ),
     "Wrap reflectivity")
     ( "NEvents,N", usr::po::defvalue<unsigned>( 1 ), "Number of events to run" )
     ( "output,o", usr::po::defvalue<std::string>( "test.root" ), "output file" )
@@ -39,6 +42,9 @@ main( int argc, char** argv )
   const double width         = args.Arg<double>( "beamwidth"   );
   const double dimplerad     = args.Arg<double>( "dimplerad"   );
   const double dimpleind     = args.Arg<double>( "dimpleind"   );
+  const double sipmwidth     = args.Arg<double>( "sipmwidth"   );
+  const double sipmrim       = args.Arg<double>( "sipmrim"     );
+  const double sipmstand     = args.Arg<double>( "sipmstand"   );
   const double absmult       = args.Arg<double>( "absmult"     );
   const double wrapref       = args.Arg<double>( "wrapreflect" );
   const unsigned N           = args.Arg<unsigned>( "NEvents" );
@@ -54,6 +60,10 @@ main( int argc, char** argv )
   detector->SetDimpleIndent( dimpleind );
   detector->SetTileAbsMult( absmult );
   detector->SetWrapReflect( wrapref );
+  detector->SetSiPMX( sipmwidth );
+  detector->SetSiPMY( sipmwidth );
+  detector->SetSiPMRim( sipmrim );
+  detector->SetSiPMStand( sipmstand );
 
   runManager->SetUserInitialization( detector );
   runManager->SetUserInitialization( physlist );

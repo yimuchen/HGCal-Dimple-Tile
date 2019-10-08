@@ -24,8 +24,9 @@ LYSimDetectorMessenger::LYSimDetectorMessenger( LYSimDetectorConstruction* Det )
   UpdateCmd->SetGuidance( "if you changed geometrical value(s)." );
   UpdateCmd->AvailableForStates( G4State_Idle );
 
+  // Tile Geometry commands
   SetTileXCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetTileX", this );
-  SetTileXCmd->SetGuidance( "Set the scintillator transverse dimenstions" );
+  SetTileXCmd->SetGuidance( "Set the scintillator transverse dimensions" );
   SetTileXCmd->SetParameterName( "TileX", false );
   SetTileXCmd->SetUnitCategory( "Length" );
   SetTileXCmd->SetDefaultUnit( "mm" );
@@ -33,7 +34,7 @@ LYSimDetectorMessenger::LYSimDetectorMessenger( LYSimDetectorConstruction* Det )
   SetTileXCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
   SetTileYCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetTileY", this );
-  SetTileYCmd->SetGuidance( "Set the scintillator transverse dimenstions" );
+  SetTileYCmd->SetGuidance( "Set the scintillator transverse dimensions" );
   SetTileYCmd->SetParameterName( "TileY", false );
   SetTileYCmd->SetUnitCategory( "Length" );
   SetTileYCmd->SetDefaultUnit( "mm" );
@@ -48,6 +49,32 @@ LYSimDetectorMessenger::LYSimDetectorMessenger( LYSimDetectorConstruction* Det )
   SetTileZCmd->SetRange( "TileZ>=0." );
   SetTileZCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
+  // SiPM geometry commands
+  SetSiPMXCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetSiPMX", this );
+  SetSiPMXCmd->SetGuidance( "Set the SiPM transverse dimensions" );
+  SetSiPMXCmd->SetParameterName( "SiPMX", false );
+  SetSiPMXCmd->SetUnitCategory( "Length" );
+  SetSiPMXCmd->SetDefaultUnit( "mm" );
+  SetSiPMXCmd->SetRange( "SiPMX>=0." );
+  SetSiPMXCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+
+  SetSiPMYCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetSiPMY", this );
+  SetSiPMYCmd->SetGuidance( "Set the SiPM transverse dimensions" );
+  SetSiPMYCmd->SetParameterName( "SiPMY", false );
+  SetSiPMYCmd->SetUnitCategory( "Length" );
+  SetSiPMYCmd->SetDefaultUnit( "mm" );
+  SetSiPMYCmd->SetRange( "SiPMY>=0." );
+  SetSiPMYCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+
+  SetSiPMRimCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetSiPMRim", this );
+  SetSiPMRimCmd->SetGuidance( "Set the SiPM transverse dimensions" );
+  SetSiPMRimCmd->SetParameterName( "SiPMRim", false );
+  SetSiPMRimCmd->SetUnitCategory( "Length" );
+  SetSiPMRimCmd->SetDefaultUnit( "mm" );
+  SetSiPMRimCmd->SetRange( "SiPMRim>=0." );
+  SetSiPMRimCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+
+  // Optical setting commands
   SetTileAbsMultCmd = new G4UIcmdWithADouble( "/LYSim/SetTileAbsMult", this );
   SetTileAbsMultCmd->SetGuidance( "Set the light absorption length multiplier" );
   SetTileAbsMultCmd->SetParameterName( "TileAbsMult", false );
@@ -117,6 +144,12 @@ LYSimDetectorMessenger::SetNewValue( G4UIcommand* command, G4String val )
   } else if( command == SetTileYCmd ){
     Detector->SetTileY(
       G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
+  } else if( command == SetSiPMXCmd ){
+    Detector->SetSiPMX( G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
+  } else if( command == SetSiPMYCmd ){
+    Detector->SetSiPMY( G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
+  } else if( command == SetSiPMRimCmd ){
+    Detector->SetSiPMRim( G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
   } else if( command == SetTileAbsMultCmd ){
     Detector->SetTileAbsMult( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
   } else if( command == SetWrapReflectCmd ){

@@ -90,6 +90,11 @@ LYSimAnalysis::PrepareNewEvent( const G4Event* event )
   format->beam_x = event->GetPrimaryVertex()->GetX0();
   format->beam_y = event->GetPrimaryVertex()->GetY0();
 
+  // Getting the SiPM parameters
+  format->sipm_width = DetectorConstruction->GetSiPMX();
+  format->sipm_rim   = DetectorConstruction->GetSiPMRim();
+  format->sipm_stand = DetectorConstruction->GetSiPMStand();
+
   format->abs_mult = DetectorConstruction->GetTileAbsMult();
   format->wrap_reflect = DetectorConstruction->GetWrapReflect();
 

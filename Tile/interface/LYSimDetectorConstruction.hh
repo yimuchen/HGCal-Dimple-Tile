@@ -41,7 +41,7 @@ public:
   inline G4double
   GetTileY() const {return _tiley;}
 
-  // Get/Set functions of dimple geometry paramters
+  // Get/Set functions of dimple geometry parameters
   inline double
   GetDimpleRadius() const { return _dimple_radius; }
   inline void
@@ -54,6 +54,24 @@ public:
   GetDimpleType() const {return _dimple_type; }
   inline void
   SetDimpleType( const int x ){ _dimple_type = x; }
+
+  // Get/Set functions for SiPM geometry parameters
+  inline double
+  GetSiPMX() const {return _sipm_x; }
+  inline void
+  SetSiPMX( const double x ){ _sipm_x = x; }
+  inline double
+  GetSiPMY() const { return _sipm_y; }
+  inline void
+  SetSiPMY( const double x ){ _sipm_y = x; }
+  inline double
+  GetSiPMRim() const {return _sipm_rimwidth; }
+  inline void
+  SetSiPMRim( const double x ){ _sipm_rimwidth = x; }
+  inline double
+  GetSiPMStand() const { return _sipm_standz; }
+  inline void
+  SetSiPMStand( const double x ){ _sipm_standz = x ; }
 
   enum  DIMPLE_TYPE
   {
@@ -80,25 +98,27 @@ public:
   GetWrapReflect() const { return _wrap_reflect; }
 
   // Accesing Custom Materials
-  inline G4Material* GetEJ200(){ return fEJ200; }
-  inline G4OpticalSurface* GetSiPMSurface(){ return fSiPMSurface; }
+  inline G4Material*
+  GetEJ200(){ return fEJ200; }
+  inline G4OpticalSurface*
+  GetSiPMSurface(){ return fSiPMSurface; }
 
 private:
   // Subfunctions for cleaner code
   G4VSolid* ConstructTrapazoidSolid(
     const G4String& name,
-    double        x, // Maximum Length along z direction.
-    double        y, // Length along y direction
-    double        z, // length along z direction
-    double        indent_x1, // Indent in x direction
-    double        indent_x2  // indent of corner
-  ) const;
+    double          x,// Maximum Length along z direction.
+    double          y,// Length along y direction
+    double          z,// length along z direction
+    double          indent_x1,// Indent in x direction
+    double          indent_x2// indent of corner
+    ) const;
 
   G4VSolid* ConstructHollowWrapSolid() const;
 
-  G4VSolid*     ConstructSphereDimpleSolid() const;
-  G4VSolid*     ConstructPyramidDimpleSolid() const;
-  G4VSolid*     ConstructParabolicDimpleSolid() const;
+  G4VSolid* ConstructSphereDimpleSolid() const;
+  G4VSolid* ConstructPyramidDimpleSolid() const;
+  G4VSolid* ConstructParabolicDimpleSolid() const;
 
   G4ThreeVector CalcDimpleOffset() const;
   G4ThreeVector CalcSiPMDimpleOffset() const;
@@ -111,13 +131,13 @@ private:
   G4Material* fEJ200;
   G4Material* fBialkali;
   G4Material* fEpoxy;
-  G4Material* fEpoxy2;
+  G4Material* fResin;
 
   // Pointers to surfaces
   G4OpticalSurface* fESROpSurface;
   G4OpticalSurface* fPolishedOpSurface;
   G4OpticalSurface* fIdealPolishedOpSurface;
-  G4OpticalSurface* fIdealMirrorOpSurface;
+  G4OpticalSurface* fIdealWhiteOpSurface;
   G4OpticalSurface* fSiPMSurface;
 
   // Pointers for access to Sensitive Detector
@@ -142,11 +162,13 @@ private:
   double _dimple_radius;// Dimple radius
   int _dimple_type;
 
+  double _sipm_deadwidth;
   double _sipm_x;
   double _sipm_y;
   double _sipm_z;
-  double _sipm_depth;// SiPM depth
+  double _sipm_standz;
   double _sipm_rimwidth;
+  double _sipm_glasswidth;
 };
 
 #endif

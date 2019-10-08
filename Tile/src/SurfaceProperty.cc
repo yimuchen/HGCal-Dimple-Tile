@@ -1,8 +1,13 @@
-#include "G4OpticalSurface.hh"
 #include "G4MaterialPropertiesTable.hh"
 #include "G4NistManager.hh"
+#include "G4OpticalSurface.hh"
 
 using namespace CLHEP;
+
+static const unsigned flatentries = 2;
+static const double minenergy     = 1.0*eV;
+static const double maxenergy     = 8.0*eV;
+
 
 G4OpticalSurface*
 MakeS_TyvekCrystal()
@@ -141,9 +146,9 @@ MakeS_IdealTyvek()
 G4OpticalSurface*
 MakeS_Polished()
 {
-  static const unsigned nentries        = 2;
-  static double phoE[nentries]          = {1.0*eV, 6.0*eV};
-  static double specularlobe[nentries]  = {1.0, 1.0};
+  static const unsigned nentries       = 2;
+  static double phoE[nentries]         = {1.0*eV, 6.0*eV};
+  static double specularlobe[nentries] = {1.0, 1.0};
 
   //////////////////////////////////
   // Realistic polished surface
@@ -221,6 +226,27 @@ MakeS_IdealMirror()
 }
 
 G4OpticalSurface*
+MakeS_IdealWhiteSurface()
+{
+  //////////////////////////////////
+  // Ideal mirror surface
+  //////////////////////////////////
+  G4OpticalSurface* surface = new G4OpticalSurface( "WhiteOpSurface" );
+  surface->SetType( dielectric_metal );
+  surface->SetFinish( ground );
+  surface->SetModel( unified );
+
+  double phoE[flatentries]         = {minenergy, maxenergy};
+  double reflectivity[flatentries] = {0.70, 0.70};
+
+  G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable();
+  table->AddProperty( "REFLECTIVITY", phoE, reflectivity, flatentries );
+  surface->SetMaterialPropertiesTable( table );
+
+  return surface;
+}
+
+G4OpticalSurface*
 MakeS_Absorbing()
 {
   const unsigned nentries       = 2;
@@ -274,11 +300,7 @@ MakeS_SiPM()
     1.705491878*eV, 1.683828975*eV, 1.662853866*eV, 1.643031375*eV,
     1.623272564*eV, 1.603516479*eV, 1.584163112*eV, 1.565103929*eV,
     1.548241716*eV};
-  double reflectivity[nentries] = {
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
   double efficiency[nentries] = {
     0.00080151,  0.003873974,  0.009957452,   0.025682901,
     0.070237974, 0.150458664,  0.218876073,   0.239857707,
@@ -293,6 +315,10 @@ MakeS_SiPM()
     0.129615124, 0.123742916,  0.11736541,    0.11184209,
     0.105217764, 0.097865669,  0.091000102,   0.084681686,
     0.080451249};
+  // SiPM reflectivity paper: Using a flat 0.12 for now
+  // https://reader.elsevier.com/reader/sd/pii/S016890021831297X?token=FADE142C43F500DEE5289D65B9D6573497F4AD220F3462EBA9239256CFD8E11FF98FF84E302016EAB89FA1B62B1EEDCE
+  double phoE2[flatentries]        = {minenergy, maxenergy };
+  double reflectivity[flatentries] = {0.12, 0.12};
 
   G4OpticalSurface* surface = new G4OpticalSurface( "SiPM_Surface" );
   surface->SetType( dielectric_metal );
@@ -300,8 +326,8 @@ MakeS_SiPM()
 
   G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable();
 
-  table->AddProperty( "REFLECTIVITY", phoE, reflectivity, nentries );
-  table->AddProperty( "EFFICIENCY",   phoE, efficiency,   nentries );
+  table->AddProperty( "EFFICIENCY",   phoE,  efficiency,   nentries );
+  table->AddProperty( "REFLECTIVITY", phoE2, reflectivity, flatentries );
   surface->SetMaterialPropertiesTable( table );
   return surface;
 }

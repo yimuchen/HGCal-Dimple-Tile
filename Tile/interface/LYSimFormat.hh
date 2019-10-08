@@ -15,6 +15,10 @@ public:
   double beam_x;
   double beam_y;
 
+  double sipm_width;
+  double sipm_rim;
+  double sipm_stand;
+
   double abs_mult;
   double wrap_reflect;
 
@@ -31,6 +35,9 @@ public:
     tree->Branch( "DimpleIndent", &dimple_indent );
     tree->Branch( "BeamX",        &beam_x        );
     tree->Branch( "BeamY",        &beam_y        );
+    tree->Branch( "SiPMWidth",    &sipm_width    );
+    tree->Branch( "SiPMRim",      &sipm_rim      );
+    tree->Branch( "SiPMStand",    &sipm_stand    );
     tree->Branch( "absmult",      &abs_mult      );
     tree->Branch( "Reflectivity", &wrap_reflect  );
     tree->Branch( "genphotons",   &genphotons    );
@@ -47,6 +54,9 @@ public:
     tree->SetBranchAddress( "DimpleIndent", &dimple_indent );
     tree->SetBranchAddress( "BeamX",        &beam_x        );
     tree->SetBranchAddress( "BeamY",        &beam_y        );
+    tree->SetBranchAddress( "SiPMWidth",    &sipm_width    );
+    tree->SetBranchAddress( "SiPMRim",      &sipm_rim      );
+    tree->SetBranchAddress( "SiPMStand",    &sipm_stand    );
     tree->SetBranchAddress( "absmult",      &abs_mult      );
     tree->SetBranchAddress( "Reflectivity", &wrap_reflect  );
     tree->SetBranchAddress( "genphotons",   &genphotons    );

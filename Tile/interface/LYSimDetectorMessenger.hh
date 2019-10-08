@@ -42,6 +42,10 @@ private:
   G4UIcmdWithADoubleAndUnit* SetTileYCmd;
   G4UIcmdWithADoubleAndUnit* SetTileZCmd;
 
+  G4UIcmdWithADoubleAndUnit* SetSiPMXCmd;
+  G4UIcmdWithADoubleAndUnit* SetSiPMYCmd;
+  G4UIcmdWithADoubleAndUnit* SetSiPMRimCmd;
+
   G4UIcmdWithADouble* SetTileAbsMultCmd;
   G4UIcmdWithADouble* SetWrapReflectCmd;
 
