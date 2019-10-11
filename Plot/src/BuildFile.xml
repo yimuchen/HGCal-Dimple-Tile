@@ -1,4 +1,5 @@
 <use name="root"/>
+<use name="UserUtils/Common"/>
 
 <flags CXXFLAGS="-g"/>
 

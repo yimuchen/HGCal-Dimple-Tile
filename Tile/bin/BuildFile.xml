@@ -1,5 +1,6 @@
 <use name="geant4"/>
 <use name="HGCalTileSim/Tile"/>
+<use name="UserUtils/Common"/>
 
 <!--Interactive session should be used in standalong Geant4
     With OpenGL interactive window. Leaving here for standard
