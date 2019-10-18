@@ -18,6 +18,8 @@ main( int argc, char** argv )
     "Multple of inbuilt absorption length" )
     ( "wrapreflect,m", usr::po::multivalue<double>(),
     "Wrap reflectivity" )
+    ( "sipmwidth,W", usr::po::value<double>(), "SiPM Width [mm]" )
+    ( "sipmstand,S",   usr::po::multivalue<double>(), "SiPM stand height [mm]" )
     ( "inputfile,f", usr::po::value<std::string>(),
     "File containing the generated files" )
     ( "output,o", usr::po::defvalue<std::string>(
@@ -33,12 +35,16 @@ main( int argc, char** argv )
   const std::vector<double> dlist = args.ArgList<double>( "dimpleind" );
   const std::vector<double> alist = args.ArgList<double>( "absmult"   );
   const std::vector<double> wlist = args.ArgList<double>( "wrapreflect" );
+  const std::vector<double> Slist = args.ArgList<double>( "sipmstand" );
+  const double sipmwidth          = args.Arg<double>( "sipmwidth" );
 
   const std::vector<double>& varlist = rlist.size() > 1 ? rlist :
                                        dlist.size() > 1 ? dlist :
                                        alist.size() > 1 ? alist :
-                                       wlist;
+                                       wlist.size() > 1 ? wlist :
+                                       Slist;
 
+  // Dummy for insersion.
   LYSimFormat fmt;
   fmt.beam_width = 1.5;
   std::vector<LYSimFormat> fmtlist;
@@ -47,11 +53,15 @@ main( int argc, char** argv )
     for( const auto d : dlist ){
       for( const auto a : alist ){
         for( const auto w : wlist ){
-          fmt.dimple_radius = r;
-          fmt.dimple_indent = d;
-          fmt.abs_mult      = a;
-          fmt.wrap_reflect  = w;
-          fmtlist.push_back( fmt );
+          for( const auto S : Slist ){
+            fmt.dimple_radius = r;
+            fmt.dimple_indent = d;
+            fmt.abs_mult      = a;
+            fmt.wrap_reflect  = w;
+            fmt.sipm_width    = sipmwidth;
+            fmt.sipm_stand    = S;
+            fmtlist.push_back( fmt );
+          }
         }
       }
     }
@@ -91,22 +101,27 @@ main( int argc, char** argv )
     TGraph* graph = (TGraph*)( file.Get( graphname.c_str() ) );
     if( !graph ){ continue; }
 
-    const std::string var = &varlist == &rlist ? "Rad." :
-                            &varlist == &dlist ? "Ind." :
-                            &varlist == &alist ? "Abs." :
+    const std::string var = &varlist == &rlist ? "Rad."  :
+                            &varlist == &dlist ? "Ind."  :
+                            &varlist == &alist ? "Abs."  :
                             &varlist == &wlist ? "Refl." :
+                            &varlist == &Slist ? "Stand" :
                             "";
     const std::string unit = &varlist == &rlist ? "[mm]" :
                              &varlist == &dlist ? "[mm]" :
                              &varlist == &alist ? "[cm]" :
                              &varlist == &wlist ? "%" :
+                             &varlist == &Slist ? "[mm]" :
                              "";
     const double val = &varlist == &rlist ? fmt.dimple_radius :
                        &varlist == &dlist ? fmt.dimple_indent :
                        &varlist == &alist ? fmt.abs_mult *380 :
                        &varlist == &wlist ? fmt.wrap_reflect *100 :
+                       &varlist == &Slist ? fmt.sipm_stand :
                        0;
-    const std::string entry = usr::fstr( "%s=%.1lf%s", var, val, unit );
+
+    const std::string entry = usr::fstr( "%s=%.2lf%s", var, val, unit );
+
     c.PlotGraph( graph,
       usr::plt::PlotType( usr::plt::fittedfunc ),
       usr::plt::TrackY( usr::plt::TrackY::max ),
@@ -138,7 +153,7 @@ main( int argc, char** argv )
   c.Pad().Xaxis().SetTitle( "Beam Center X [mm]" );
   c.Pad().Yaxis().SetTitle( "Detected Photons" );
 
-  c.DrawLuminosity( usr::fstr( "Trigger Width: %.1lf[mm]", width ) );
+  c.DrawLuminosity( usr::fstr( "Trigger Width: %.1lf[mm]", width *2  ) );
   c.DrawCMSLabel( "Simulation", "HGCal" );
   if( &varlist != &rlist ){
     c.Pad().WriteLine( usr::fstr( "Radius=%.1lf[mm]", rlist.front() ) );
@@ -151,6 +166,9 @@ main( int argc, char** argv )
   }
   if( &varlist != &wlist ){
     c.Pad().WriteLine( usr::fstr( "Refl =%.1lf[%%]", wlist.front()*100 ) );
+  }
+  if( &varlist != &Slist ){
+    c.Pad().WriteLine( usr::fstr( "Stand =%.1lf[mm]", Slist.front() ) );
   }
 
 
