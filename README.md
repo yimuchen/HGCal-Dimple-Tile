@@ -147,7 +147,7 @@ command, and use them to generate a Light yield verses beam x value graph, with
 different geometric configuration automatically listed in the Graph name. For
 details on the graph name, see the file `Plot/src/LYvX_Common.cc`.
 
-## Plotting the Light-yeild v.s. graph
+## Plotting the Light-yield v.s. graph
 
 The command
 
