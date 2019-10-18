@@ -87,15 +87,22 @@ In the CMSSW, one has can run the program
   -h [ --help ]                     print help options and exit program
 
 Running a run with a certain geometry:
-  -x [ --beamx ] arg (=0)           x center of beam [mm]
-  -y [ --beamy ] arg (=0)           y center of beam [mm]
-  -w [ --beamwidth ] arg (=0)       width of beam [mm]
-  -r [ --dimplerad ] arg (=3)       Dimple radius [mm]
-  -d [ --dimpleind ] arg (=1.5)     Dimple indent [mm]
-  -a [ --absmult ] arg (=1)         Multple of inbuilt absorption length
-  -m [ --wrapreflect ] arg (=1)     Wrap reflectivity
-  -N [ --NEvents ] arg (=1)         Number of events to run
-  -o [ --output ] arg (=test.root)  output file
+  -x [ --beamx ] arg (=0)               x center of beam [mm]
+  -y [ --beamy ] arg (=0)               y center of beam [mm]
+  -w [ --beamwidth ] arg (=0)           width of beam [mm]
+  -r [ --dimplerad ] arg (=3)           Dimple radius [mm]
+  -d [ --dimpleind ] arg (=1.5)         Dimple indent [mm]
+  -W [ --sipmwidth ] arg (=1.3999999999999999)
+                                        SiPM active width [mm]
+  -R [ --sipmrim ] arg (=0.40000000000000002)
+                                        SiPM Rim width [mm]
+  -S [ --sipmstand ] arg (=0.29999999999999999)
+                                        SiPM Stand height [mm]
+  -a [ --absmult ] arg (=1)             Multple of inbuilt absorption length
+  -m [ --wrapreflect ] arg (=0.98499999999999999)
+                                        Wrap reflectivity
+  -N [ --NEvents ] arg (=1)             Number of events to run
+  -o [ --output ] arg (=test.root)      output file
 ```
 
 This will generate a root file of a single configuration with many number of
@@ -107,6 +114,47 @@ $CMSSW_BASE/bin/slc6_amd64_gcc700/LYSim_SquareTrigger --beamx 2.0 --beamwidth 1.
 ```
 
 will generate the file `mytest.root` with the muon beam hitting the tile at
-x=2.0mm, y=0.0mm, with a uniform square distribution with half-width of 1.5mm,
-and will run a total of 1000 events (~1 hour runtime). The user is free to write
+x=2.0 mm, y=0.0 mm, with a uniform square distribution with half-width of 1.5 mm,
+and will run a total of 100 events (~30 min runtime). The user is free to write
 your own scripts for generating the required scripts for running under condor.
+For a list of parameters, see the help commands.
+
+## Generating Condor scripts
+
+The command:
+
+```bash
+python3 condor/SubmitJobs.py <options>
+```
+
+Will generated of bunch of .jdl files in the condor/results/condor directory for
+condor job submission. There is a program option corresponding to each of the
+geometric program options for `LYSim_SquareTrigger`, except this time, each
+program option inputs takes in an array. All combinations of all geometric
+options will be have its corresponding jdl file generated. The JDL files
+themselves are essentially running a single instance of LYSim_SquareTrigger.
+
+## Generating the Light-yield v.s. beam x graph
+
+The command
+
+```bash
+$CMSSW_BASE/bin/$SCRAM_ARCH/LYSim_MakeLYvXGraph --inputfiles *.root --output graph.root
+```
+
+will take all the bunch of output file generated using the LYSim_SquareTrigger
+command, and use them to generate a Light yield verses beam x value graph, with
+different geometric configuration automatically listed in the Graph name. For
+details on the graph name, see the file `Plot/src/LYvX_Common.cc`.
+
+## Plotting the Light-yeild v.s. graph
+
+The command
+
+```bash
+$CMSSW_BASE/bin/$SCRAM_ARCH/LYSim_PlotLYvXGraph --inputfiles graph.root <geometric parameters>
+```
+
+takes the output of the `MakeLYvXGraph` command, and plots the graphs into a
+standard CMS plots format. One of the geometric parameters can be a list to put
+more than one geometric comparison in the same plot for comparison.
