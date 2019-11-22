@@ -17,6 +17,12 @@ parser.add_argument('--beamy',
                     nargs='+',
                     default=[0],
                     help='List of y values of beam center')
+parser.add_argument('--tilewidth',
+                    '-L',
+                    type=float,
+                    nargs='+',
+                    default=[30],
+                    help='Tile width')
 parser.add_argument('--dimplerad',
                     '-r',
                     type=float,
@@ -87,19 +93,23 @@ Arguments = {2}
 Queue
 """
 
-for x, y, r, d, a, w, W, R, S in [(x, y, r, d, a, w, W, R, S) for x in args.beamx
-                                  for y in args.beamy for r in args.dimplerad
-                                  for d in args.dimpleind for a in args.absmult
-                                  for w in args.wrapreflect
-                                  for W in args.sipmwidth for R in args.sipmrim
-                                  for S in args.sipmstand]:
+for x, y, L, r, d, a, w, W, R, S in [(x, y, L, r, d, a, w, W, R, S)
+                                     for x in args.beamx for y in args.beamy
+                                     for L in args.tilewidth
+                                     for r in args.dimplerad
+                                     for d in args.dimpleind
+                                     for a in args.absmult
+                                     for w in args.wrapreflect
+                                     for W in args.sipmwidth
+                                     for R in args.sipmrim
+                                     for S in args.sipmstand]:
 
   def make_str(prefix):
     args_string = '_'.join([
-        'x{0:.1f}'.format(x), 'y{0:.1f}'.format(y), 'r{0:.1f}'.format(r),
-        'd{0:.1f}'.format(d), 'a{0:.1f}'.format(a*100), 'm{0:.1f}'.format(
-            w * 100), 'W{0:.1f}'.format(W), 'R{0:.1f}'.format(R),
-        'S{0:.2f}'.format(S),
+        'x{0:.1f}'.format(x), 'y{0:.1f}'.format(y), 'L{0:.1f}'.format(L),
+        'r{0:.1f}'.format(r), 'd{0:.1f}'.format(d), 'a{0:.1f}'.format(
+            a * 100), 'm{0:.1f}'.format(w * 100), 'W{0:.1f}'.format(W),
+        'R{0:.1f}'.format(R), 'S{0:.2f}'.format(S),
     ])
     return prefix + args.prefix + '_' + args_string.replace('.', 'p')
 
@@ -107,9 +117,9 @@ for x, y, r, d, a, w, W, R, S in [(x, y, r, d, a, w, W, R, S) for x in args.beam
                                   make_str('hgcal_tilesim') + '.root')
 
   condor_args = ' '.join([
-      '-x {}'.format(x), '-y {}'.format(y), '-w 1.5', '-r {}'.format(r),
-      '-d {}'.format(d), '-a {}'.format(a), '-m {}'.format(w), '-W {}'.format(W),
-      '-R {}'.format(R), '-S {}'.format(S), '-N {}'.format(
+      '-x {}'.format(x), '-y {}'.format(y), '-L {}'.format(L), '-w 1.5',
+      '-r {}'.format(r), '-d {}'.format(d), '-a {}'.format(a), '-m {}'.format(w),
+      '-W {}'.format(W), '-R {}'.format(R), '-S {}'.format(S), '-N {}'.format(
           args.NEvents), '-o {}'.format(os.path.abspath(save_filename)),
   ])
 

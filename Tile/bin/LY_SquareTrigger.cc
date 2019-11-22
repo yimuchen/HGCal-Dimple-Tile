@@ -19,16 +19,17 @@ main( int argc, char** argv )
   desc.add_options()
     ( "beamx,x", usr::po::defvalue<double>( 0 ), "x center of beam [mm]" )
     ( "beamy,y", usr::po::defvalue<double>( 0 ), "y center of beam [mm]" )
+    ( "tilewidth,L", usr::po::defvalue<double>( 30 ), "Length of tile [mm]" )
     ( "beamwidth,w", usr::po::defvalue<double>( 0 ), "width of beam [mm]" )
     ( "dimplerad,r", usr::po::defvalue<double>( 3.0 ), "Dimple radius [mm]" )
     ( "dimpleind,d", usr::po::defvalue<double>( 1.5 ), "Dimple indent [mm]" )
-    ( "sipmwidth,W" , usr::po::defvalue<double>(1.4), "SiPM active width [mm]")
-    ( "sipmrim,R",    usr::po::defvalue<double>(0.4), "SiPM Rim width [mm]" )
-    ( "sipmstand,S",  usr::po::defvalue<double>(0.3), "SiPM Stand height [mm]")
+    ( "sipmwidth,W", usr::po::defvalue<double>( 1.4 ), "SiPM active width [mm]" )
+    ( "sipmrim,R",    usr::po::defvalue<double>( 0.4 ), "SiPM Rim width [mm]" )
+    ( "sipmstand,S",  usr::po::defvalue<double>( 0.3 ), "SiPM stand [mm]" )
     ( "absmult,a",   usr::po::defvalue<double>( 1 ),
     "Multple of inbuilt absorption length" )
     ( "wrapreflect,m", usr::po::defvalue<double>( 0.985 ),
-    "Wrap reflectivity")
+    "Wrap reflectivity" )
     ( "NEvents,N", usr::po::defvalue<unsigned>( 1 ), "Number of events to run" )
     ( "output,o", usr::po::defvalue<std::string>( "test.root" ), "output file" )
   ;
@@ -37,19 +38,20 @@ main( int argc, char** argv )
   args.AddOptions( desc );
   args.ParseOptions( argc, argv );
 
-  const double x_center      = args.Arg<double>( "beamx"       );
-  const double y_center      = args.Arg<double>( "beamy"       );
-  const double width         = args.Arg<double>( "beamwidth"   );
-  const double dimplerad     = args.Arg<double>( "dimplerad"   );
-  const double dimpleind     = args.Arg<double>( "dimpleind"   );
-  const double sipmwidth     = args.Arg<double>( "sipmwidth"   );
-  const double sipmrim       = args.Arg<double>( "sipmrim"     );
-  const double sipmstand     = args.Arg<double>( "sipmstand"   );
-  const double absmult       = args.Arg<double>( "absmult"     );
-  const double wrapref       = args.Arg<double>( "wrapreflect" );
-  const unsigned N           = args.Arg<unsigned>( "NEvents" );
-  std::string filename = args.Arg<std::string>( "output" );
-  filename.insert(filename.length()-5, "_" + usr::RandomString(6) );
+  const double x_center  = args.Arg<double>( "beamx"       );
+  const double y_center  = args.Arg<double>( "beamy"       );
+  const double tilewidth = args.Arg<double>( "tilewidth"   );
+  const double width     = args.Arg<double>( "beamwidth"   );
+  const double dimplerad = args.Arg<double>( "dimplerad"   );
+  const double dimpleind = args.Arg<double>( "dimpleind"   );
+  const double sipmwidth = args.Arg<double>( "sipmwidth"   );
+  const double sipmrim   = args.Arg<double>( "sipmrim"     );
+  const double sipmstand = args.Arg<double>( "sipmstand"   );
+  const double absmult   = args.Arg<double>( "absmult"     );
+  const double wrapref   = args.Arg<double>( "wrapreflect" );
+  const unsigned N       = args.Arg<unsigned>( "NEvents" );
+  std::string filename   = args.Arg<std::string>( "output" );
+  filename.insert( filename.length()-5, "_" + usr::RandomString( 6 ) );
 
   // Must initialize Run Manager first
   G4RunManager* runManager   = new G4RunManager;
@@ -58,6 +60,8 @@ main( int argc, char** argv )
   LYSimDetectorConstruction* detector = new LYSimDetectorConstruction();
   detector->SetDimpleRadius( dimplerad );
   detector->SetDimpleIndent( dimpleind );
+  detector->SetTileX( tilewidth );
+  detector->SetTileY( tilewidth );
   detector->SetTileAbsMult( absmult );
   detector->SetWrapReflect( wrapref );
   detector->SetSiPMX( sipmwidth );
@@ -85,7 +89,8 @@ main( int argc, char** argv )
   runManager->SetUserAction( new LYSimAnalysis::RunAction() );
   runManager->SetUserAction( new LYSimAnalysis::EventAction() );
   runManager->SetUserAction( new LYSimTrackingAction() );
-  runManager->SetUserAction( new LYSimSteppingAction() );
+  runManager->SetUserAction(
+    new LYSimSteppingAction( LYSimAnalysis::GetInstance() ) );
 
   // Preparing the LYSimAnalysis
   LYSimAnalysis::GetInstance()->PrepareExperiment();

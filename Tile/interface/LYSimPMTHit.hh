@@ -36,22 +36,33 @@ public:
   AddEnergy( G4double energy ){fEnergy += energy;}
   void
   IncPhotonCount(){fPhotonCount++;}
+  void
+  SetBounceCount( G4int x ){ fBounceCount = x ; }
 
   G4double
-  GetEnergy(){ return fEnergy; }
+  GetEnergy() const { return fEnergy; }
   G4int
-  GetPhotonCount(){ return fPhotonCount;}
+  GetPhotonCount() const { return fPhotonCount;}
 
   void
-  SetTime( G4double t ){fTime = t;};
+  SetTime( const G4double t ){fTime = t;};
   G4double
-  GetTime(){return fTime;};
+  GetTime() const {return fTime;};
+
+  void
+  SetLength( const double x ){ fLength = x ; }
+  double
+  GetLength() const { return fLength; }
+
+  G4int
+  GetBounceCount() const {return fBounceCount; }
 
 private:
   G4double fEnergy;   // Total photon energy deposited in PMT
   G4int fPhotonCount;   // Total number of photons detected by PMT
   G4double fTime;
-
+  G4double fLength; // Track length of photon hitting the detector
+  G4int  fBounceCount;
 };
 
 // --------------------------------------------------

@@ -1,9 +1,11 @@
 #ifdef CMSSW_GIT_HASH
+#include "HGCalTileSim/Tile/interface/LYSimAnalysis.hh"
 #include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPMTSD.hh"
 #include "HGCalTileSim/Tile/interface/LYSimSteppingAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimSteppingMessenger.hh"
 #else
+#include "LYSimAnalysis.hh"
 #include "LYSimDetectorConstruction.hh"
 #include "LYSimPMTSD.hh"
 #include "LYSimSteppingAction.hh"
@@ -16,13 +18,15 @@
 #include "G4SDManager.hh"
 #include "G4Step.hh"
 #include "G4UnitsTable.hh"
+#include "TH1D.h"
 
 using namespace CLHEP;
 
-LYSimSteppingAction::LYSimSteppingAction()
+LYSimSteppingAction::LYSimSteppingAction( LYSimAnalysis* ana )
   : G4UserSteppingAction(),
   maxtracklength( 500000.*mm ),
-  messenger( new LYSimSteppingMessenger( this ) )
+  messenger( new LYSimSteppingMessenger( this ) ),
+  analysis( ana )
 {
 }
 
@@ -71,6 +75,13 @@ LYSimSteppingAction::UserSteppingAction( const G4Step* step )
   }
   default:
     break;
+  }
+
+  if( step->GetTrack()->GetTrackStatus() != fAlive ){
+    analysis->photon_all_track_hist->Fill(
+      step->GetTrack()->GetTrackLength()/cm );
+    analysis->photon_all_bounce_hist->Fill(
+      step->GetTrack()->GetCurrentStepNumber()/3 );
   }
 
   G4double tracklength = step->GetTrack()->GetTrackLength();

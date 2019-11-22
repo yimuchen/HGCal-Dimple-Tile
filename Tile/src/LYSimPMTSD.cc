@@ -53,6 +53,8 @@ LYSimPMTSD::ProcessHits_constStep( const G4Step*       aStep,
   hit->AddEnergy( theTrack->GetTotalEnergy() );
   hit->IncPhotonCount();// increment hit for the selected pmt
   hit->SetTime( aStep->GetPostStepPoint()->GetGlobalTime() );
+  hit->SetLength( theTrack->GetTrackLength() );
+  hit->SetBounceCount( theTrack->GetCurrentStepNumber() );
 
   fPMTHitsCollection->insert( hit );
 

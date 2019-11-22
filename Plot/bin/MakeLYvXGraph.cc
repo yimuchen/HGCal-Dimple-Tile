@@ -93,6 +93,7 @@ main( int argc, char** argv )
   // Printing out all unique values of parameter for easier plotting commands.
   std::map<double, std::vector<double> > rlist;
   std::map<double, std::vector<double> > dlist;
+  std::map<double, std::vector<double> > llist ;
   std::map<double, std::vector<double> > alist;
   std::map<double, std::vector<double> > wlist;
   std::map<double, std::vector<double> > Slist;
@@ -102,6 +103,7 @@ main( int argc, char** argv )
 
     rlist[fmt.sipm_width].push_back( fmt.dimple_radius );
     dlist[fmt.sipm_width].push_back( fmt.dimple_indent );
+    llist[fmt.sipm_width].push_back( fmt.tile_width    );
     alist[fmt.sipm_width].push_back( fmt.abs_mult      );
     wlist[fmt.sipm_width].push_back( fmt.wrap_reflect  );
     Slist[fmt.sipm_width].push_back( fmt.sipm_stand    );
@@ -126,6 +128,7 @@ main( int argc, char** argv )
               << sipm_width << " [mm]:" << std::endl;
     print_vec( "Dimple Radius :", usr::RemoveDuplicate( rlist[sipm_width] ) );
     print_vec( "Dimple Indent :", usr::RemoveDuplicate( dlist[sipm_width] ) );
+    print_vec( "Tile Size     :", usr::RemoveDuplicate( llist[sipm_width] ) );
     print_vec( "Abs Multiplier:", usr::RemoveDuplicate( alist[sipm_width] ) );
     print_vec( "Wrap reflect. :", usr::RemoveDuplicate( wlist[sipm_width] ) );
     print_vec( "SiPM Stand    :", usr::RemoveDuplicate( Slist[sipm_width] ) );

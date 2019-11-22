@@ -59,7 +59,8 @@ main( int argc, char** argv )
   runManager->SetUserAction( new LYSimAnalysis::RunAction() );
   runManager->SetUserAction( new LYSimAnalysis::EventAction() );
   runManager->SetUserAction( new LYSimTrackingAction() );
-  runManager->SetUserAction( new LYSimSteppingAction() );
+  runManager->SetUserAction(
+    new LYSimSteppingAction( LYSimAnalysis::GetInstance() ) );
 
   runManager->Initialize();
   G4VisManager* visManager = new G4VisExecutive( "Quiet" );

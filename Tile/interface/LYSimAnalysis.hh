@@ -87,10 +87,15 @@ private:
   LYSimDetectorConstruction* DetectorConstruction;
   LYSimPrimaryGeneratorAction* generatorAction;
 
+public:
   std::string filename;
   TTree*  tree;
   LYSimFormat* format;
   TH1D* photon_energy_hist;
+  TH1D* photon_track_hist;
+  TH1D* photon_bounce_hist;
+  TH1D* photon_all_track_hist;
+  TH1D* photon_all_bounce_hist;
 
   G4int PhotonCount;
   G4int HitCount;

@@ -4,12 +4,13 @@
 #include "globals.hh"
 #include "G4UserSteppingAction.hh"
 
+class LYSimAnalysis;
 class LYSimSteppingMessenger;
 
 class LYSimSteppingAction : public G4UserSteppingAction
 {
 public:
-  LYSimSteppingAction();
+  LYSimSteppingAction(LYSimAnalysis* analysis);
   virtual ~LYSimSteppingAction();
 
   // method from the base class
@@ -23,6 +24,7 @@ public:
 private:
   double maxtracklength;
   LYSimSteppingMessenger* messenger;
+  LYSimAnalysis* analysis;
 };
 
 // ....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

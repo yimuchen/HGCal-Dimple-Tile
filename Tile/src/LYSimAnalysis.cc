@@ -54,7 +54,11 @@ LYSimAnalysis::PrepareExperiment()
   tree   = new TTree( "LYSim", "LYSim" );
   format = new LYSimFormat();
   format->AddToTree( tree );
-  photon_energy_hist = new TH1D( "PhotonWLE", "", 100, 300., 600. );
+  photon_energy_hist     = new TH1D( "PhotonWLE", "", 100, 300., 600. );
+  photon_track_hist      = new TH1D( "PhotonTrack", "", 500, 0.01, 500 );
+  photon_all_track_hist  = new TH1D( "AllPhotonTrack", "", 500, 0.01, 500 );
+  photon_bounce_hist     = new TH1D( "PhotonBounce", "", 30, 0, 300);
+  photon_all_bounce_hist = new TH1D( "AllPhotonBounce", "", 30, 0, 300);
 
   // Preparing the signal termination function
   signal( SIGABRT, CloseAll );
@@ -90,12 +94,15 @@ LYSimAnalysis::PrepareNewEvent( const G4Event* event )
   format->beam_x = event->GetPrimaryVertex()->GetX0();
   format->beam_y = event->GetPrimaryVertex()->GetY0();
 
+  // Get tile parameters
+  format->tile_width    = DetectorConstruction->GetTileX();
+
   // Getting the SiPM parameters
   format->sipm_width = DetectorConstruction->GetSiPMX();
   format->sipm_rim   = DetectorConstruction->GetSiPMRim();
   format->sipm_stand = DetectorConstruction->GetSiPMStand();
 
-  format->abs_mult = DetectorConstruction->GetTileAbsMult();
+  format->abs_mult     = DetectorConstruction->GetTileAbsMult();
   format->wrap_reflect = DetectorConstruction->GetWrapReflect();
 
   format->dimple_radius = DetectorConstruction->GetDimpleRadius();
@@ -137,6 +144,10 @@ LYSimAnalysis::EndOfExperiment()
             << tree->GetEntries() << ")" << std::endl;
   tree->Write();
   photon_energy_hist->Write();
+  photon_track_hist->Write();
+  photon_bounce_hist->Write();
+  photon_all_track_hist->Write();
+  photon_all_bounce_hist->Write();
   file->Close();
 
   delete tree;
@@ -169,6 +180,10 @@ LYSimAnalysis::GetNPhotons( const G4Event* event )
     assert( ( *hits )[i]->GetPhotonCount() == 1 );
     ++EventPhotonCount;
     photon_energy_hist->Fill( 1239.842/( HitEnergy/eV ) );
+    const double TrackLength = ( *hits )[i]->GetLength();
+    const int bounce = (*hits)[i]->GetBounceCount();
+    photon_track_hist->Fill( TrackLength / cm );
+    photon_bounce_hist->Fill( bounce/3 );
   }
 
   return EventPhotonCount;

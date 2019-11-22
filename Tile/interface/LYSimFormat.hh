@@ -8,6 +8,7 @@ class LYSimFormat
 public:
   double beam_center_x;
   double beam_center_y;
+  double tile_width;
   double beam_width;
   double dimple_radius;
   double dimple_indent;
@@ -30,6 +31,7 @@ public:
   {
     tree->Branch( "BeamCenterX",  &beam_center_x );
     tree->Branch( "BeamCenterY",  &beam_center_y );
+    tree->Branch( "TileWidth",    &tile_width     );
     tree->Branch( "BeamWidth",    &beam_width    );
     tree->Branch( "DimpleRadius", &dimple_radius );
     tree->Branch( "DimpleIndent", &dimple_indent );
@@ -49,6 +51,7 @@ public:
   {
     tree->SetBranchAddress( "BeamCenterX",  &beam_center_x );
     tree->SetBranchAddress( "BeamCenterY",  &beam_center_y );
+    tree->SetBranchAddress( "TileWidth",    &tile_width    );
     tree->SetBranchAddress( "BeamWidth",    &beam_width    );
     tree->SetBranchAddress( "DimpleRadius", &dimple_radius );
     tree->SetBranchAddress( "DimpleIndent", &dimple_indent );
