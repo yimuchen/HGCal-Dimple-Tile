@@ -20,6 +20,9 @@ public:
   double sipm_rim;
   double sipm_stand;
 
+  double pcb_reflect;
+  double pcb_radius;
+
   double abs_mult;
   double wrap_reflect;
 
@@ -40,6 +43,8 @@ public:
     tree->Branch( "SiPMWidth",    &sipm_width    );
     tree->Branch( "SiPMRim",      &sipm_rim      );
     tree->Branch( "SiPMStand",    &sipm_stand    );
+    tree->Branch( "PCBReflect",   &pcb_reflect   );
+    tree->Branch( "PCBRadius",    &pcb_radius    );
     tree->Branch( "absmult",      &abs_mult      );
     tree->Branch( "Reflectivity", &wrap_reflect  );
     tree->Branch( "genphotons",   &genphotons    );
@@ -61,6 +66,8 @@ public:
     tree->SetBranchAddress( "SiPMRim",      &sipm_rim      );
     tree->SetBranchAddress( "SiPMStand",    &sipm_stand    );
     tree->SetBranchAddress( "absmult",      &abs_mult      );
+    tree->SetBranchAddress( "PCBReflect",   &pcb_reflect   );
+    tree->SetBranchAddress( "PCBRadiys",    &pcb_radius    );
     tree->SetBranchAddress( "Reflectivity", &wrap_reflect  );
     tree->SetBranchAddress( "genphotons",   &genphotons    );
     tree->SetBranchAddress( "nphotons",     &nphotons      );

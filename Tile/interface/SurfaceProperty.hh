@@ -16,6 +16,7 @@ extern G4OpticalSurface* MakeS_IdealWhiteSurface();
 extern G4OpticalSurface* MakeS_Absorbing();
 extern G4OpticalSurface* MakeS_Rough();
 extern G4OpticalSurface* MakeS_SiPM();
+extern G4OpticalSurface* MakeS_PCBSurface();
 extern G4OpticalSurface* MakeS_AirAir();
 
 #endif

@@ -102,6 +102,10 @@ LYSimAnalysis::PrepareNewEvent( const G4Event* event )
   format->sipm_rim   = DetectorConstruction->GetSiPMRim();
   format->sipm_stand = DetectorConstruction->GetSiPMStand();
 
+  // PCB parameters
+  format->pcb_reflect = DetectorConstruction->GetPCBReflect();
+  format->pcb_radius  = DetectorConstruction->GetPCBRadius();
+
   format->abs_mult     = DetectorConstruction->GetTileAbsMult();
   format->wrap_reflect = DetectorConstruction->GetWrapReflect();
 

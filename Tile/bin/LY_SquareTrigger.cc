@@ -30,6 +30,10 @@ main( int argc, char** argv )
     "Multple of inbuilt absorption length" )
     ( "wrapreflect,m", usr::po::defvalue<double>( 0.985 ),
     "Wrap reflectivity" )
+    ( "pcbreflect,p", usr::po::defvalue<double>( 0.5 ),
+    "Average reflectivity of Exposed PCB back plane" )
+    ( "pcbradius,b", usr::po::defvalue<double>( 2.3 ),
+    "Radius of Exposed PCB back plane" )
     ( "NEvents,N", usr::po::defvalue<unsigned>( 1 ), "Number of events to run" )
     ( "output,o", usr::po::defvalue<std::string>( "test.root" ), "output file" )
   ;
@@ -49,6 +53,8 @@ main( int argc, char** argv )
   const double sipmstand = args.Arg<double>( "sipmstand"   );
   const double absmult   = args.Arg<double>( "absmult"     );
   const double wrapref   = args.Arg<double>( "wrapreflect" );
+  const double pcbref    = args.Arg<double>( "pcbreflect"  );
+  const double pcbrad    = args.Arg<double>( "pcbradius"   );
   const unsigned N       = args.Arg<unsigned>( "NEvents" );
   std::string filename   = args.Arg<std::string>( "output" );
   filename.insert( filename.length()-5, "_" + usr::RandomString( 6 ) );
@@ -68,6 +74,8 @@ main( int argc, char** argv )
   detector->SetSiPMY( sipmwidth );
   detector->SetSiPMRim( sipmrim );
   detector->SetSiPMStand( sipmstand );
+  detector->SetPCBReflect( pcbref );
+  detector->SetPCBRadius( pcbrad );
 
   runManager->SetUserInitialization( detector );
   runManager->SetUserInitialization( physlist );

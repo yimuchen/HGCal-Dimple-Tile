@@ -71,7 +71,7 @@ public:
   inline double
   GetSiPMStand() const { return _sipm_standz; }
   inline void
-  SetSiPMStand( const double x ){ _sipm_standz = x ; }
+  SetSiPMStand( const double x ){ _sipm_standz = x; }
 
   enum  DIMPLE_TYPE
   {
@@ -96,6 +96,15 @@ public:
   void SetWrapReflect( const double x );
   inline double
   GetWrapReflect() const { return _wrap_reflect; }
+
+  void
+  SetPCBRadius( const double x ){ _pcb_radius = x; }
+  inline double
+  GetPCBRadius() const { return _pcb_radius; }
+
+  void SetPCBReflect( const double x );
+  inline double
+  GetPCBReflect() const { return _pcb_reflectivity; }
 
   // Accesing Custom Materials
   inline G4Material*
@@ -139,6 +148,7 @@ private:
   G4OpticalSurface* fIdealPolishedOpSurface;
   G4OpticalSurface* fIdealWhiteOpSurface;
   G4OpticalSurface* fSiPMSurface;
+  G4OpticalSurface* fPCBSurface;
 
   // Pointers for access to Sensitive Detector
   static LYSimPMTSD* fPMTSD;
@@ -152,6 +162,7 @@ private:
 
   // Wrapping Geometry definitions
   double wrapgap;// distance between tile and wrapping
+  double wrapthickness;
 
   // Absorption length multiplier
   double _absmult;
@@ -161,6 +172,10 @@ private:
   double _dimple_indent;// Depth of dimple
   double _dimple_radius;// Dimple radius
   int _dimple_type;
+
+  // Parameters for plate behind SiPM
+  double _pcb_radius;
+  double _pcb_reflectivity;
 
   double _sipm_deadwidth;
   double _sipm_x;

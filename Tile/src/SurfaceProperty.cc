@@ -331,3 +331,23 @@ MakeS_SiPM()
   surface->SetMaterialPropertiesTable( table );
   return surface;
 }
+
+G4OpticalSurface*
+MakeS_PCBSurface()
+{
+  // PCB is a flat gray surface for now
+  double phoE2[flatentries]        = {minenergy, maxenergy };
+  double reflectivity[flatentries] = {0.5, 0.5};
+
+  G4OpticalSurface* surface = new G4OpticalSurface( "PCB_Surface" );
+  surface->SetType( dielectric_metal );
+  surface->SetFinish( ground );
+  surface->SetModel( unified );
+
+  G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable();
+
+  table->AddProperty( "REFLECTIVITY", phoE2, reflectivity, flatentries );
+  surface->SetMaterialPropertiesTable( table );
+  return surface;
+}
+

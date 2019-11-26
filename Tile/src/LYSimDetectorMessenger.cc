@@ -82,6 +82,21 @@ LYSimDetectorMessenger::LYSimDetectorMessenger( LYSimDetectorConstruction* Det )
   SetSiPMStandCmd->SetRange( "SiPMStand>=0." );
   SetSiPMStandCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
+  // PCB Hole commands
+  SetPCBRadiusCmd = new G4UIcmdWithADoubleAndUnit( "/LYSim/SetPCBRadius", this );
+  SetPCBRadiusCmd->SetGuidance( "Set PCB Hole dimensions" );
+  SetPCBRadiusCmd->SetParameterName( "PCBRadius", false );
+  SetPCBRadiusCmd->SetUnitCategory( "Length" );
+  SetPCBRadiusCmd->SetDefaultUnit( "mm" );
+  SetPCBRadiusCmd->SetRange( "PCBRadius>=0." );
+  SetPCBRadiusCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+
+  SetPCBReflectCmd = new G4UIcmdWithADouble( "/LYSim/SetPCBReflect", this );
+  SetPCBReflectCmd->SetGuidance( "Set reflectivity of exposed PCB" );
+  SetPCBReflectCmd->SetParameterName( "PCBReflect", false );
+  SetPCBReflectCmd->SetRange( "PCBReflect>=0." );
+  SetPCBReflectCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+
   // Optical setting commands
   SetTileAbsMultCmd = new G4UIcmdWithADouble( "/LYSim/SetTileAbsMult", this );
   SetTileAbsMultCmd->SetGuidance( "Set the light absorption length multiplier" );
@@ -161,6 +176,11 @@ LYSimDetectorMessenger::SetNewValue( G4UIcommand* command, G4String val )
   } else if( command == SetSiPMStandCmd ){
     Detector->SetSiPMStand(
       G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
+  } else if( command == SetPCBRadiusCmd ){
+    Detector->SetPCBRadius(
+      G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
+  } else if( command == SetPCBReflectCmd ){
+    Detector->SetPCBReflect( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
   } else if( command == SetTileAbsMultCmd ){
     Detector->SetTileAbsMult( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
   } else if( command == SetWrapReflectCmd ){

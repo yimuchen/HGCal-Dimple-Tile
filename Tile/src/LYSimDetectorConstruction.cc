@@ -56,12 +56,13 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
 {
   fdetectorMessenger = new LYSimDetectorMessenger( this );
 
-  _tilex   = 29.65*mm;
-  _tiley   = 29.65*mm;
-  _tilez   = 2.98*mm;
-  _tile_x1 = 0.0*mm;
-  _tile_x2 = 0.0*mm;
-  wrapgap  = 0.065*mm;
+  _tilex        = 29.65*mm;
+  _tiley        = 29.65*mm;
+  _tilez        = 2.98*mm;
+  _tile_x1      = 0.0*mm;
+  _tile_x2      = 0.0*mm;
+  wrapgap       = 0.065*mm;
+  wrapthickness = 0.1*mm;
 
   _absmult      = 1;
   _wrap_reflect = 0.985;
@@ -76,8 +77,13 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
 
   // Default Dimple settings
   _dimple_type   = SPHERICAL;// 0: Normal, 1: Pyramid, 2: Parabolic
-  _dimple_indent = 1.25*1.6*mm;
+  _dimple_indent = 1.6*mm;
   _dimple_radius = 3.5*mm;// 3.4409*mm
+
+  // Default Hole settings
+  _pcb_radius       = 2.3;
+  _pcb_reflectivity = 0.5;
+
 
   // Defining material list.
   fBialkali = Make_Bialkali();
@@ -93,6 +99,7 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   fIdealPolishedOpSurface = MakeS_IdealPolished();
   fIdealWhiteOpSurface    = MakeS_IdealWhiteSurface();
   fSiPMSurface            = MakeS_SiPM();
+  fPCBSurface             = MakeS_PCBSurface();
   SetWrapReflect( _wrap_reflect );
 }
 
@@ -156,6 +163,21 @@ LYSimDetectorConstruction::Construct()
                                                  , false
                                                  , 0
                                                  , checkOverlaps );
+
+  // Exposed PCB Back plane
+  const G4ThreeVector pcb_offset( 0, 0
+                                , 0.5*_tilez + wrapgap + 2*wrapthickness );
+
+  G4VSolid* solidPCB = new G4Tubs( "PCBSolid"
+                                 , 0, _pcb_radius + 1*mm
+                                 , wrapthickness
+                                 , 0, 2*pi );
+  G4LogicalVolume* logicPCB = new G4LogicalVolume( solidPCB, fEpoxy, "PCB" );
+
+  G4VPhysicalVolume* physPCB = new G4PVPlacement( 0, pcb_offset
+                                                , logicPCB, "PCB"
+                                                , logicWorld, false
+                                                , 0, checkOverlaps  );
 
   ///////////////////////////////////////////////////////////////////////////////
   // Subtracted Dimple Version (dimple sub from tile, WWW = mothervolume of both)
@@ -310,6 +332,7 @@ LYSimDetectorConstruction::Construct()
                               , physTile
                               , physWorld
                               , fIdealPolishedOpSurface );
+
   // G4LogicalBorderSurface* DimpleTileSurface =
   //   new G4LogicalBorderSurface( "DimpleTileSurface"
   //                             , physDimple
@@ -329,9 +352,9 @@ LYSimDetectorConstruction::Construct()
                               , logicSiPMStand
                               , fIdealWhiteOpSurface );
   G4LogicalSkinSurface* SiPMSurface
-    = new G4LogicalSkinSurface( "SiPMSurface"
-                              , logicSiPM
-                              , fSiPMSurface );
+    = new G4LogicalSkinSurface( "SiPMSurface", logicSiPM, fSiPMSurface );
+  G4LogicalSkinSurface* PCBSurface
+    = new G4LogicalSkinSurface( "PCBSurface", logicPCB, fPCBSurface );
 
   // Setting the sensitive detector
   if( !fPMTSD ){
@@ -365,10 +388,15 @@ LYSimDetectorConstruction::Construct()
   TileVisAtt->SetVisibility( true );
   logicTile->SetVisAttributes( TileVisAtt );
 
-  G4VisAttributes* WrapVisAtt = new G4VisAttributes( G4Colour( 0., 1., 0. ) );
+  G4VisAttributes* WrapVisAtt = new G4VisAttributes( G4Colour( 0.5, 1., 0.5 ) );
   WrapVisAtt->SetForceWireframe( true );
   WrapVisAtt->SetVisibility( true );
   logicWrap->SetVisAttributes( WrapVisAtt );
+
+  G4VisAttributes* PCBVisAtt = new G4VisAttributes( G4Colour( 0.0, 0.4, 0.1 ) );
+  PCBVisAtt->SetForceSolid( true );
+  PCBVisAtt->SetVisibility( true );
+  logicPCB->SetVisAttributes( PCBVisAtt );
 
   return physWorld;
 }
@@ -399,17 +427,30 @@ LYSimDetectorConstruction::ConstructTrapazoidSolid(
 G4VSolid*
 LYSimDetectorConstruction::ConstructHollowWrapSolid() const
 {
-  G4VSolid* wrapOuter = ConstructTrapazoidSolid( "WrapOuter"
-                                               , _tilex + 2*wrapgap + 0.5*mm
-                                               , _tiley + 2*wrapgap + 0.5*mm
-                                               , _tilez + 2*wrapgap + 0.5*mm
-                                               , 0, 0 );
-  G4VSolid* wrapInner = ConstructTrapazoidSolid( "WrapInner"
-                                               , _tilex + 2*wrapgap
-                                               , _tiley + 2*wrapgap
-                                               , _tilez + 2*wrapgap
-                                               , 0, 0 );
-  return new G4SubtractionSolid( "WrapSolid", wrapOuter, wrapInner );
+  G4VSolid* wrapOuter
+    = ConstructTrapazoidSolid( "WrapOuter"
+                             , _tilex + 2*wrapgap + 2*wrapthickness
+                             , _tiley + 2*wrapgap + 2*wrapthickness
+                             , _tilez + 2*wrapgap + 2*wrapthickness
+                             , 0, 0 );
+  G4VSolid* wrapInner
+    = ConstructTrapazoidSolid( "WrapInner"
+                             , _tilex + 2*wrapgap
+                             , _tiley + 2*wrapgap
+                             , _tilez + 2*wrapgap
+                             , 0, 0 );
+  G4VSolid* wrapbox = new G4SubtractionSolid( "WrapBox"
+                                            , wrapOuter, wrapInner );
+  G4VSolid* wraphole = new G4Tubs( "WrapHole"
+                                 , 0, _pcb_radius
+                                 , 2*wrapthickness
+                                 , 0, 2*pi );
+
+  const G4ThreeVector offset( 0, 0, 0.5*_tilez + wrapgap + 0.5*wrapthickness );
+
+  return new G4SubtractionSolid( "WrapSolid"
+                               , wrapbox, wraphole
+                               , nullptr, offset );
 }
 
 G4VSolid*
@@ -550,6 +591,26 @@ LYSimDetectorConstruction::SetWrapReflect( const double r )
   double reflectivity[nentries]  = {_wrap_reflect, _wrap_reflect};
 
   G4MaterialPropertiesTable* table = fESROpSurface->GetMaterialPropertiesTable();
+  if( table ){
+    table->RemoveProperty( "REFLECTIVITY" );
+    table->AddProperty( "REFLECTIVITY", phoE, reflectivity, nentries );
+  } else {
+    table = new G4MaterialPropertiesTable();
+    table->AddProperty( "REFLECTIVITY", phoE, reflectivity, nentries );
+    fESROpSurface->SetMaterialPropertiesTable( table );
+  }
+}
+
+void
+LYSimDetectorConstruction::SetPCBReflect( const double r )
+{
+  // Add entries into properties table
+  _pcb_reflectivity = r;
+  static const unsigned nentries = 2;
+  static double phoE[nentries]   = {1.0*eV, 6.0*eV};
+  double reflectivity[nentries]  = {r, r};
+
+  G4MaterialPropertiesTable* table = fPCBSurface->GetMaterialPropertiesTable();
   if( table ){
     table->RemoveProperty( "REFLECTIVITY" );
     table->AddProperty( "REFLECTIVITY", phoE, reflectivity, nentries );
