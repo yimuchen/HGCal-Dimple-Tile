@@ -32,7 +32,7 @@ main( int argc, char** argv )
     = args.ArgList<std::string>( "inputfiles" );
   const std::string pdf = args.Arg<std::string>( "pdf" );
 
-  typedef std::map<double, TH1D*> HistMap;
+  typedef std::vector<TH1D*> HistMap;
 
   HistMap lengthlist;
   HistMap bouncelist;
@@ -50,8 +50,6 @@ main( int argc, char** argv )
 
     tree.GetEntry( 0 );
 
-    const double r = format.wrap_reflect;
-
     TH1D* length     = (TH1D*)( infile->Get( "PhotonTrack" ) );
     TH1D* bounce     = (TH1D*)( infile->Get( "PhotonBounce" ) );
     TH1D* all_length = (TH1D*)( infile->Get( "AllPhotonTrack" ) );
@@ -61,14 +59,16 @@ main( int argc, char** argv )
     all_length->SetDirectory( nullptr );
     all_bounce->SetDirectory( nullptr );
 
-    lengthlist[r]     = length;
-    bouncelist[r]     = bounce;
-    all_lengthlist[r] = all_length;
-    all_bouncelist[r] = all_bounce;
+    lengthlist.push_back( length );
+    bouncelist.push_back( bounce );
+    all_lengthlist.push_back( all_length );
+    all_bouncelist.push_back( all_bounce );
 
-    const std::string title = usr::fstr( "Tile:%.0lf[cm], R:%0.1lf%%"
+    const std::string title = usr::fstr(
+      "Tile:%.0lf[cm], R_{wrap}:%0.1lf%%, R_{PCB}:%0.1lf%%"
                                        , format.tile_width
-                                       , format.wrap_reflect*100 );
+                                       , format.wrap_reflect*100
+                                       , format.pcb_reflect*100 );
 
     length->SetTitle( title.c_str() );
     bounce->SetTitle( title.c_str() );
@@ -100,10 +100,10 @@ main( int argc, char** argv )
           unsigned i = 0;
 
           for( const auto p : histlist ){
-            TH1D* ch = (TH1D*)p.second->GetCumulative( kFALSE );
-            ch->Scale( 1/ch->GetBinContent(1) );
-            const std::string title = p.second->GetTitle();
-            c.PlotHist( p.second,
+            TH1D* ch = (TH1D*)p->GetCumulative( kFALSE );
+            ch->Scale( 1/ch->GetBinContent( 1 ) );
+            const std::string title = p->GetTitle();
+            c.PlotHist( p,
               usr::plt::PlotType( usr::plt::hist ),
               usr::plt::LineColor( colorlist[i] ),
               usr::plt::EntryText( title ),

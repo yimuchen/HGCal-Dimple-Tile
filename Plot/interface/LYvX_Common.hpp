@@ -12,6 +12,7 @@ typedef bool(* LYFormatCompare)( const LYSimFormat&, const LYSimFormat&);
 bool LYGraphCompare( const LYSimFormat& x, const LYSimFormat& y );
 
 // Generating ther graphname
-std::string LYGraphName( const LYSimFormat& x );
+extern std::string LYGraphName( const LYSimFormat& x );
+extern LYSimFormat FromLYGraphName( const std::string& x );
 
 #endif

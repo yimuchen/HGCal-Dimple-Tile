@@ -67,7 +67,7 @@ public:
     tree->SetBranchAddress( "SiPMStand",    &sipm_stand    );
     tree->SetBranchAddress( "absmult",      &abs_mult      );
     tree->SetBranchAddress( "PCBReflect",   &pcb_reflect   );
-    tree->SetBranchAddress( "PCBRadiys",    &pcb_radius    );
+    tree->SetBranchAddress( "PCBRadius",    &pcb_radius    );
     tree->SetBranchAddress( "Reflectivity", &wrap_reflect  );
     tree->SetBranchAddress( "genphotons",   &genphotons    );
     tree->SetBranchAddress( "nphotons",     &nphotons      );
