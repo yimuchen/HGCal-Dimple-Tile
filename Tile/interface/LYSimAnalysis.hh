@@ -14,9 +14,10 @@ class LYSimDetectorConstruction;
 class LYSimPrimaryGeneratorAction;
 class LYSimScintillation;
 class LYSimFormat;
+class LYSimRunFormat;
 
+class TFile;
 class TTree;
-class TH1D;
 
 class LYSimAnalysis
 {
@@ -89,16 +90,11 @@ private:
 
 public:
   std::string filename;
-  TTree*  tree;
+  TFile* file;
+  TTree* tree;
+  TTree* runtree;
   LYSimFormat* format;
-  TH1D* photon_energy_hist;
-  TH1D* photon_track_hist;
-  TH1D* photon_bounce_hist;
-  TH1D* photon_all_track_hist;
-  TH1D* photon_all_bounce_hist;
-
-  G4int PhotonCount;
-  G4int HitCount;
+  LYSimRunFormat* runformat;
 
   int GetNPhotons( const G4Event* event );
 };

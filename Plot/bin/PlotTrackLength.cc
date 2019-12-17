@@ -34,6 +34,8 @@ main( int argc, char** argv )
 
   typedef std::vector<TH1D*> HistMap;
 
+  double tile_width = 0;
+
   HistMap lengthlist;
   HistMap bouncelist;
   HistMap all_lengthlist;
@@ -65,10 +67,12 @@ main( int argc, char** argv )
     all_bouncelist.push_back( all_bounce );
 
     const std::string title = usr::fstr(
-      "Tile:%.0lf[cm], R_{wrap}:%0.1lf%%, R_{PCB}:%0.1lf%%"
-                                       , format.tile_width
+      "Abs:%.1fcm, R_{wrap}:%0.1lf%%, R_{PCB}:%0.1lf%%"
+                                       , format.abs_mult * 380
                                        , format.wrap_reflect*100
                                        , format.pcb_reflect*100 );
+
+    tile_width = format.tile_width;
 
     length->SetTitle( title.c_str() );
     bounce->SetTitle( title.c_str() );
@@ -121,13 +125,15 @@ main( int argc, char** argv )
           c.Pad().SetLogy( kTRUE );
           c.Pad().Xaxis().SetTitle( xaxis.c_str() );
           c.Pad().Yaxis().SetTitle( "Number of photons" );
-          c.Pad().DrawCMSLabel( "Simulation", "HGCal" );
           c.Pad().DrawLuminosity( tag );
+          c.Pad().DrawCMSLabel( "Simulation", "HGCal" );
+          c.Pad().WriteLine( usr::fstr( "Tile: %.1lf[mm]", tile_width ) );
 
           c2.Pad().Xaxis().SetTitle( xaxis.c_str() );
           c2.Pad().Yaxis().SetTitle( "Remaining photon fractions" );
-          c2.Pad().DrawCMSLabel( "Simulation", "HGCal" );
           c2.Pad().DrawLuminosity( tag );
+          c2.Pad().DrawCMSLabel( "Simulation", "HGCal" );
+          c2.Pad().WriteLine( usr::fstr( "Tile: %.1lf[mm]", tile_width ) );
 
           std::string filename = args.Arg<std::string>( "pdf" );
           filename.insert( filename.length()-4, postfix );

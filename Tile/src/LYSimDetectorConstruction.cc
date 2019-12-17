@@ -298,6 +298,15 @@ LYSimDetectorConstruction::Construct()
                                                      , 0
                                                      , checkOverlaps );
 
+  G4VPhysicalVolume* physSiPMResin = new G4PVPlacement( 0
+                                                      , ResinOffset
+                                                      , logicSiPMResin
+                                                      , "SiPMResin"
+                                                      , logicWorld
+                                                      , false
+                                                      , 0
+                                                      , checkOverlaps  );
+
   G4VPhysicalVolume* physSiPM = new G4PVPlacement( 0
                                                  , SiPMOffset
                                                  , logicSiPM
@@ -307,14 +316,6 @@ LYSimDetectorConstruction::Construct()
                                                  , 0
                                                  , checkOverlaps );
 
-  G4VPhysicalVolume* physSiPMResin = new G4PVPlacement( 0
-                                                      , ResinOffset
-                                                      , logicSiPMResin
-                                                      , "SiPMResin"
-                                                      , logicWorld
-                                                      , false
-                                                      , 0
-                                                      , checkOverlaps  );
 
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -332,17 +333,6 @@ LYSimDetectorConstruction::Construct()
                               , physTile
                               , physWorld
                               , fIdealPolishedOpSurface );
-
-  // G4LogicalBorderSurface* DimpleTileSurface =
-  //   new G4LogicalBorderSurface( "DimpleTileSurface"
-  //                             , physDimple
-  //                             , physTile
-  //                             , fIdealPolishedOpSurface );
-  // G4LogicalBorderSurface* DimpleAirSurface =
-  //  new G4LogicalBorderSurface( "DimpleAirSurface"
-  //                            , physDimple
-  //                            , physWorld
-  //                            , fIdealPolishedOpSurface );
   G4LogicalSkinSurface* CaseSurface
     = new G4LogicalSkinSurface( "SiPMCaseSurface"
                               , logicSiPMCase

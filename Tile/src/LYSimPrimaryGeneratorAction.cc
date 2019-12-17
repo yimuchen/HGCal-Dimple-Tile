@@ -18,7 +18,7 @@
 #include "G4GeneralParticleSource.hh"
 #include "G4ParticleTypes.hh"
 #include "G4SystemOfUnits.hh"
-
+#include "G4Poisson.hh"
 
 // Static helper functions.
 static double CalcNumPhotons( const double thickness );
@@ -73,7 +73,7 @@ LYSimPrimaryGeneratorAction::RandomizePosition()
   const double y = ( 2*G4UniformRand()-1 )*_width + _beamy;
   const double z = fDetector->GetTileZ();
   const double t = fDetector->LocalTileZ( x, y );
-  const int np   = _photon_multiplier * CalcNumPhotons( t );
+  const int np   = G4Poisson( _photon_multiplier * CalcNumPhotons( t ) );
 
   for( int i = 0; i < np; ++i ){
     // Creating a new particle source with just 1 photon

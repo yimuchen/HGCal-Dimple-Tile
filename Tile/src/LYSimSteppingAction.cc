@@ -77,13 +77,6 @@ LYSimSteppingAction::UserSteppingAction( const G4Step* step )
     break;
   }
 
-  if( step->GetTrack()->GetTrackStatus() != fAlive ){
-    analysis->photon_all_track_hist->Fill(
-      step->GetTrack()->GetTrackLength()/cm );
-    analysis->photon_all_bounce_hist->Fill(
-      step->GetTrack()->GetCurrentStepNumber()/3 );
-  }
-
   G4double tracklength = step->GetTrack()->GetTrackLength();
   if( tracklength > maxtracklength ){
     G4cout << "Track length exceeded limit of " << maxtracklength/mm

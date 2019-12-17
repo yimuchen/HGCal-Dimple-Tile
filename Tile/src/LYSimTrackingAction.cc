@@ -20,7 +20,7 @@ void
 LYSimTrackingAction::PreUserTrackingAction( const G4Track* aTrack )
 {
   // Let this be up to the user via vis.mac
-  //  fpTrackingManager->SetStoreTrajectory(true);
+  fpTrackingManager->SetStoreTrajectory(true);
 
   // Use custom trajectory class
   fpTrackingManager->SetTrajectory( new LYSimTrajectory( aTrack ) );
