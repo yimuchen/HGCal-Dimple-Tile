@@ -16,7 +16,7 @@ on your system.
 git clone https://github.com/yimuchen/HGCal-Dimple-Tile.git HGCalTileSim
 cd     HGCalTileSim
 source ./g4env.sh # If you do not have Geant4 already installed
-cmake .
+cmake -DCMAKE_C_COMPILER=$(which gcc) -DCMAKE_CXX_COMPILER=$(which g++) .
 cmake --build .
 ```
 

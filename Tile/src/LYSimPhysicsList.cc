@@ -252,7 +252,6 @@ LYSimPhysicsList::ConstructOp()
       pmanager->SetProcessOrderingToLast( theScintillationProcess, idxPostStep );
     }
     if( particleName == "opticalphoton" ){
-      G4cout << " AddDiscreteProcess to OpticalPhoton " << G4endl;
       pmanager->AddDiscreteProcess(         theAbsorptionProcess );
       pmanager->AddDiscreteProcess( theRayleighScatteringProcess );
       pmanager->AddDiscreteProcess(    theMieHGScatteringProcess );
@@ -298,7 +297,6 @@ LYSimPhysicsList::ConstructIdealOp()
     G4ProcessManager* pmanager     = particle->GetProcessManager();
     G4String particleName          = particle->GetParticleName();
     if( particleName == "opticalphoton" ){
-      G4cout << " AddDiscreteProcess to OpticalPhoton " << G4endl;
       pmanager->AddDiscreteProcess( theBoundaryProcess );
       pmanager->AddDiscreteProcess(      theWLSProcess );
     }

@@ -16,6 +16,7 @@
 
 #include "g4root.hh"
 #include "G4Event.hh"
+#include "G4EventManager.hh"
 #include "G4ios.hh"
 #include "G4PhysicalConstants.hh"
 #include "G4SDManager.hh"
@@ -76,51 +77,62 @@ LYSimAnalysis::PrepareExperiment()
 void
 LYSimAnalysis::PrepareNewRun( const G4Run* )
 {
-  runformat->tile_x     = DetectorConstruction->GetTileX();
-  runformat->tile_y     = DetectorConstruction->GetTileY();
-  runformat->tile_z     = DetectorConstruction->GetTileZ();
+  runformat->tile_x = DetectorConstruction->GetTileX();
+  runformat->tile_y = DetectorConstruction->GetTileY();
+  runformat->tile_z = DetectorConstruction->GetTileZ();
+
   runformat->sipm_width = DetectorConstruction->GetSiPMX();
   runformat->sipm_rim   = DetectorConstruction->GetSiPMRim();
   runformat->sipm_stand = DetectorConstruction->GetSiPMStand();
+
   runformat->dimple_rad = DetectorConstruction->GetDimpleRadius();
   runformat->dimple_ind = DetectorConstruction->GetDimpleIndent();
-  runformat->abs_mult   = DetectorConstruction->GetTileAbsMult();
-  runformat->wrap_ref   = DetectorConstruction->GetWrapReflect();
-  runformat->pcb_rad    = DetectorConstruction->GetPCBRadius();
-  runformat->pcb_ref    = DetectorConstruction->GetPCBReflect();
-  runformat->beam_x     = generatorAction->GetBeamX();
-  runformat->beam_y     = generatorAction->GetBeamY();
-  runformat->beam_w     = generatorAction->GetWidth();
 
-  runformat->start_event = tree->GetEntries();
-  runformat->end_event   = tree->GetEntries();
+  runformat->abs_mult = DetectorConstruction->GetTileAbsMult();
+  runformat->wrap_ref = DetectorConstruction->GetWrapReflect();
+
+  runformat->pcb_rad = DetectorConstruction->GetPCBRadius();
+  runformat->pcb_ref = DetectorConstruction->GetPCBReflect();
+
+  runformat->beam_x = generatorAction->GetBeamX();
+  runformat->beam_y = generatorAction->GetBeamY();
+  runformat->beam_w = generatorAction->GetWidth();
+
+#ifdef CMSSW_GIT_HASH
+  runformat->UpdateHash();
+#endif
 }
 
 void
 LYSimAnalysis::PrepareNewEvent( const G4Event* event )
 {
   // All primary vertex's in the event share the same x,y values
-  format->beam_x = event->GetPrimaryVertex()->GetX0();
-  format->beam_y = event->GetPrimaryVertex()->GetY0();
+  format->beam_x   = event->GetPrimaryVertex()->GetX0();
+  format->beam_y   = event->GetPrimaryVertex()->GetY0();
+  format->run_hash = runformat->run_hash;
 }
 
 void
 LYSimAnalysis::EndOfEvent( const G4Event* event )
 {
-  format->genphotons = generatorAction->NSources();
-  format->nphotons   = GetNPhotons( event );
+  format->genphotons   = generatorAction->NSources();
+  format->nphotons     = GetNPhotons( event );
+  format->savedphotons = std::min( format->genphotons
+                                 , (unsigned)LYSIMFORMAT_MAX_PHOTONS );
 
-  auto trajectory_list   = event->GetTrajectoryContainer();
-  G4Navigator* navigator =
+  G4TrajectoryContainer* trajectory_list = event->GetTrajectoryContainer();
+  G4Navigator* navigator                 =
     G4TransportationManager::GetTransportationManager()
     ->GetNavigator( "World" );
 
   assert( format->genphotons == trajectory_list->size() );
 
-  unsigned nhits = format->nphotons;
+  unsigned nhits     = format->nphotons;
+  unsigned saveindex = 0;
 
-  for( size_t i = 0; i < trajectory_list->size(); ++i ){
-    auto trajectory = ( *trajectory_list )[i];
+  for( size_t i = 0; i < trajectory_list->size()
+       && saveindex < format->savedphotons; ++i ){
+    G4VTrajectory* trajectory = ( *trajectory_list )[i];
 
     unsigned wrapbounce = 0;
     unsigned pcbbounce  = 0;
@@ -128,11 +140,12 @@ LYSimAnalysis::EndOfEvent( const G4Event* event )
     bool isdetected     = false;
 
     for( int j = 0; j < trajectory->GetPointEntries(); ++j ){
-      const auto pos_end   = trajectory->GetPoint( j )->GetPosition();
-      const auto pos_start = j == 0 ? pos_end :
-                             trajectory->GetPoint( j-1 )->GetPosition();
+      const G4ThreeVector pos_end   = trajectory->GetPoint( j )->GetPosition();
+      const G4ThreeVector pos_start = j == 0 ? pos_end :
+                                      trajectory->GetPoint( j-1 )->GetPosition();
 
-      auto volume = navigator->LocateGlobalPointAndSetup( pos_end );
+      G4VPhysicalVolume* volume
+        = navigator->LocateGlobalPointAndSetup( pos_end );
       if( volume->GetName() == "Wrap" ){
         ++wrapbounce;
       } else if( volume->GetName() == "PCB" ){
@@ -142,7 +155,7 @@ LYSimAnalysis::EndOfEvent( const G4Event* event )
       tracklength += ( pos_end - pos_start ).mag();
     }
 
-    const auto endpoint
+    const G4ThreeVector endpoint
       = trajectory->GetPoint( trajectory->GetPointEntries()-1 )->GetPosition();
 
     if( IsSiPMTrajectory( navigator, endpoint ) && nhits ){
@@ -150,31 +163,59 @@ LYSimAnalysis::EndOfEvent( const G4Event* event )
       isdetected = true;
     }
 
-    format->NumWrapReflection[i] = wrapbounce;
-    format->NumPCBReflection[i]  = pcbbounce;
-    format->OpticalLength[i]     = tracklength / ( 0.1*mm );
-    format->IsDetected[i]        = isdetected;
-    format->EndX[i]              = endpoint.x() / ( 1*um );
-    format->EndY[i]              = endpoint.y() / ( 1*um );
+    // If is saving last photons, skipping so that at least on detected photons
+    // is saved.
+    if( saveindex == format->savedphotons - 1
+        && format->nphotons > 0
+        && nhits == format->nphotons ){
+      continue;
+    }
+
+    format->NumWrapReflection[saveindex] = wrapbounce;
+    format->NumPCBReflection[saveindex]  = pcbbounce;
+    format->IsDetected[saveindex]        = isdetected;
+    format->OpticalLength[saveindex]
+      = tracklength / LYSimFormat::opt_length_unit;
+    format->EndX[saveindex]
+      = endpoint.x() / LYSimFormat::end_pos_unit;
+    format->EndY[saveindex]
+      = endpoint.y() / LYSimFormat::end_pos_unit;
+    ++saveindex;
   }
+
+#ifdef CMSSW_GIT_HASH
+  format->UpdateHash();
+#endif
 
   // Filling the tree
   tree->Fill();
+  tree->Write( NULL, TObject::kOverwrite );
+
+#ifdef CMSSW_GIT_HASH// Disabling event saving for non-interactive stuff
+  G4EventManager::GetEventManager()
+  ->GetNonconstCurrentEvent()
+  ->KeepTheEvent( false );
+#endif
 }
 
 
 void
 LYSimAnalysis::EndOfRun( const G4Run* )
 {
-  runformat->end_event = tree->GetEntries() ;
   runtree->Fill();
+  runtree->Write( NULL, TObject::kOverwrite );
 }
 
 void
 LYSimAnalysis::EndOfExperiment()
 {
-  runtree->Write();
-  tree->Write();
+  // Flushing run tree if no entries is present
+  if( runtree->GetEntries() == 0 ){
+    runtree->Fill();
+  }
+
+  runtree->Write( NULL, TObject::kOverwrite );
+  tree->Write( NULL, TObject::kOverwrite );
   file->Close();
 }
 
@@ -208,8 +249,12 @@ LYSimAnalysis::GetNPhotons( const G4Event* event )
 static bool IsSiPMTrajectory( G4Navigator* nav, const G4ThreeVector& endpoint )
 {
   const G4ThreeVector zvec( 0, 0, 1 );
-  const auto endvol
+  const G4VPhysicalVolume* endvol
     = nav->LocateGlobalPointAndSetup( endpoint, &zvec, false, false );
   // Expecting SiPM hits to be pointing in the z direction.
-  return endvol->GetName() == "SiPM";
+  if( endvol ){
+    return endvol->GetName() == "SiPM";
+  } else {// Rare occassion that endvol is not found
+    return false;
+  }
 }

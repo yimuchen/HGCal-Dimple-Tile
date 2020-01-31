@@ -2,16 +2,12 @@
 #define HGCALTILESIM_PLOT_LYVX_COMMON_HPP
 
 #include "HGCalTileSim/Tile/interface/LYSimFormat.hh"
+#include "UserUtils/Common/interface/ArgumentExtender.hpp"
 
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TProfile.h"
-
-// Typedef for simpler declaration
-typedef bool (* RunFormatCompare)( const LYSimRunFormat&, const LYSimRunFormat& );
-
-// Comparison function required for std::map.
-bool LYvXGraphCompare( const LYSimRunFormat& x, const LYSimRunFormat& y );
+#include "TGraph.h"
 
 class LYvXGraphContainer
 {
@@ -36,7 +32,25 @@ public:
   void LoadBranches( TTree* );
 
   void Fill( const LYSimRunFormat&, const LYSimFormat& );
+  bool operator() (const LYSimRunFormat&, const LYSimRunFormat& ) const;
 };
+
+// List of options for plotting.
+extern usr::po::options_description GeometryOptions();
+
+double      FormatOpt( const LYSimRunFormat&, const std::string& );
+std::string FormatOptString( const LYSimRunFormat&, const std::string& );
+
+// Additional graph processing.
+extern TGraph* MakeGraph( const LYSimRunFormat&,
+                          const LYvXGraphContainer&,
+                          const std::string& );
+extern TH1D* MakePhotonHist( const LYSimRunFormat&,
+                        const LYvXGraphContainer&,
+                        const std::string& );
+extern TH1D* MakePhotonAccum( const LYSimRunFormat&,
+                        const LYvXGraphContainer&,
+                        const std::string& );
 
 
 

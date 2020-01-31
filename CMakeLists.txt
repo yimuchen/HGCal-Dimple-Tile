@@ -3,10 +3,16 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(LYSim)
 
+
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-add_compile_options("-g")
-add_compile_options("-O3")
+
+if(${CMAKE_VERSION} VERSION_GREATER "3.3.0")
+  add_compile_options("-g")
+  add_compile_options("-O3")
+else ()
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -f -O3")
+endif()
 
 # find_package( ROOT REQUIRED)
 execute_process(COMMAND "root-config" "--version"
@@ -19,12 +25,20 @@ if( ${ROOTCONFIG_MAJOR_VERSION} STREQUAL "6" )
   add_compile_options("-std=c++17")
 else()
   ## Adding ROOT the old fashioned way
+  message("BUILDING WITH root-config outputs")
   execute_process(COMMAND "root-config" "--cflags"
-                 OUTPUT_VARIABLE  ROOT_CONFIG )
+                  OUTPUT_VARIABLE  ROOT_CONFIG )
   string(REPLACE " " ";" ROOTCONFIG_LIST ${ROOT_CONFIG})
   foreach(CONFIG ${ROOTCONFIG_LIST})
-    add_compile_options(${CONFIG})
+    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CONFIG}")
   endforeach()
+
+  execute_process(COMMAND "root-config" "--incdir"
+                  OUTPUT_VARIABLE ROOT_INC )
+  include_directories(${ROOT_INC})
+  add_definitions(-std=c++0x)
+  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+  message("${CMAKE_CXX_FLAGS}")
 endif()
 
 #----------------------------------------------------------------------------
@@ -50,7 +64,7 @@ file(GLOB Tile_src ${PROJECT_SOURCE_DIR}/Tile/src/*.cc)
 add_library(Tile SHARED ${Tile_src})
 
 if( ${ROOTCONFIG_MAJOR_VERSION} STREQUAL "6" )
-  target_link_libraries(Tile ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
+  target_link_libraries( Tile ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 else()
   target_link_libraries(Tile ${Geant4_LIBRARIES}  "Core"  "Hist" "Tree")
 endif()

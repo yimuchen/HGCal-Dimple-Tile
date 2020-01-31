@@ -117,8 +117,6 @@ main( int argc, char** argv )
 
   ui->SessionStart();
 
-
-
   LYSimAnalysis::GetInstance()->EndOfExperiment();
   // Job termination Free the store: user actions, physics_list and
   // detector_description are owned and deleted by the run manager, so they

@@ -18,7 +18,6 @@
 #include "G4SDManager.hh"
 #include "G4Step.hh"
 #include "G4UnitsTable.hh"
-#include "TH1D.h"
 
 using namespace CLHEP;
 

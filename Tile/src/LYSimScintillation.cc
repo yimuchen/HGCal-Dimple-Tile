@@ -33,13 +33,17 @@ LYSimScintillation::PostStepDoIt( const G4Track& aTrack, const G4Step& aStep )
   if( depenergy > 0.0 ){
     G4ThreeVector pos = aStep.GetPreStepPoint()->GetPosition();
     depenergy += TotEnergy;
-    G4cout << "[LYSim] Energy Deposited keV: " << depenergy << G4endl;
 
-    G4cout << "scintillating: "
+    /****************************************************************************
+       G4cout << "[LYSim] Energy Deposited keV: " << depenergy << G4endl;
+
+       G4cout << "scintillating: "
            << std::setprecision( 4 )
            << std::setw( 10 ) << depenergy/keV << " keV of "
-           << std::setw( 9 ) << aStep.GetPreStepPoint()->GetKineticEnergy()/keV << " keV [kine] "
-           << std::setw( 10 ) << aStep.GetPreStepPoint()->GetTotalEnergy()/keV << " keV [total] "
+           << std::setw( 9 )
+           << aStep.GetPreStepPoint()->GetKineticEnergy()/keV << " keV [kine] "
+           << std::setw( 10 )
+           << aStep.GetPreStepPoint()->GetTotalEnergy()/keV << " keV [total] "
            << "deposited at ("
            << std::fixed
            << std::setw( 7 ) << pos.x()/mm << " mm,"
@@ -47,9 +51,11 @@ LYSimScintillation::PostStepDoIt( const G4Track& aTrack, const G4Step& aStep )
            << std::setw( 7 ) << pos.z()/mm << " mm) "
            << "by parent ID " << std::setw( 5 ) << aTrack.GetTrackID() << " : "
            << std::setw( 5 ) << particleName << " "
-           << "producing " << result->GetNumberOfSecondaries() << " optical photons"
-           << G4endl
+           << "producing "
+           << result->GetNumberOfSecondaries()
+           << " optical photons" << G4endl
            << std::resetiosflags( std::ios::fixed );
+     ***************************************************************************/
   }
 
   return result;

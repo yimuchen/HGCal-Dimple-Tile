@@ -8,6 +8,7 @@
 #include "UserUtils/Common/interface/STLUtils/VectorUtils.hpp"
 
 #include "TChain.h"
+#include "TError.h"
 #include "TFile.h"
 #include "TGraphErrors.h"
 
@@ -32,30 +33,42 @@ main( int argc, char** argv )
     = args.ArgList<std::string>( "inputfile" );
   const std::string output = args.Arg<std::string>( "output" );
 
-  std::map<LYSimRunFormat, LYvXGraphContainer, RunFormatCompare>
-  container( LYvXGraphCompare );
+  std::map<LYSimRunFormat, LYvXGraphContainer, LYvXGraphContainer> container;
+
+  TChain tree( "LYSim", "LYSim" );
+  TChain runtree( "LYSimRun", "LYSimRun" );
+  LYSimFormat format;
+  LYSimRunFormat runformat;
 
   for( const auto& file : filelist ){
-    LYSimFormat format;
-    LYSimRunFormat runformat;
-
-    TChain tree( "LYSim", "LYSim" );
-    TChain runtree( "LYSimRun", "LYSimRun" );
     tree.Add( file.c_str() );
     runtree.Add( file.c_str() );
-    format.LoadBranches( &tree );
-    runformat.LoadBranches( &runtree );
+  }
 
-    for( int runid = 0; runid < runtree.GetEntries(); ++runid ){
-      runtree.GetEntry( runid );
+  format.LoadBranches( &tree );
+  runformat.LoadBranches( &runtree );
 
-      for( unsigned evt = runformat.start_event;
-           evt < runformat.end_event; ++evt ){
-        tree.GetEntry( evt );
+  std::map<unsigned, unsigned> hash_map;
 
-        container[ runformat ].Fill( runformat, format );
-      }
+  for( int entry = 0; entry < runtree.GetEntries(); ++entry ){
+    runtree.GetEntry( entry );
+    hash_map[runformat.run_hash]  = entry;
+  }
+
+
+  for( int entry = 0; entry < tree.GetEntries(); ++entry ){
+    if( ( entry+1 ) % 100 == 0 ){
+      std::cout <<
+        usr::fstr( "\rEvent ID [%10d/%10d] | %10u | %10u | %5u"
+                 , entry+1, tree.GetEntries()
+                 , format.run_hash
+                 , format.event_hash
+                 , container.size() )
+                << std::flush;
     }
+    tree.GetEntry( entry );
+    runtree.GetEntry( hash_map.at(format.run_hash) );
+    container[runformat].Fill( runformat, format );
   }
 
 
@@ -70,6 +83,9 @@ main( int argc, char** argv )
   for( const auto p : container ){
     outputformat   = p.first;
     graphcontainer = p.second;
+
+    outputformat.beam_x = 0;// Forcing to be zero
+    outputformat.UpdateHash();
 
     outputtree.Fill();
   }

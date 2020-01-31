@@ -94,14 +94,15 @@ BASE_DIR = os.path.abspath(os.environ['CMSSW_BASE'] + '/src/' +
 DATA_DIR = os.path.abspath(BASE_DIR + '/results/')
 
 CONDOR_JDL_TEMPLATE = """
-universe = vanilla
-Executable = {0}/condor-LYSquareTrigger_CMSSW.sh
+universe              = vanilla
+Executable            = {0}/condor-LYSquareTrigger_CMSSW.sh
 should_transfer_files = NO
-Requirements = TARGET.FileSystemDomain == "privnet"
-Output = {1}/sce_$(cluster)_$(process).stdout
-Error  = {1}/sce_$(cluster)_$(process).stderr
-Log    = {1}/sce_$(cluster)_$(process).condor
-Arguments = {2}
+Requirements          = TARGET.FileSystemDomain == "privnet"
+request_memory        = 1 GB
+Output                = {1}.stdout
+Error                 = {1}.stderr
+Log                   = {1}.condor
+Arguments             = {2}
 Queue
 """
 
@@ -140,12 +141,13 @@ for x, y, L, r, d, a, w, W, p, b, R, S in [(x, y, L, r, d, a, w, W, p, b, R, S)
           os.path.abspath(save_filename)),
   ])
 
-  jdl_content = CONDOR_JDL_TEMPLATE.format(BASE_DIR,
-                                           os.path.abspath(DATA_DIR + '/log/'),
-                                           condor_args)
-
+  log_filename = os.path.abspath(DATA_DIR + '/condor/' + '/' +
+                                 make_str('log_tilesim'))
   jdl_filename = os.path.abspath(DATA_DIR + '/condor/' + '/' +
                                  make_str('hgcal_tilesim') + '.jdl')
+  jdl_content = CONDOR_JDL_TEMPLATE.format(BASE_DIR,
+                                           log_filename,
+                                           condor_args)
 
   ## Writing jdl files
   os.makedirs(os.path.dirname(jdl_filename), exist_ok=True)

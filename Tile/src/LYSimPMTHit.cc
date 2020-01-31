@@ -53,5 +53,6 @@ void
 LYSimPMTHit::Draw()
 {
 }
+
 void
 LYSimPMTHit::Print(){}

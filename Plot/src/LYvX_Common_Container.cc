@@ -2,8 +2,11 @@
 
 #include "UserUtils/Common/interface/STLUtils/StringUtils.hpp"
 
+#include "G4PhysicalConstants.hh"
+
 bool
-LYvXGraphCompare( const LYSimRunFormat& x, const LYSimRunFormat& y )
+LYvXGraphContainer::operator()( const LYSimRunFormat& x,
+                                const LYSimRunFormat& y ) const
 {
 #define COMPARE_MEMBER( MEMBER ) \
   if( x.MEMBER != y.MEMBER ){ return x.MEMBER < y.MEMBER;  }
@@ -15,12 +18,15 @@ LYvXGraphCompare( const LYSimRunFormat& x, const LYSimRunFormat& y )
   COMPARE_MEMBER( sipm_width );
   COMPARE_MEMBER( sipm_rim );
   COMPARE_MEMBER( sipm_stand );
+
   COMPARE_MEMBER( dimple_rad );
   COMPARE_MEMBER( dimple_ind );
+
   COMPARE_MEMBER( abs_mult );
   COMPARE_MEMBER( wrap_ref );
   COMPARE_MEMBER( pcb_rad );
   COMPARE_MEMBER( pcb_ref );
+
   COMPARE_MEMBER( beam_y );
   COMPARE_MEMBER( beam_w );
 
@@ -40,11 +46,11 @@ LYvXGraphContainer::LYvXGraphContainer() :
   Eff_Unbinned( new TProfile( HIST1D( 1001, -50.5, +50.5 ) ) ),
   OpticalLength(  new TH1D( HIST1D( 600, 0, 600 ) ) ),
   OpticalLength_Detected(  new TH1D( HIST1D( 600, 0, 600 ) ) ),
-  NumWrapReflection(  new TH1D(  HIST1D( 100, 0, 2000 ) ) ),
-  NumWrapReflection_Detected(  new TH1D( HIST1D( 100, 0, 2000 ) ) ),
+  NumWrapReflection(  new TH1D(  HIST1D( 100, 0, 200 ) ) ),
+  NumWrapReflection_Detected(  new TH1D( HIST1D( 100, 0, 200 ) ) ),
   NumPCBReflection(  new TH1D( HIST1D( 25, 0, 25 ) ) ),
   NumPCBReflection_Detected(  new TH1D( HIST1D( 25, 0, 25 ) ) ),
-  FinalPosition( new TH2D( HIST2D( 1000, -50.0, +50.0, 100, -50.0, +50.0 ) ) ),
+  FinalPosition( new TH2D( HIST2D( 100, -50.0, +50.0, 100, -50.0, +50.0 ) ) ),
   FinalPosition_Detected( new TH2D( HIST2D( 70, -3.5, +3.5, 70, -3.5, 3.5 ) ) )
 {
 }
@@ -54,20 +60,24 @@ LYvXGraphContainer::LYvXGraphContainer() :
 void LYvXGraphContainer::Fill( const LYSimRunFormat& run,
                                const LYSimFormat&    evt )
 {
-  for( unsigned i = 0; i < evt.genphotons; ++i ){
-    OpticalLength->Fill( evt.OpticalLength[i] );
+  for( unsigned i = 0; i < evt.savedphotons; ++i ){
+    const double opt = (double)evt.OpticalLength[i]
+                        / (CLHEP::cm / LYSimFormat::opt_length_unit);
+    const double x = (double)evt.EndX[i] * LYSimFormat::end_pos_unit;
+    const double y = (double)evt.EndY[i] * LYSimFormat::end_pos_unit;
+    OpticalLength->Fill( opt );
     NumWrapReflection->Fill( evt.NumWrapReflection[i] );
     NumPCBReflection->Fill( evt.NumPCBReflection[i] );
-    FinalPosition->Fill( evt.EndX[i], evt.EndY[i] );
+    FinalPosition->Fill( x, y );
 
     if( evt.IsDetected[i] ){
-      OpticalLength_Detected->Fill( evt.OpticalLength[i] );
+      OpticalLength_Detected->Fill( opt );
       NumWrapReflection_Detected->Fill( evt.NumWrapReflection[i] );
       NumPCBReflection_Detected->Fill( evt.NumPCBReflection[i] );
-      FinalPosition_Detected->Fill( evt.EndX[i], evt.EndY[i] );
+      FinalPosition_Detected->Fill( x, y );
     }
-
   }
+
 
   LYvX->Fill( run.beam_x, evt.nphotons );
   LYvX_Unbinned->Fill( evt.beam_x, evt.nphotons );
@@ -79,7 +89,6 @@ void LYvXGraphContainer::Fill( const LYSimRunFormat& run,
   Eff->Fill( -run.beam_x, (double)evt.nphotons/(double)evt.genphotons );
   Eff_Unbinned->Fill( -evt.beam_x, (double)evt.nphotons/(double)evt.genphotons );
 }
-
 
 void LYvXGraphContainer::AddToTree( TTree* tree )
 {

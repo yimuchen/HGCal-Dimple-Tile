@@ -33,8 +33,6 @@ LYSimPrimaryGeneratorAction::LYSimPrimaryGeneratorAction( LYSimDetectorConstruct
   _photon_multiplier( 1 ),
   _open_angle( CLHEP::pi )
 {
-  std::cout << "[LYSIM] entering LYSIMPrimaryGeneratorAction" << std::endl;
-
   // For our use case, we will need to randomize on a event by event basis
   particleSource->SetMultipleVertex( true );
 }

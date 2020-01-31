@@ -2,8 +2,8 @@
 <use name="HGCalTileSim/Tile"/>
 <use name="UserUtils/Common"/>
 
-<!--Interactive session should be used in standalong Geant4
+<!--Interactive session should be used in standalone Geant4
     With OpenGL interactive window. Leaving here for standard
-    runtime debuggin-->
+    runtime debugging-->
 <bin file="InteractiveSession.cc" name="LYSim_Session"/>
 <bin file="LY_SquareTrigger.cc"   name="LYSim_SquareTrigger"/>

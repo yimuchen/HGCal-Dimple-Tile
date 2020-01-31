@@ -58,7 +58,7 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
 
   _tilex        = 29.65*mm;
   _tiley        = 29.65*mm;
-  _tilez        = 2.98*mm;
+  _tilez        = 3.0*mm;
   _tile_x1      = 0.0*mm;
   _tile_x2      = 0.0*mm;
   wrapgap       = 0.065*mm;
@@ -132,7 +132,6 @@ LYSimDetectorConstruction::Construct()
   ///////////////////////////////////////////////////////////////////////////////
   // World volume
   ///////////////////////////////////////////////////////////////////////////////
-  std::cout << "Constructing World Volume" << std::endl;
   G4Box* solidWorld = new G4Box( "World", WorldHalfX()
                                , WorldHalfY(), WorldHalfZ() );
 
@@ -149,7 +148,6 @@ LYSimDetectorConstruction::Construct()
   ///////////////////////////////////////////////////////////////////////////////
   // wrapping
   ///////////////////////////////////////////////////////////////////////////////
-  std::cout << "Constructing Wrapping stuff" << std::endl;
   G4VSolid* solidWrap = ConstructHollowWrapSolid();
 
   // The matrial of the wrap isn't as important as the surface
@@ -182,8 +180,6 @@ LYSimDetectorConstruction::Construct()
   ///////////////////////////////////////////////////////////////////////////////
   // Subtracted Dimple Version (dimple sub from tile, WWW = mothervolume of both)
   ///////////////////////////////////////////////////////////////////////////////
-  std::cout << "Constructing Solid physical tile" << std::endl;
-
   G4VSolid* solidTile = ConstructTrapazoidSolid( "TileTrap"
                                                , _tilex
                                                , _tiley
@@ -213,8 +209,6 @@ LYSimDetectorConstruction::Construct()
   ///////////////////////////////////////////////////////////////////////////////
   // SiPM
   ///////////////////////////////////////////////////////////////////////////////
-  std::cout << "Constructing Solid SiPM" << std::endl;
-
   G4Box* solidSiPMDead = new G4Box( "SiPMDead"
                                   , 0.5*_sipm_deadwidth, 0.5*_sipm_deadwidth
                                   , _sipm_z );
@@ -321,8 +315,6 @@ LYSimDetectorConstruction::Construct()
   ///////////////////////////////////////////////////////////////////////////////
   // Defining surfaces
   ///////////////////////////////////////////////////////////////////////////////
-  std::cout << "Defining surfaces" << std::endl;
-
   G4LogicalBorderSurface* WrapAirSurface =
     new G4LogicalBorderSurface( "WrapAirSurface"
                               , physWorld
@@ -440,7 +432,7 @@ LYSimDetectorConstruction::ConstructHollowWrapSolid() const
 
   return new G4SubtractionSolid( "WrapSolid"
                                , wrapbox, wraphole
-                               , nullptr, offset );
+                               , NULL, offset );
 }
 
 G4VSolid*
