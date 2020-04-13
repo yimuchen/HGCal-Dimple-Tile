@@ -62,7 +62,7 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   _tile_x1      = 0.0*mm;
   _tile_x2      = 0.0*mm;
   wrapgap       = 0.065*mm;
-  wrapthickness = 0.1*mm;
+  wrapthickness = 0.065*mm;
 
   _absmult      = 1;
   _wrap_reflect = 0.985;
@@ -268,11 +268,14 @@ LYSimDetectorConstruction::Construct()
                                                        , fEpoxy, "SiPMStand" );
 
   const G4ThreeVector SiPMOffset( 0, 0
-                                , +0.5*_tilez - 0.5*_sipm_z - _sipm_standz );
+                                , +0.5*_tilez - 0.5*_sipm_z - _sipm_standz
+                                  + wrapgap + wrapthickness );
   const G4ThreeVector ResinOffset( 0, 0
                                  , +0.5*_tilez - 0.5*_sipm_z - _sipm_standz
-                                   - _sipm_glasswidth );
-  const G4ThreeVector StandOffset( 0, 0, +0.5*_tilez - 0.5*_sipm_standz );
+                                   - _sipm_glasswidth
+                                   + wrapgap  + wrapthickness );
+  const G4ThreeVector StandOffset( 0, 0, +0.5*_tilez - 0.5*_sipm_standz
+                                   + wrapgap + wrapthickness );
 
   G4VPhysicalVolume* physSiPMStand = new G4PVPlacement( 0
                                                       , StandOffset
@@ -349,6 +352,8 @@ LYSimDetectorConstruction::Construct()
   // Visual attributes
   logicWorld->SetVisAttributes( G4VisAttributes::Invisible );
 
+  // Avoid Colours Green and Yellow, since these are defaulted to the optical
+  // Photons (I don't know how to avoid this)
   G4VisAttributes* SiPMVisAtt = new G4VisAttributes( G4Colour( 0, 0, 0 ) );
   SiPMVisAtt->SetForceSolid( true );
   SiPMVisAtt->SetVisibility( true );
