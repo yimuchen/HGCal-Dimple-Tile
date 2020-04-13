@@ -370,12 +370,12 @@ LYSimDetectorConstruction::Construct()
   ResinVisAtt->SetVisibility( true );
   logicSiPMResin->SetVisAttributes( ResinVisAtt );
 
-  G4VisAttributes* TileVisAtt = new G4VisAttributes( G4Colour( 1., 1., 0. ) );
+  G4VisAttributes* TileVisAtt = new G4VisAttributes( G4Colour( 0, 0, 1. ) );
   TileVisAtt->SetForceWireframe( true );
   TileVisAtt->SetVisibility( true );
   logicTile->SetVisAttributes( TileVisAtt );
 
-  G4VisAttributes* WrapVisAtt = new G4VisAttributes( G4Colour( 0.5, 1., 0.5 ) );
+  G4VisAttributes* WrapVisAtt = new G4VisAttributes( G4Colour( 0.5, 0.5, 1.0 ) );
   WrapVisAtt->SetForceWireframe( true );
   WrapVisAtt->SetVisibility( true );
   logicWrap->SetVisAttributes( WrapVisAtt );
@@ -604,6 +604,6 @@ LYSimDetectorConstruction::SetPCBReflect( const double r )
   } else {
     table = new G4MaterialPropertiesTable();
     table->AddProperty( "REFLECTIVITY", phoE, reflectivity, nentries );
-    fESROpSurface->SetMaterialPropertiesTable( table );
+    fPCBSurface->SetMaterialPropertiesTable( table );
   }
 }
