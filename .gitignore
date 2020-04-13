@@ -20,7 +20,7 @@ Makefile
 
 # Specific file exclusion
 # [relative/path/to/file]
-Temp/**
+Tile/src/ProjectPath.cc
 
 # Specific file inclusion
 # ![relative/path/to/file]
