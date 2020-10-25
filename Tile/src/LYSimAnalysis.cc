@@ -3,6 +3,7 @@
 #include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimFormat.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPrimaryGeneratorAction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimProtonGeneratorAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimScintillation.hh"
 #include "HGCalTileSim/Tile/interface/LYSimTrajectoryPoint.hh"
 #else
@@ -10,6 +11,7 @@
 #include "LYSimDetectorConstruction.hh"
 #include "LYSimFormat.hh"
 #include "LYSimPrimaryGeneratorAction.hh"
+#include "LYSimProtonGeneratorAction.hh"
 #include "LYSimScintillation.hh"
 #include "LYSimTrajectoryPoint.hh"
 #endif
@@ -46,7 +48,9 @@ static bool IsSiPMTrajectory( G4Navigator*, const G4ThreeVector& );
 // LYSimAnalysis Programs
 LYSimAnalysis* LYSimAnalysis::singleton = 0;
 
-LYSimAnalysis::LYSimAnalysis()
+LYSimAnalysis::LYSimAnalysis() :
+  generatorAction( nullptr ),
+  protonAction( nullptr )
 {
 }
 
@@ -85,18 +89,31 @@ LYSimAnalysis::PrepareNewRun( const G4Run* )
   runformat->sipm_rim   = DetectorConstruction->GetSiPMRim();
   runformat->sipm_stand = DetectorConstruction->GetSiPMStand();
 
-  runformat->dimple_rad = DetectorConstruction->GetDimpleRadius();
-  runformat->dimple_ind = DetectorConstruction->GetDimpleIndent();
+  runformat->dimple_rad  = DetectorConstruction->GetDimpleRadius();
+  runformat->dimple_ind  = DetectorConstruction->GetDimpleIndent();
+  runformat->dimple_type = DetectorConstruction->GetDimpleType();
 
-  runformat->abs_mult = DetectorConstruction->GetTileAbsMult();
-  runformat->wrap_ref = DetectorConstruction->GetWrapReflect();
+  runformat->abs_mult     = DetectorConstruction->GetTileAbsMult();
+  runformat->wrap_ref     = DetectorConstruction->GetWrapReflect();
+  runformat->tile_alpha   = DetectorConstruction->GetTileAlpha();
+  runformat->dimple_alpha = DetectorConstruction->GetDimpleAlpha();
 
   runformat->pcb_rad = DetectorConstruction->GetPCBRadius();
   runformat->pcb_ref = DetectorConstruction->GetPCBReflect();
 
-  runformat->beam_x = generatorAction->GetBeamX();
-  runformat->beam_y = generatorAction->GetBeamY();
-  runformat->beam_w = generatorAction->GetWidth();
+  if( generatorAction ){
+    runformat->beam_x = generatorAction->GetBeamX();
+    runformat->beam_y = generatorAction->GetBeamY();
+    runformat->beam_w = generatorAction->GetWidth();
+  } else if( protonAction ){
+    runformat->beam_x = protonAction->GetBeamX();
+    runformat->beam_y = protonAction->GetBeamY();
+    runformat->beam_w = protonAction->GetWidth();
+  } else {
+    runformat->beam_x = 0;
+    runformat->beam_y = 0;
+    runformat->beam_w = 0;
+  }
 
 #ifdef CMSSW_GIT_HASH
   runformat->UpdateHash();
@@ -115,7 +132,12 @@ LYSimAnalysis::PrepareNewEvent( const G4Event* event )
 void
 LYSimAnalysis::EndOfEvent( const G4Event* event )
 {
-  format->genphotons   = generatorAction->NSources();
+  if( generatorAction ){
+    format->genphotons = generatorAction->NSources();
+  } else {
+    format->genphotons = 1.0;// TODO: Somehow recover the number of generatoed photons.
+  }
+
   format->nphotons     = GetNPhotons( event );
   format->savedphotons = std::min( format->genphotons
                                  , (unsigned)LYSIMFORMAT_MAX_PHOTONS );
@@ -130,8 +152,17 @@ LYSimAnalysis::EndOfEvent( const G4Event* event )
   unsigned nhits     = format->nphotons;
   unsigned saveindex = 0;
 
+  // Getting the number of saved photons.
+  const unsigned target_hit_photons
+    = std::max( unsigned(1)
+              , format->savedphotons * format->nphotons / format->genphotons );
+
+  unsigned num_hit_photons = 0;
+  unsigned num_los_photons = 0;
+
+
   for( size_t i = 0; i < trajectory_list->size()
-       && saveindex < format->savedphotons; ++i ){
+       && num_hit_photons + num_los_photons < format->savedphotons; ++i ){
     G4VTrajectory* trajectory = ( *trajectory_list )[i];
 
     unsigned wrapbounce = 0;
@@ -163,12 +194,18 @@ LYSimAnalysis::EndOfEvent( const G4Event* event )
       isdetected = true;
     }
 
-    // If is saving last photons, skipping so that at least on detected photons
-    // is saved.
-    if( saveindex == format->savedphotons - 1
-        && format->nphotons > 0
-        && nhits == format->nphotons ){
-      continue;
+    if( isdetected ){
+      if( num_hit_photons < target_hit_photons ){
+        num_hit_photons++;
+      } else {
+        continue;
+      }
+    } else {
+      if( num_los_photons < format->savedphotons - target_hit_photons ){
+        num_los_photons++;
+      } else {
+        continue;
+      }
     }
 
     format->NumWrapReflection[saveindex] = wrapbounce;
@@ -181,6 +218,7 @@ LYSimAnalysis::EndOfEvent( const G4Event* event )
     format->EndY[saveindex]
       = endpoint.y() / LYSimFormat::end_pos_unit;
     ++saveindex;
+    assert( saveindex == num_hit_photons + num_los_photons );
   }
 
 #ifdef CMSSW_GIT_HASH
@@ -189,7 +227,7 @@ LYSimAnalysis::EndOfEvent( const G4Event* event )
 
   // Filling the tree
   tree->Fill();
-  tree->Write( NULL, TObject::kOverwrite );
+  // tree->Write( NULL, TObject::kOverwrite );
 
 #ifdef CMSSW_GIT_HASH// Disabling event saving for non-interactive stuff
   G4EventManager::GetEventManager()
@@ -246,7 +284,8 @@ LYSimAnalysis::GetNPhotons( const G4Event* event )
 }
 
 // Implementation of helper functions
-static bool IsSiPMTrajectory( G4Navigator* nav, const G4ThreeVector& endpoint )
+static bool
+IsSiPMTrajectory( G4Navigator* nav, const G4ThreeVector& endpoint )
 {
   const G4ThreeVector zvec( 0, 0, 1 );
   const G4VPhysicalVolume* endvol

@@ -76,8 +76,9 @@ public:
   enum  DIMPLE_TYPE
   {
     SPHERICAL,
-    PARABOLIC,
-    PYRAMID
+    ELLIPSOID,
+    FLAT_DOME,
+    CYLINDRICAL
   };
 
   // Additional geometric factors.
@@ -85,7 +86,6 @@ public:
   double WorldHalfY() const;
   double WorldHalfZ() const;
 
-  double GetDimpleSizeRadius() const;
   double LocalTileZ( const double x, const double y ) const;
 
   // Material updating functions
@@ -96,6 +96,14 @@ public:
   void SetWrapReflect( const double x );
   inline double
   GetWrapReflect() const { return _wrap_reflect; }
+
+  void SetTileAlpha( const double x );
+  inline double
+  GetTileAlpha(){ return _tile_alpha; }
+
+  void SetDimpleAlpha( const double x );
+  inline double
+  GetDimpleAlpha(){ return _dimple_alpha; }
 
   void
   SetPCBRadius( const double x ){ _pcb_radius = x; }
@@ -125,12 +133,20 @@ private:
 
   G4VSolid* ConstructHollowWrapSolid() const;
 
+  G4VSolid* ConstructDimpleSubtract() const;
+
   G4VSolid* ConstructSphereDimpleSolid() const;
-  G4VSolid* ConstructPyramidDimpleSolid() const;
-  G4VSolid* ConstructParabolicDimpleSolid() const;
+  G4VSolid* ConstructFlatDomeDimpleSolid() const;
+  G4VSolid* ConstructCylindricalDimpleSolid() const;
+  G4VSolid* ConstructEllipsoidDimpleSolid() const;
 
   G4ThreeVector CalcDimpleOffset() const;
-  G4ThreeVector CalcSiPMDimpleOffset() const;
+  double        LocalTileZSpherical( const double r ) const;
+  double        LocalTileZFlatDome( const double r ) const;
+  double        LocalTileZCylindrical( const double r ) const;
+  double        LocalTileZEllipsoid( const double r ) const;
+
+  double GetDimpleSphereRadius() const;
 
   // Pointer to detector messenger class
   LYSimDetectorMessenger* fdetectorMessenger;
@@ -144,8 +160,9 @@ private:
 
   // Pointers to surfaces
   G4OpticalSurface* fESROpSurface;
-  G4OpticalSurface* fPolishedOpSurface;
   G4OpticalSurface* fIdealPolishedOpSurface;
+  G4OpticalSurface* fTileBulkSurface;
+  G4OpticalSurface* fTileDimpleSurface;
   G4OpticalSurface* fIdealWhiteOpSurface;
   G4OpticalSurface* fSiPMSurface;
   G4OpticalSurface* fPCBSurface;
@@ -167,6 +184,8 @@ private:
   // Absorption length multiplier
   double _absmult;
   double _wrap_reflect;
+  double _tile_alpha;
+  double _dimple_alpha;
 
   // Dimple variables;
   double _dimple_indent;// Depth of dimple

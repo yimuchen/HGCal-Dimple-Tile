@@ -67,8 +67,11 @@ main( int argc, char** argv )
                 << std::flush;
     }
     tree.GetEntry( entry );
-    runtree.GetEntry( hash_map.at(format.run_hash) );
-    container[runformat].Fill( runformat, format );
+    if( hash_map.count(format.run_hash) ){
+      runtree.GetEntry( hash_map.at(format.run_hash) );
+       container[runformat].Fill( runformat, format );
+    } else {
+    }
   }
 
 

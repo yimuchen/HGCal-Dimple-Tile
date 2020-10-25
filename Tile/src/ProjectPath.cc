@@ -8,4 +8,6 @@
 #ifdef CMSSW_GIT_HASH
 extern const std::string project_base
   = usr::subpkgpath("HGCalTileSim","Tile" ).string();
+#else
+extern const std::string project_base = std::string("/home/ensc/Homework/UMDCMS/HGCalTile/Code") + std::string("/Tile/");
 #endif

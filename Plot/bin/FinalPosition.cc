@@ -3,6 +3,7 @@
 #include "UserUtils/Common/interface/STLUtils/Filesystem.hpp"
 #include "UserUtils/Common/interface/STLUtils/VectorUtils.hpp"
 #include "UserUtils/PlotUtils/interface/Flat2DCanvas.hpp"
+#include "UserUtils/PlotUtils/interface/Simple1DCanvas.hpp"
 
 #include "HGCalTileSim/Plot/interface/LYvX_Common.hpp"
 
@@ -13,7 +14,7 @@
 int
 main( int argc, char** argv )
 {
-  usr::po::options_description desc( "Input options" );
+  usr::po::options_description desc( "Input output options" );
   desc.add_options()
     ( "inputfile,f", usr::po::value<std::string>(),
     "File containing the generated files" )
@@ -21,32 +22,39 @@ main( int argc, char** argv )
     usr::resultpath( "HGCalTileSim", "Plot" ).string() ),
     "Output plot directory" )
   ;
+
   usr::ArgumentExtender args;
   args.AddOptions( GeometryOptions() );
   args.AddOptions( desc );
   args.ParseOptions( argc, argv );
   args.SetFilePrefix( args.Arg( "output" ) );
   args.AddNameScheme( {
-    {"dimplerad", "r"}, {"dimpleind", "d"},
-    {"tilewidth", "L"}, {"absmult", "a"}, {"wrapreflect", "m"},
-    {"sipmwidth", "W"}, {"sipmstand", "S"}, {"PCBRadius", "b"}, {"PCBRef", "P"}
+    {"dimplerad", "r"}, {"dimpleind", "d"}, {"dimpletype", "T"},
+    {"tilewidth", "L"}, {"absmult", "a"},
+    {"wrapreflect", "m"},
+    {"sipmwidth", "W"}, {"sipmstand", "S"},
+    {"tilealpha", "A"}, {"dimplealpha", "D"},
+    {"PCBRadius", "b"}, {"PCBRef", "P"}
   } );
 
   const std::vector<std::string> options_list = {
-    "dimplerad", "dimpleind",
+    "dimplerad", "dimpleind",     "dimpletype",
     "tilewidth",
     "absmult",   "wrapreflect",
     "sipmwidth", "sipmstand",
-    "PCBRadius", "PCBRef"
+    "PCBRadius", "PCBRef",
+    "tilealpha", "dimplealpha"
   };
   TChain tree( "LYSimRun", "LYSimRun" );
   LYSimRunFormat fmt;
-  LYvXGraphContainer cont;
-  int entry = -1;
+  LYSimRunFormat first_fmt;
+  LYvXGraphContainer graph_container;
+  std::vector<std::string> difflist;
+  std::vector<int> entrylist;
+  double xmax = 0;
 
   tree.Add( args.Arg<std::string>( "inputfile" ).c_str() );
   fmt.LoadBranches( &tree );
-  cont.LoadBranches( &tree );
 
   for( int i = 0; i < tree.GetEntries(); ++i ){
     tree.GetEntry( i );
@@ -60,41 +68,88 @@ main( int argc, char** argv )
       }
     }
 
-    if( !pass ){
-      continue;
-    } else {
-      entry = i;
-      break;
+    if( !pass ){continue;}
+
+    if( entrylist.size() == 0 ){
+      first_fmt = fmt;
+      xmax      = std::max( fmt.tile_x/2, xmax );
+    }
+    entrylist.push_back( i );
+
+    for( const auto& opt : options_list ){
+      if( entrylist.size() > 0 &&
+          FormatOpt( fmt, opt ) != FormatOpt( first_fmt, opt ) ){
+        difflist.push_back( opt );
+      }
     }
   }
 
-  if( entry < 0 ){
+  if( entrylist.size() == 0 ){
     std::cout << "NO PLOTS SATISFIED" << std::endl;
     return 0;
   }
 
-  TH2D* all_hist = cont.FinalPosition;
-  TH2D* det_hist = cont.FinalPosition_Detected;
+  difflist = usr::RemoveDuplicate( difflist );
 
-  usr::plt::Flat2DCanvas c;
+  const std::vector<int> colorlist = {
+    usr::plt::col::black,
+    usr::plt::col::darkblue,
+    usr::plt::col::darkred,
+    usr::plt::col::darkgreen,
+    usr::plt::col::darkorange,
+    usr::plt::col::darkviolet
+  };
 
-  c.PlotHist( all_hist,
-    usr::plt::Plot2DF( usr::plt::heat ),
-    usr::plt::EntryText( "All Photons" ) );
+  usr::plt::Simple1DCanvas c( usr::plt::len::a4textwidth_default(),
+                              usr::plt::len::a4textwidth_default(),
+                              usr::plt::FontSet( 12 ) );
+  unsigned idx = 0;
+  double width = 0;
 
-  c.SaveAsPDF( args.MakePDFFile("FinalPosition") );
-  c.Pad().Xaxis().SetTitle( "Photon final X [mm]");
-  c.Pad().Yaxis().SetTitle( "Photon final Y [mm]");
+  graph_container.LoadBranches( &tree );
 
-  usr::plt::Flat2DCanvas c2;
+  for( const auto& runentry : entrylist ){
+    tree.GetEntry( runentry );
 
-  c2.PlotHist( det_hist,
-    usr::plt::Plot2DF( usr::plt::heat ),
-    usr::plt::EntryText( "Detected Photons" ) );
-  c2.Pad().Xaxis().SetTitle( "Photon final X [mm]");
-  c2.Pad().Yaxis().SetTitle( "Photon final Y [mm]");
+    TH1D* hist = MakeDetXHist( fmt, graph_container  );
 
-  c2.SaveAsPDF( args.MakePDFFile("FinalPosition_Detected") );
+    std::string entry = entrylist.size() > 0 ? "" : "Simulation Results";
+
+    for( const auto opt : difflist ){
+      entry += FormatOptString( fmt, opt ) + ";";
+    }
+
+    entry.pop_back();
+
+    // if( idx >= 5 ){ continue; }
+    const auto color = colorlist.at( idx % colorlist.size() );
+
+    c.PlotHist( hist,
+      usr::plt::PlotType( usr::plt::hist ),
+      usr::plt::TrackY( usr::plt::tracky::both ),
+      usr::plt::LineColor( color ),
+      usr::plt::EntryText( entry ) );
+
+    ++idx;
+  }
+
+  c.Pad().SetDataMax( c.Pad().GetDataMax() * 1.3 );
+  c.Pad().Xaxis().SetTitle( "Detected photon final x position X [mm]" );
+  c.Pad().Yaxis().SetTitle( "Normalized num. of detected photons" );
+
+  c.DrawLuminosity( usr::fstr( "Trigger Width: %.1lf[mm]", width ) );
+  c.DrawCMSLabel( "Simulation", "HGCal" );
+
+  for( const auto opt : options_list ){
+    tree.GetEntry( entrylist.front() );
+    if( args.CheckArg( opt ) ){
+      c.Pad().WriteLine( FormatOptString( fmt, opt ) );
+    }
+  }
+
+  std::cout << args.MakePDFFile( "FinalPositionX_Detected" ) << std::endl;
+  c.SaveAsPDF( args.MakePDFFile( "FinalPositionX_Detected" ) );
 
   return 0;
+
 }

@@ -50,11 +50,11 @@ Make_Epoxy()
   G4Material* epoxy = new G4Material( "Epoxy", 3.75*g/cm3, 2, kStateSolid );
   epoxy->AddElement( Al, 40*perCent );
   epoxy->AddElement( O,  60*perCent );
-  double photonE[flatentries]      = {minenergy,maxenergy};
+  double photonE[flatentries]      = {minenergy, maxenergy};
   double refrac_idx[flatentries]   = {1.50, 1.50};
   double Reflectivity[flatentries] = {0.0, 0.0};
-   // Will obe overwritten in surface property defintiion
-  double abs_length[flatentries]   = {10*m, 10*m};
+  // Will obe overwritten in surface property defintiion
+  double abs_length[flatentries] = {10*m, 10*m};
 
   G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable();
   table->AddProperty( "RINDEX",       photonE, refrac_idx,   flatentries );
@@ -83,7 +83,7 @@ Make_Custom_Air()
 G4Material*
 Make_Resin()
 {
-  static double photonE[flatentries] = {minenergy,maxenergy};
+  static double photonE[flatentries]    = {minenergy, maxenergy};
   static double refrac_idx[flatentries] = {1.52, 1.52};
   static double abs_length[flatentries] = {10*m, 10*m};
 
@@ -103,18 +103,25 @@ Make_EJ200()
 {
   G4Material* material = new G4Material( "EJ200", 1.023*g/cm3, 2, kStateSolid );
   material->AddElement( C, 91.53*perCent );
-  material->AddElement( H,  8.47*perCent );
+  material->AddElement( H, 8.47*perCent );
 
   static double photonE[flatentries]    = {minenergy, maxenergy};
   static double refrac_idx[flatentries] = { 1.58, 1.58 };
 
+
+  static double pp[9]
+    = {6.6*eV, 6.7*eV, 6.8*eV, 6.9*eV, 7.0*eV, 7.1*eV, 7.2*eV, 7.3*eV, 7.4*eV};
+  static double scint[9]
+    = {0.000134, 0.004432, 0.053991, 0.241971, 0.398942, 0.000134, 0.004432, 0.053991, 0.241971};
+
   // Add entries into properties table
   G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable();
-  table->AddProperty( "RINDEX", photonE, refrac_idx, flatentries );
-  // table->AddProperty( "ABSLENGTH", photonE, abs_length, nentries );
+  table->AddProperty( "RINDEX",        photonE, refrac_idx, flatentries );
+  table->AddProperty( "SCINTILLATION", pp,      scint,      9  );
   table->AddConstProperty( "SCINTILLATIONYIELD",        10./keV );
   table->AddConstProperty( "RESOLUTIONSCALE",           1.0 );
   table->AddConstProperty( "FASTSCINTILLATIONRISETIME", 0.9*ns );
+
 
   // Disabled for CMSSW
   // table->AddConstProperty( "ELECTRONSCINTILLATIONYIELD", 10./keV );

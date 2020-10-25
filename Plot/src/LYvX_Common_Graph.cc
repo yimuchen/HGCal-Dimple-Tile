@@ -3,9 +3,10 @@
 #include "TGraphErrors.h"
 #include "TH1D.h"
 
-TGraph* MakeGraph( const LYSimRunFormat&     fmt,
-                   const LYvXGraphContainer& cont,
-                   const std::string&        name )
+TGraph*
+MakeGraph( const LYSimRunFormat&     fmt,
+           const LYvXGraphContainer& cont,
+           const std::string&        name )
 {
   const double width      = fmt.beam_w;
   const TProfile* profile = name == "LYvX_Unbinned" ? cont.LYvX_Unbinned  :
@@ -32,11 +33,23 @@ TGraph* MakeGraph( const LYSimRunFormat&     fmt,
                          , xerr_list.data(), yerr_list.data() );
 }
 
+TH1D*
+MakeDetXHist( const LYSimRunFormat&     fmt,
+              const LYvXGraphContainer& cont )
+{
+  TH1D* ans = (TH1D*)(cont.FinalPositionX_Detected->Clone());
+  ans->Rebin(2);
+  ans->Scale(100.0/ans->Integral());
 
-TH1D* MakePhotonHist( const LYSimRunFormat&     fmt,
-                      const LYvXGraphContainer& cont,
-                      const std::string&        name
-                      )
+  return ans;
+}
+
+
+TH1D*
+MakePhotonHist( const LYSimRunFormat&     fmt,
+                const LYvXGraphContainer& cont,
+                const std::string&        name
+                )
 {
   TH1D* orig = name == "OpticalLength" ? cont.OpticalLength :
                name == "OpticalLength_Detected" ? cont.OpticalLength_Detected :
@@ -45,13 +58,14 @@ TH1D* MakePhotonHist( const LYSimRunFormat&     fmt,
                name == "NumPCBReflection" ? cont.NumPCBReflection :
                cont.NumPCBReflection_Detected;
 
-  TH1D* newhist = name.find("OpticalLength") != std::string::npos ?
-                   (TH1D*)( orig->Rebin(5) ) : (TH1D*)orig->Clone();
+  TH1D* newhist = name.find( "OpticalLength" ) != std::string::npos ?
+                  (TH1D*)( orig->Rebin( 5 ) ) : (TH1D*)orig->Clone();
   newhist->Scale( 1/orig->Integral() );
   return newhist;
 }
 
-TH1D* MakePhotonAccum( const LYSimRunFormat&     fmt,
+TH1D*
+MakePhotonAccum( const LYSimRunFormat&     fmt,
                  const LYvXGraphContainer& cont,
                  const std::string&        name  )
 {

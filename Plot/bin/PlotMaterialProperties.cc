@@ -62,7 +62,9 @@ main( int argc, char const* argv[] )
   const double absscale   = ScaleGraph( absgraph );
   const double effscale   = ScaleGraph( effgraph );
 
-  usr::plt::Simple1DCanvas c;
+  usr::plt::Simple1DCanvas c( usr::plt::len::a4textwidth_default(),
+                              usr::plt::len::a4textwidth_default(),
+                              usr::plt::FontSet( 12 ) );
   c.PlotGraph( scintgraph,
     usr::plt::PlotType( usr::plt::simplefunc ),
     usr::plt::LineColor( usr::plt::col::darkblue ),
@@ -78,7 +80,7 @@ main( int argc, char const* argv[] )
 
   c.Pad().SetYaxisMax( 1.5 );
 
-  for( const auto y : {1.0,0.75,0.5,0.25} ){
+  for( const auto y : {1.0, 0.75, 0.5, 0.25} ){
     c.Pad().DrawHLine( y,
       usr::plt::LineColor( usr::plt::col::darkgray ),
       usr::plt::LineStyle( usr::plt::sty::lindashed ) );
@@ -89,24 +91,24 @@ main( int argc, char const* argv[] )
     .SetTextAlign( usr::plt::font::align::bottom_right )
     .WriteAtData(
       xmax, y, usr::fstr( "%.0f%%", y*effscale*100 ),
-      usr::plt::TextColor( usr::plt::col::darkgreen )  );
+      usr::plt::TextColor( usr::plt::col::darkgreen ) );
   }
 
   c.Pad().DrawVLine( 425,
-      usr::plt::LineColor( usr::plt::col::darkgray ),
-      usr::plt::LineStyle( usr::plt::sty::lindotted ) );
+    usr::plt::LineColor( usr::plt::col::darkgray ),
+    usr::plt::LineStyle( usr::plt::sty::lindotted ) );
   c.Pad().DrawHLine( 3800 / absscale,
-      usr::plt::LineColor( usr::plt::col::darkgray ),
-      usr::plt::LineStyle( usr::plt::sty::lindotted ) );
+    usr::plt::LineColor( usr::plt::col::darkgray ),
+    usr::plt::LineStyle( usr::plt::sty::lindotted ) );
   c.Pad().WriteAtData(
     xmin, 3800/absscale, usr::fstr( "%.0lfmm", 3800 ),
-    usr::plt::TextColor( usr::plt::col::red )  );
+    usr::plt::TextColor( usr::plt::col::red ) );
 
 
-  c.Pad().Yaxis().SetLabelSize(0);
-  c.Pad().Xaxis().SetTitle("Optical photon wavelength [nm]");
+  c.Pad().Yaxis().SetLabelSize( 0 );
+  c.Pad().Xaxis().SetTitle( "Optical photon wavelength [nm]" );
 
-  c.Pad().DrawCMSLabel("Simulation", "HGCal" );
+  c.Pad().DrawCMSLabel( "Simulation", "HGCal" );
 
   c.SaveAsPDF( "MaterialsGraph.pdf" );
 

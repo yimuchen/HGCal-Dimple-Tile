@@ -2,8 +2,9 @@
 #define HGCALTILESIM_PLOT_LYVX_COMMON_HPP
 
 #include "HGCalTileSim/Tile/interface/LYSimFormat.hh"
-#include "UserUtils/Common/interface/ArgumentExtender.hpp"
+// #include "UserUtils/Common/interface/ArgumentExtender.hpp"
 
+#include <boost/program_options.hpp>
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TProfile.h"
@@ -27,6 +28,7 @@ public:
   TH1D* NumPCBReflection_Detected;
   TH2D* FinalPosition;
   TH2D* FinalPosition_Detected;
+  TH1D* FinalPositionX_Detected;
 
   void AddToTree( TTree* );
   void LoadBranches( TTree* );
@@ -36,7 +38,7 @@ public:
 };
 
 // List of options for plotting.
-extern usr::po::options_description GeometryOptions();
+extern boost::program_options::options_description GeometryOptions();
 
 double      FormatOpt( const LYSimRunFormat&, const std::string& );
 std::string FormatOptString( const LYSimRunFormat&, const std::string& );
@@ -45,6 +47,8 @@ std::string FormatOptString( const LYSimRunFormat&, const std::string& );
 extern TGraph* MakeGraph( const LYSimRunFormat&,
                           const LYvXGraphContainer&,
                           const std::string& );
+extern TH1D* MakeDetXHist( const LYSimRunFormat&,
+                           const LYvXGraphContainer& );
 extern TH1D* MakePhotonHist( const LYSimRunFormat&,
                         const LYvXGraphContainer&,
                         const std::string& );

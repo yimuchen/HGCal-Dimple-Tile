@@ -55,31 +55,34 @@ LYSimSteppingAction::UserSteppingAction( const G4Step* step )
     }
   }
 
-  boundaryStatus = boundary->GetStatus();
+  // Stop if boundary is not found
+  if( boundary ){
+    boundaryStatus = boundary->GetStatus();
 
-  switch( boundaryStatus ){
-  case Detection:
-    // Note, this assumes that the volume causing detection is the photocathode
-    // because it is the only one with non-zero efficiency. Trigger sensitive
-    // detector manually since photon is absorbed but status was Detection
-  {
-    G4EventManager::GetEventManager()->KeepTheCurrentEvent();
-    G4SDManager* SDman = G4SDManager::GetSDMpointer();
-    LYSimPMTSD* pmtSD
-      = (LYSimPMTSD*)SDman->FindSensitiveDetector( "/LYSimPMT" );
-    if( pmtSD ){
-      pmtSD->ProcessHits_constStep( step, NULL );
+    switch( boundaryStatus ){
+    case Detection:
+      // Note, this assumes that the volume causing detection is the photocathode
+      // because it is the only one with non-zero efficiency. Trigger sensitive
+      // detector manually since photon is absorbed but status was Detection
+    {
+      G4EventManager::GetEventManager()->KeepTheCurrentEvent();
+      G4SDManager* SDman = G4SDManager::GetSDMpointer();
+      LYSimPMTSD* pmtSD
+        = (LYSimPMTSD*)SDman->FindSensitiveDetector( "/LYSimPMT" );
+      if( pmtSD ){
+        pmtSD->ProcessHits_constStep( step, NULL );
+      }
+      break;
     }
-    break;
-  }
-  default:
-    break;
-  }
+    default:
+      break;
+    }
 
-  G4double tracklength = step->GetTrack()->GetTrackLength();
-  if( tracklength > maxtracklength ){
-    G4cout << "Track length exceeded limit of " << maxtracklength/mm
-           << "mm" << G4endl;
-    step->GetTrack()->SetTrackStatus( fStopAndKill );
+    G4double tracklength = step->GetTrack()->GetTrackLength();
+    if( tracklength > maxtracklength ){
+      G4cout << "Track length exceeded limit of " << maxtracklength/mm
+             << "mm" << G4endl;
+      step->GetTrack()->SetTrackStatus( fStopAndKill );
+    }
   }
 }

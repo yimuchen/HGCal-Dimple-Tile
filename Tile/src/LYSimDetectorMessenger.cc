@@ -110,6 +110,18 @@ LYSimDetectorMessenger::LYSimDetectorMessenger( LYSimDetectorConstruction* Det )
   SetWrapReflectCmd->SetRange( "WrapReflect>=0." );
   SetWrapReflectCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 
+  SetTileAlphaCmd = new G4UIcmdWithADouble( "/LYSim/SetTileAlpha", this );
+  SetTileAlphaCmd->SetGuidance( "Set micro facet distribution of tile" );
+  SetTileAlphaCmd->SetParameterName( "TileAlpha", false );
+  SetTileAlphaCmd->SetRange( "TileAlpha>=0." );
+  SetTileAlphaCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+
+  SetDimpleAlphaCmd = new G4UIcmdWithADouble( "/LYSim/SetDimpleAlpha", this );
+  SetDimpleAlphaCmd->SetGuidance( "Set micro facet distribution of dimple" );
+  SetDimpleAlphaCmd->SetParameterName( "DimpleAlpha", false );
+  SetDimpleAlphaCmd->SetRange( "DimpleAlpha>=0." );
+  SetDimpleAlphaCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
+
   // Dimple Geometry commands
   SetDimpleIndentCmd = new G4UIcmdWithADoubleAndUnit(
     "/LYSim/SetDimpleIndent", this );
@@ -133,7 +145,7 @@ LYSimDetectorMessenger::LYSimDetectorMessenger( LYSimDetectorConstruction* Det )
 
   SetDimpleTypeCmd = new G4UIcmdWithAString( "/LYSim/SetDimpleType", this );
   SetDimpleTypeCmd->SetGuidance( "Setting the type of dimple to use" );
-  SetDimpleTypeCmd->SetCandidates( "Spherical Parabolic Pyramid" );
+  SetDimpleTypeCmd->SetCandidates( "Spherical FlatDome Cylindrical Ellipsoid" );
   SetDimpleTypeCmd->AvailableForStates( G4State_PreInit, G4State_Idle );
 }
 
@@ -147,6 +159,8 @@ LYSimDetectorMessenger::~LYSimDetectorMessenger()
 
   delete SetTileAbsMultCmd;
   delete SetWrapReflectCmd;
+  delete SetTileAlphaCmd;
+  delete SetDimpleAlphaCmd;
 
   delete SetDimpleIndentCmd;
   delete SetDimpleRadiusCmd;
@@ -185,6 +199,10 @@ LYSimDetectorMessenger::SetNewValue( G4UIcommand* command, G4String val )
     Detector->SetTileAbsMult( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
   } else if( command == SetWrapReflectCmd ){
     Detector->SetWrapReflect( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
+  } else if( command == SetTileAlphaCmd ){
+    Detector->SetTileAlpha( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
+  } else if( command == SetDimpleAlphaCmd ){
+    Detector->SetDimpleAlpha( G4UIcmdWithADouble::GetNewDoubleValue( val ) );
   } else if( command == SetDimpleIndentCmd ){
     Detector->SetDimpleIndent(
       G4UIcmdWithADoubleAndUnit::GetNewDoubleValue( val ) );
@@ -194,10 +212,12 @@ LYSimDetectorMessenger::SetNewValue( G4UIcommand* command, G4String val )
   } else if( command == SetDimpleTypeCmd ){
     if( val == "Spherical" ){
       Detector->SetDimpleType( LYSimDetectorConstruction::SPHERICAL );
-    } else if( val == "Parabolic" ){
-      Detector->SetDimpleType( LYSimDetectorConstruction::PARABOLIC );
-    } else if( val == "Pyramid" ){
-      Detector->SetDimpleType( LYSimDetectorConstruction::PARABOLIC );
+    } else if( val == "FlatDome" ){
+      Detector->SetDimpleType( LYSimDetectorConstruction::FLAT_DOME );
+    } else if( val == "Cylindrical" ){
+      Detector->SetDimpleType( LYSimDetectorConstruction::CYLINDRICAL );
+    } else if( val == "Ellipsoid" ){
+      Detector->SetDimpleType( LYSimDetectorConstruction::ELLIPSOID );
     }
   }
 }

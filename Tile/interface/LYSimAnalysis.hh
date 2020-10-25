@@ -12,6 +12,7 @@
 
 class LYSimDetectorConstruction;
 class LYSimPrimaryGeneratorAction;
+class LYSimProtonGeneratorAction;
 class LYSimScintillation;
 class LYSimFormat;
 class LYSimRunFormat;
@@ -40,6 +41,8 @@ public:
   void
   SetGeneratorAction( LYSimPrimaryGeneratorAction* genaction )
   { generatorAction = genaction; };
+  void SetProtonGeneratorAction( LYSimProtonGeneratorAction* genaction )
+  { protonAction = genaction; }
 
   void
   SetOutputFile( const std::string& x ){ filename = x;}
@@ -87,6 +90,7 @@ private:
 
   LYSimDetectorConstruction* DetectorConstruction;
   LYSimPrimaryGeneratorAction* generatorAction;
+  LYSimProtonGeneratorAction* protonAction;
 
 public:
   std::string filename;

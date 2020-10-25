@@ -50,10 +50,10 @@ private:
   G4UIcmdWithADoubleAndUnit* SetPCBRadiusCmd;
   G4UIcmdWithADouble*        SetPCBReflectCmd;
 
-
-
   G4UIcmdWithADouble* SetTileAbsMultCmd;
   G4UIcmdWithADouble* SetWrapReflectCmd;
+  G4UIcmdWithADouble* SetTileAlphaCmd;
+  G4UIcmdWithADouble* SetDimpleAlphaCmd;
 
   // Dimple Geometry commands
   G4UIcmdWithADoubleAndUnit* SetDimpleIndentCmd;

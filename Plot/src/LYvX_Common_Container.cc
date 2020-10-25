@@ -19,6 +19,7 @@ LYvXGraphContainer::operator()( const LYSimRunFormat& x,
   COMPARE_MEMBER( sipm_rim );
   COMPARE_MEMBER( sipm_stand );
 
+  COMPARE_MEMBER( dimple_type );
   COMPARE_MEMBER( dimple_rad );
   COMPARE_MEMBER( dimple_ind );
 
@@ -26,6 +27,8 @@ LYvXGraphContainer::operator()( const LYSimRunFormat& x,
   COMPARE_MEMBER( wrap_ref );
   COMPARE_MEMBER( pcb_rad );
   COMPARE_MEMBER( pcb_ref );
+  COMPARE_MEMBER( tile_alpha );
+  COMPARE_MEMBER( dimple_alpha );
 
   COMPARE_MEMBER( beam_y );
   COMPARE_MEMBER( beam_w );
@@ -51,18 +54,20 @@ LYvXGraphContainer::LYvXGraphContainer() :
   NumPCBReflection(  new TH1D( HIST1D( 25, 0, 25 ) ) ),
   NumPCBReflection_Detected(  new TH1D( HIST1D( 25, 0, 25 ) ) ),
   FinalPosition( new TH2D( HIST2D( 100, -50.0, +50.0, 100, -50.0, +50.0 ) ) ),
-  FinalPosition_Detected( new TH2D( HIST2D( 70, -3.5, +3.5, 70, -3.5, 3.5 ) ) )
+  FinalPosition_Detected( new TH2D( HIST2D( 70, -3.5, +3.5, 70, -3.5, 3.5 ) ) ),
+  FinalPositionX_Detected( new TH1D( HIST1D( 60, -1.5, +1.5 ) ) )
 {
 }
 #undef HIST1D
 #undef HIST2D
 
-void LYvXGraphContainer::Fill( const LYSimRunFormat& run,
-                               const LYSimFormat&    evt )
+void
+LYvXGraphContainer::Fill( const LYSimRunFormat& run,
+                          const LYSimFormat&    evt )
 {
   for( unsigned i = 0; i < evt.savedphotons; ++i ){
     const double opt = (double)evt.OpticalLength[i]
-                        / (CLHEP::cm / LYSimFormat::opt_length_unit);
+                       / ( CLHEP::cm / LYSimFormat::opt_length_unit );
     const double x = (double)evt.EndX[i] * LYSimFormat::end_pos_unit;
     const double y = (double)evt.EndY[i] * LYSimFormat::end_pos_unit;
     OpticalLength->Fill( opt );
@@ -75,6 +80,7 @@ void LYvXGraphContainer::Fill( const LYSimRunFormat& run,
       NumWrapReflection_Detected->Fill( evt.NumWrapReflection[i] );
       NumPCBReflection_Detected->Fill( evt.NumPCBReflection[i] );
       FinalPosition_Detected->Fill( x, y );
+      FinalPositionX_Detected->Fill( x );
     }
   }
 
@@ -90,7 +96,8 @@ void LYvXGraphContainer::Fill( const LYSimRunFormat& run,
   Eff_Unbinned->Fill( -evt.beam_x, (double)evt.nphotons/(double)evt.genphotons );
 }
 
-void LYvXGraphContainer::AddToTree( TTree* tree )
+void
+LYvXGraphContainer::AddToTree( TTree* tree )
 {
   tree->Branch( "LYvX",                       "TProfile", &LYvX );
   tree->Branch( "LYvX_Unbinned",              "TProfile", &LYvX_Unbinned );
@@ -104,31 +111,23 @@ void LYvXGraphContainer::AddToTree( TTree* tree )
   tree->Branch( "NumPCBReflection_Detected",  "TH1D",     &NumPCBReflection_Detected );
   tree->Branch( "FinalPosition",              "TH2D",     &FinalPosition );
   tree->Branch( "FinalPosition_Detected",     "TH2D",     &FinalPosition_Detected );
+  tree->Branch( "FinalPositionX_Detected",    "TH1D",     &FinalPositionX_Detected );
 }
 
-void LYvXGraphContainer::LoadBranches( TTree* tree )
+void
+LYvXGraphContainer::LoadBranches( TTree* tree )
 {
-  tree->SetBranchAddress( "LYvX", &LYvX );
-  tree->SetBranchAddress(
-    "LYvX_Unbinned",              &LYvX_Unbinned );
-  tree->SetBranchAddress(
-    "Eff",                        &Eff );
-  tree->SetBranchAddress(
-    "Eff_Unbinned",               &Eff_Unbinned );
-  tree->SetBranchAddress(
-    "OpticalLength",              &OpticalLength );
-  tree->SetBranchAddress(
-    "OpticalLength_Detected",     &OpticalLength_Detected );
-  tree->SetBranchAddress(
-    "NumWrapReflection",          &NumWrapReflection );
-  tree->SetBranchAddress(
-    "NumWrapReflection_Detected", &NumWrapReflection_Detected );
-  tree->SetBranchAddress(
-    "NumPCBReflection",           &NumPCBReflection );
-  tree->SetBranchAddress(
-    "NumPCBReflection_Detected",  &NumPCBReflection_Detected );
-  tree->SetBranchAddress(
-    "FinalPosition",              &FinalPosition );
-  tree->SetBranchAddress(
-    "FinalPosition_Detected",     &FinalPosition_Detected );
+  tree->SetBranchAddress( "LYvX",                       &LYvX );
+  tree->SetBranchAddress( "LYvX_Unbinned",              &LYvX_Unbinned );
+  tree->SetBranchAddress( "Eff",                        &Eff );
+  tree->SetBranchAddress( "Eff_Unbinned",               &Eff_Unbinned );
+  tree->SetBranchAddress( "OpticalLength",              &OpticalLength );
+  tree->SetBranchAddress( "OpticalLength_Detected",     &OpticalLength_Detected );
+  tree->SetBranchAddress( "NumWrapReflection",          &NumWrapReflection );
+  tree->SetBranchAddress( "NumWrapReflection_Detected", &NumWrapReflection_Detected );
+  tree->SetBranchAddress( "NumPCBReflection",           &NumPCBReflection );
+  tree->SetBranchAddress( "NumPCBReflection_Detected",  &NumPCBReflection_Detected );
+  tree->SetBranchAddress( "FinalPosition",              &FinalPosition );
+  tree->SetBranchAddress( "FinalPosition_Detected",     &FinalPosition_Detected );
+  tree->SetBranchAddress( "FinalPositionX_Detected",    &FinalPositionX_Detected );
 }
