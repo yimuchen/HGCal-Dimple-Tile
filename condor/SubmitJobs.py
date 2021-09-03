@@ -23,6 +23,12 @@ parser.add_argument('--tilewidth',
                     nargs='+',
                     default=[30],
                     help='Tile width')
+parser.add_argument('--coverref',
+                    '-c',
+                    type=float,
+                    nargs='+',
+                    default=[1.52],
+                    help='Whether or not to add the epoxy cover')
 parser.add_argument('--dimplerad',
                     '-r',
                     type=float,
@@ -41,6 +47,24 @@ parser.add_argument('--dimpletype',
                     nargs='+',
                     default=[0],
                     help='Type of dimple to test out')
+parser.add_argument('--sipmrefalpha',
+                    '-F',
+                    type=float,
+                    nargs='+',
+                    default=[0.05],
+                    help='Active area roughness angle')
+parser.add_argument('--sipmrefmult',
+                    '-M',
+                    type=float,
+                    nargs='+',
+                    default=[1.0],
+                    help='Active area reflectivity multiplier')
+parser.add_argument('--sipmsref',
+                    '-s',
+                    type=float,
+                    nargs='+',
+                    default=[0.8],
+                    help='SiPM stand reflectivity')
 parser.add_argument('--sipmwidth',
                     '-W',
                     type=float,
@@ -124,13 +148,16 @@ Arguments             = {2}
 Queue
 """
 
-for x, y, L, r, d, T, a, w, W, p, b, R, S, A, D in [
-    (x, y, L, r, d, T, a, w, W, p, b, R, S, A, D) for x in args.beamx
+#print(args.addcover)
+
+for x, y, L, r, d, T, a, w, W, p, b, R, S, A, D, M, s, c, F in [
+    (x, y, L, r, d, T, a, w, W, p, b, R, S, A, D, M, s, c, F) for x in args.beamx
     for y in args.beamy for L in args.tilewidth for r in args.dimplerad
     for d in args.dimpleind for T in args.dimpletype for a in args.absmult
     for w in args.wrapreflect for W in args.sipmwidth for p in args.pcbreflect
     for b in args.pcbradius for R in args.sipmrim for S in args.sipmstand
-    for A in args.tilealpha for D in args.dimplealpha
+    for A in args.tilealpha for D in args.dimplealpha for M in args.sipmrefmult
+    for s in args.sipmsref for c in args.coverref for F in args.sipmrefalpha
 ]:
 
   def make_str(prefix):
@@ -139,8 +166,10 @@ for x, y, L, r, d, T, a, w, W, p, b, R, S, A, D in [
         'r{0:.1f}'.format(r), 'd{0:.1f}'.format(d), 'T{0:d}'.format(T),
         'a{0:.1f}'.format(a * 100), 'm{0:.1f}'.format(
             w * 100), 'A{0:0.3f}'.format(A), 'D{0:0.3f}'.format(D),
-        'W{0:.1f}'.format(W), 'P{:.1f}'.format(p * 100), 'Pr{:.1f}'.format(b),
-        'R{0:.1f}'.format(R), 'S{0:.2f}'.format(S),
+        'W{0:.1f}'.format(W), 'P{:.1f}'.format(
+            p * 100), 'Pr{:.1f}'.format(b), 'R{0:.1f}'.format(R),
+        'S{0:.2f}'.format(S), 'M{:.2f}'.format(M), 's{:.1f}'.format(
+            s * 100), 'c{:.2f}'.format(c), 'F{:0.2f}'.format(F)
     ])
     return prefix + args.prefix + '_' + args_string.replace('.', 'p')
 
@@ -151,8 +180,9 @@ for x, y, L, r, d, T, a, w, W, p, b, R, S, A, D in [
       '-x {}'.format(x), '-y {}'.format(y), '-L {}'.format(L), '-w 1.5',
       '-r {}'.format(r), '-d {}'.format(d), '-T {}'.format(T), '-a {}'.format(a),
       '-m {}'.format(w), '-W {}'.format(W), '-A {}'.format(A), '-D {}'.format(D),
-      '-p {}'.format(p), '-b {}'.format(b), '-R {}'.format(R),
-      '-S {}'.format(S), '-N {}'.format(args.NEvents), '-o {}'.format(
+      '-p {}'.format(p), '-b {}'.format(b), '-R {}'.format(R), '-S {}'.format(S),
+      '-N {}'.format(args.NEvents), '-s {}'.format(s), '-M {}'.format(M),
+      '-c {}'.format(c), '-F {}'.format(F), '-o {}'.format(
           os.path.abspath(save_filename)),
   ])
 

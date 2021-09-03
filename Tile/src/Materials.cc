@@ -117,7 +117,7 @@ Make_EJ200()
   // Add entries into properties table
   G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable();
   table->AddProperty( "RINDEX",        photonE, refrac_idx, flatentries );
-  table->AddProperty( "SCINTILLATION", pp,      scint,      9  );
+  // table->AddProperty( "SCINTILLATION", pp,      scint,      9  );
   table->AddConstProperty( "SCINTILLATIONYIELD",        10./keV );
   table->AddConstProperty( "RESOLUTIONSCALE",           1.0 );
   table->AddConstProperty( "FASTSCINTILLATIONRISETIME", 0.9*ns );

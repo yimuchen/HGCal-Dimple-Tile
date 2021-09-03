@@ -71,6 +71,12 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   _tile_alpha   = 0.01;
   _dimple_alpha = 0.1;
 
+  _cover_ref = 1.52;
+
+  _sipm_refalpha  = 0.01;
+  _sipm_refmult   = 1.0;
+  _sipm_stand_ref = 0.75;
+
   _sipm_deadwidth  = 0.2*mm;
   _sipm_x          = 1.4*mm;
   _sipm_y          = 1.4*mm;
@@ -103,7 +109,7 @@ LYSimDetectorConstruction::LYSimDetectorConstruction()
   fTileBulkSurface        = MakeS_RoughInterface( _tile_alpha );
   fTileDimpleSurface      = MakeS_RoughInterface( _dimple_alpha );
   fIdealWhiteOpSurface    = MakeS_IdealWhiteSurface();
-  fSiPMSurface            = MakeS_SiPM();
+  fSiPMSurface            = MakeS_SiPM( _sipm_refalpha );
   fPCBSurface             = MakeS_PCBSurface();
   SetWrapReflect( _wrap_reflect );
 }
@@ -606,7 +612,7 @@ LYSimDetectorConstruction::WorldHalfY() const
 double
 LYSimDetectorConstruction::WorldHalfZ() const
 {
-  return 100 * mm ;
+  return 100 * mm;
 }
 
 double
@@ -699,6 +705,62 @@ LYSimDetectorConstruction::SetWrapReflect( const double r )
     table->AddProperty( "REFLECTIVITY", phoE, reflectivity, nentries );
     fESROpSurface->SetMaterialPropertiesTable( table );
   }
+}
+
+void
+LYSimDetectorConstruction::SetCover( const double x )
+{
+  _cover_ref = x;
+
+  static const unsigned nentries  = 2;
+  static double photonE[nentries] = {1.0*eV, 6.0*eV};
+  double rindex[nentries]         = {x, x};
+
+  G4MaterialPropertiesTable* table = fResin->GetMaterialPropertiesTable();
+
+  if( table ){
+    table->RemoveProperty( "RINDEX" );
+    table->AddProperty( "RINDEX", photonE, rindex, nentries );
+  } else {
+    table = new G4MaterialPropertiesTable();
+    table->AddProperty( "RINDEX", photonE, rindex, nentries );
+    fResin->SetMaterialPropertiesTable( table );
+  }
+}
+
+void
+LYSimDetectorConstruction::SetSiPMReflectMult( const double x )
+{
+  _sipm_refmult = x;
+  Update_SiPMSurfaceRef( fSiPMSurface, x );
+}
+
+void
+LYSimDetectorConstruction::SetSiPMStandReflectivity( const double x )
+{
+  _sipm_stand_ref = x;
+  static const unsigned nentries = 2;
+  static double phoE[nentries]   = {1.0*eV, 6.0*eV};
+  double reflectivity[nentries]  = {x, x};
+
+  G4MaterialPropertiesTable* table =
+    fIdealWhiteOpSurface->GetMaterialPropertiesTable();
+  if( table ){
+    table->RemoveProperty( "REFLECTIVITY" );
+    table->AddProperty( "REFLECTIVITY", phoE, reflectivity, nentries );
+  } else {
+    table = new G4MaterialPropertiesTable();
+    table->AddProperty( "REFLECTIVITY", phoE, reflectivity, nentries );
+    fIdealWhiteOpSurface->SetMaterialPropertiesTable( table );
+  }
+
+}
+
+void
+LYSimDetectorConstruction::SetSiPMReflectAlpha( const double x )
+{
+  _sipm_refalpha = x ;
+  Update_SiPMSurfaceAlpha(fSiPMSurface, x );
 }
 
 void

@@ -32,18 +32,21 @@ main( int argc, char** argv )
     {"dimplerad", "r"}, {"dimpleind", "d"}, {"dimpletype", "T"},
     {"tilewidth", "L"}, {"absmult", "a"},
     {"wrapreflect", "m"},
+    {"sipmrefmult", "M"},
+    {"sipmstandref", "s"},
     {"sipmwidth", "W"}, {"sipmstand", "S"},
     {"tilealpha", "A"}, {"dimplealpha", "D"},
-    {"PCBRadius", "b"}, {"PCBRef", "P"}
+    {"PCBRadius", "b"}, {"PCBRef", "P"}, {"addcover", "c"}
   } );
 
   const std::vector<std::string> options_list = {
     "dimplerad", "dimpleind",     "dimpletype",
     "tilewidth",
     "absmult",   "wrapreflect",
+    "sipmstandref", "sipmrefmult",
     "sipmwidth", "sipmstand",
     "PCBRadius", "PCBRef",
-    "tilealpha", "dimplealpha"
+    "tilealpha",    "dimplealpha",      "addcover",
   };
   TChain tree( "LYSimRun", "LYSimRun" );
   LYSimRunFormat fmt;
@@ -100,9 +103,12 @@ main( int argc, char** argv )
     usr::plt::col::darkviolet
   };
 
-  usr::plt::Simple1DCanvas c( usr::plt::len::a4textwidth_default(),
-                              usr::plt::len::a4textwidth_default(),
-                              usr::plt::FontSet( 12 ) );
+  usr::plt::Simple1DCanvas cx( usr::plt::len::a4textwidth_default(),
+                               usr::plt::len::a4textwidth_default(),
+                               usr::plt::FontSet( 12 ) );
+  usr::plt::Simple1DCanvas cr( usr::plt::len::a4textwidth_default(),
+                               usr::plt::len::a4textwidth_default(),
+                               usr::plt::FontSet( 12 ) );
   unsigned idx = 0;
   double width = 0;
 
@@ -111,7 +117,8 @@ main( int argc, char** argv )
   for( const auto& runentry : entrylist ){
     tree.GetEntry( runentry );
 
-    TH1D* hist = MakeDetXHist( fmt, graph_container  );
+    TH1D* histx = MakeDetXHist( fmt, graph_container );
+    TH1D* histr = MakeDetRHist( fmt, graph_container );
 
     std::string entry = entrylist.size() > 0 ? "" : "Simulation Results";
 
@@ -124,7 +131,12 @@ main( int argc, char** argv )
     // if( idx >= 5 ){ continue; }
     const auto color = colorlist.at( idx % colorlist.size() );
 
-    c.PlotHist( hist,
+    cx.PlotHist( histx,
+      usr::plt::PlotType( usr::plt::hist ),
+      usr::plt::TrackY( usr::plt::tracky::both ),
+      usr::plt::LineColor( color ),
+      usr::plt::EntryText( entry ) );
+    cr.PlotHist( histr,
       usr::plt::PlotType( usr::plt::hist ),
       usr::plt::TrackY( usr::plt::tracky::both ),
       usr::plt::LineColor( color ),
@@ -133,22 +145,29 @@ main( int argc, char** argv )
     ++idx;
   }
 
-  c.Pad().SetDataMax( c.Pad().GetDataMax() * 1.3 );
-  c.Pad().Xaxis().SetTitle( "Detected photon final x position X [mm]" );
-  c.Pad().Yaxis().SetTitle( "Normalized num. of detected photons" );
+  cx.Pad().SetDataMax( cx.Pad().GetDataMax() * 1.3 );
+  cx.Pad().Xaxis().SetTitle( "Detected photon final x position [mm]" );
+  cx.Pad().Yaxis().SetTitle( "Num. of detected photons" );
 
-  c.DrawLuminosity( usr::fstr( "Trigger Width: %.1lf[mm]", width ) );
-  c.DrawCMSLabel( "Simulation", "HGCal" );
+  cr.Pad().SetDataMax( cr.Pad().GetDataMax() * 1.3 );
+  cr.Pad().Xaxis().SetTitle( "Detected photon final r position [mm]" );
+  cr.Pad().Yaxis().SetTitle( "Num. of detected photons" );
+
+  cx.DrawLuminosity( usr::fstr( "Trigger Width: %.1lf[mm]", width ) );
+  cx.DrawCMSLabel( "Simulation", "HGCal" );
+  cr.DrawLuminosity( usr::fstr( "Trigger Width: %.1lf[mm]", width ) );
+  cr.DrawCMSLabel( "Simulation", "HGCal" );
 
   for( const auto opt : options_list ){
     tree.GetEntry( entrylist.front() );
     if( args.CheckArg( opt ) ){
-      c.Pad().WriteLine( FormatOptString( fmt, opt ) );
+      cx.Pad().WriteLine( FormatOptString( fmt, opt ) );
     }
   }
 
   std::cout << args.MakePDFFile( "FinalPositionX_Detected" ) << std::endl;
-  c.SaveAsPDF( args.MakePDFFile( "FinalPositionX_Detected" ) );
+  cx.SaveAsPDF( args.MakePDFFile( "FinalPositionX_Detected" ) );
+  cr.SaveAsPDF( args.MakePDFFile( "FinalPositionR_Detected" ) );
 
   return 0;
 

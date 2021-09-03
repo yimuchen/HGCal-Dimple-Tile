@@ -2,8 +2,8 @@
 #include "UserUtils/Common/interface/Format.hpp"
 #include "UserUtils/Common/interface/STLUtils/Filesystem.hpp"
 #include "UserUtils/Common/interface/STLUtils/VectorUtils.hpp"
-#include "UserUtils/PlotUtils/interface/Simple1DCanvas.hpp"
 #include "UserUtils/PlotUtils/interface/Ratio1DCanvas.hpp"
+#include "UserUtils/PlotUtils/interface/Simple1DCanvas.hpp"
 
 #include "HGCalTileSim/Plot/interface/LYvX_Common.hpp"
 
@@ -32,18 +32,23 @@ main( int argc, char** argv )
     {"dimplerad", "r"}, {"dimpleind", "d"}, {"dimpletype", "T"},
     {"tilewidth", "L"}, {"absmult", "a"},
     {"wrapreflect", "m"},
+    {"sipmrefalpha", "F"},
+    {"sipmrefmult", "M"},
+    {"sipmstandref", "s"},
     {"sipmwidth", "W"}, {"sipmstand", "S"},
     {"tilealpha", "A"}, {"dimplealpha", "D"},
-    {"PCBRadius", "b"}, {"PCBRef", "P"}
+    {"PCBRadius", "b"}, {"PCBRef", "P"}, {"coverref", "c"}
   } );
 
   const std::vector<std::string> options_list = {
-    "dimplerad", "dimpleind",     "dimpletype",
+    "dimplerad",    "dimpleind",        "dimpletype",
     "tilewidth",
-    "absmult",   "wrapreflect",
-    "sipmwidth", "sipmstand",
-    "PCBRadius", "PCBRef",
-    "tilealpha", "dimplealpha"
+    "absmult",      "wrapreflect",
+    "sipmrefalpha", "sipmstandref", "sipmrefmult",
+    "sipmwidth",    "sipmstand",
+    "PCBRadius",    "PCBRef",
+    "tilealpha",    "dimplealpha",
+    "coverref",
   };
   TChain tree( "LYSimRun", "LYSimRun" );
   LYSimRunFormat fmt;
@@ -64,6 +69,9 @@ main( int argc, char** argv )
       if( args.CheckArg( opt )
           && FormatOpt( fmt, opt ) != args.Arg<double>( opt ) ){
         pass = false;
+        // std::cout << opt << " "
+        //           << FormatOpt(fmt,opt) << " "
+        //           << args.Arg<double>(opt) << std::endl;
         break;
       }
     }
@@ -110,7 +118,12 @@ main( int argc, char** argv )
   };
 
 
-  usr::plt::Ratio1DCanvas cr;
+  usr::plt::Ratio1DCanvas cr( usr::plt::len::a4textwidth_default(),
+                              usr::plt::len::a4textheight_default(),
+                              usr::plt::PadRatio( 1.5 ),
+                              usr::plt::FontSet( 14 ) );
+
+
   usr::plt::Simple1DCanvas c( usr::plt::len::a4textwidth_default(),
                               usr::plt::len::a4textwidth_default(),
                               usr::plt::FontSet( 12 ) );
@@ -143,7 +156,7 @@ main( int argc, char** argv )
 
     std::string entry = entrylist.size() > 0 ? "" : "Simulation Results";
     if( front == nullptr ){
-      front = graph ;
+      front = graph;
     }
 
     for( const auto opt : difflist ){
@@ -171,7 +184,7 @@ main( int argc, char** argv )
       usr::plt::FillColor( fill ),
       usr::plt::FillStyle( usr::plt::sty::fillsolid ),
       usr::plt::EntryText( entry ) );
-    cr.PlotScale(graph,front,
+    cr.PlotScale( graph, front,
       usr::plt::PlotType( usr::plt::fittedfunc ),
       usr::plt::TrackY( usr::plt::tracky::max ),
       usr::plt::LineColor( color ),
@@ -229,8 +242,18 @@ main( int argc, char** argv )
   cr.BottomPad().Xaxis().SetTitle( "Beam Center X [mm]" );
   cr.BottomPad().Yaxis().SetTitle( "Ratio" );
   cr.TopPad().Yaxis().SetTitle( "Detected Photons" );
-  cr.BottomPad().DrawHLine(0.5);
-  cr.BottomPad().DrawHLine(1.5);
+  cr.BottomPad().SetDataMax( 2.0 );
+  cr.BottomPad().SetDataMin( 1.3 );
+  cr.BottomPad().AutoSetYRange( usr::plt::Pad1D::hist );
+  cr.BottomPad().DrawHLine( 2.041
+                          , usr::plt::LineColor( usr::plt::col::gray )
+                          , usr::plt::LineStyle( usr::plt::sty::lindashed ) );
+  cr.BottomPad().DrawHLine( 1.653
+                          , usr::plt::LineColor( usr::plt::col::gray )
+                          , usr::plt::LineStyle( usr::plt::sty::lindashed ) );
+  cr.BottomPad().DrawHLine( 1.306
+                          , usr::plt::LineColor( usr::plt::col::gray )
+                          , usr::plt::LineStyle( usr::plt::sty::lindashed ) );
 
   c_opt_length.Pad().Xaxis().SetTitle( "Optical Length [cm]" );
   c_opt_length.Pad().Yaxis().SetTitle( "Remaining Photon fraction" );
@@ -247,15 +270,17 @@ main( int argc, char** argv )
   c_num_pcb.Pad().SetLogy( kTRUE );
 
   c.DrawLuminosity( usr::fstr( "Trigger Width: %.1lf[mm]", width ) );
-  c.DrawCMSLabel( "Simulation", "HGCal" );
-  c_opt_length.Pad().DrawCMSLabel( "Simulation", "HGCal" );
-  c_num_ref.Pad().DrawCMSLabel( "Simulation", "HGCal" );
-  c_num_pcb.Pad().DrawCMSLabel( "Simulation", "HGCal" );
+  cr.TopPad().DrawCMSLabel( "Simulation", "HGCAL" );
+  c.DrawCMSLabel( "Simulation", "HGCAL" );
+  c_opt_length.Pad().DrawCMSLabel( "Simulation", "HGCAL" );
+  c_num_ref.Pad().DrawCMSLabel( "Simulation", "HGCAL" );
+  c_num_pcb.Pad().DrawCMSLabel( "Simulation", "HGCAL" );
 
   for( const auto opt : options_list ){
     tree.GetEntry( entrylist.front() );
     if( args.CheckArg( opt ) ){
       c.Pad().WriteLine( FormatOptString( fmt, opt ) );
+      cr.TopPad().WriteLine( FormatOptString( fmt, opt ) );
       c_opt_length.Pad().WriteLine( FormatOptString( fmt, opt ) );
       c_num_ref.Pad().WriteLine( FormatOptString( fmt, opt ) );
       c_num_pcb.Pad().WriteLine( FormatOptString( fmt, opt ) );
@@ -264,7 +289,7 @@ main( int argc, char** argv )
 
   std::cout << args.MakePDFFile( "LYvX" ) << std::endl;
   c.SaveAsPDF( args.MakePDFFile( "LYvX" ) );
-  cr.SaveAsPDF( args.MakePDFFile("LYvX_ratio") );
+  cr.SaveAsPDF( args.MakePDFFile( "LYvX_ratio" ) );
   c_opt_length.SaveAsPDF( args.MakePDFFile( "OptLen" ) );
   c_num_ref.SaveAsPDF( args.MakePDFFile( "NumWrap" ) );
   c_num_pcb.SaveAsPDF( args.MakePDFFile( "NumPCB" ) );

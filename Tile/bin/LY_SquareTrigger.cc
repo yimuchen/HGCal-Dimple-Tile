@@ -1,7 +1,9 @@
 #include "HGCalTileSim/Tile/interface/LYSimAnalysis.hh"
 #include "HGCalTileSim/Tile/interface/LYSimDetectorConstruction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimFormat.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPhysicsList.hh"
 #include "HGCalTileSim/Tile/interface/LYSimPrimaryGeneratorAction.hh"
+#include "HGCalTileSim/Tile/interface/LYSimProtonGeneratorAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimSteppingAction.hh"
 #include "HGCalTileSim/Tile/interface/LYSimTrackingAction.hh"
 
@@ -20,10 +22,14 @@ main( int argc, char** argv )
     ( "beamx,x",       usr::po::defvalue<double>( 0 ),     "x center of beam [mm]" )
     ( "beamy,y",       usr::po::defvalue<double>( 0 ),     "y center of beam [mm]" )
     ( "tilewidth,L",   usr::po::defvalue<double>( 30 ),    "Length of tile [mm]" )
+    ( "coverref,c",    usr::po::defvalue<double>( 1.52 ),  "Index of refraction of resin cover" )
     ( "beamwidth,w",   usr::po::defvalue<double>( 1.5 ),   "width of beam [mm]" )
     ( "dimplerad,r",   usr::po::defvalue<double>( 3.0 ),   "Dimple radius [mm]" )
     ( "dimpleind,d",   usr::po::defvalue<double>( 1.5 ),   "Dimple indent [mm]" )
     ( "dimpletype,T",  usr::po::defvalue<int>( 0 ),        "Dimple Type (0:Spherical, 1:Ellipsoid, 2:FlatDome, 3:Cylinder" )
+    ( "sipmrefalpha,F", usr::po::defvalue<double>( 0.05 ),  "SiPM surface roughness angle" )
+    ( "sipmrefmult,M", usr::po::defvalue<double>( 1.0 ),   "Multipler to the SiPM nominal reflectivity" )
+    ( "sipmsref,s",    usr::po::defvalue<double>( 0.8 ),   "SiPM stand reflectivity" )
     ( "sipmwidth,W",   usr::po::defvalue<double>( 2.0 ),   "SiPM active width [mm]" )
     ( "sipmrim,R",     usr::po::defvalue<double>( 0.1 ),   "SiPM Rim width [mm]" )
     ( "sipmstand,S",   usr::po::defvalue<double>( 0.3 ),   "SiPM stand [mm]" )
@@ -42,26 +48,31 @@ main( int argc, char** argv )
   args.AddOptions( desc );
   args.ParseOptions( argc, argv );
 
-  const double x_center  = args.Arg<double>( "beamx"       );
-  const double y_center  = args.Arg<double>( "beamy"       );
-  const double tilewidth = args.Arg<double>( "tilewidth"   );
-  const double width     = args.Arg<double>( "beamwidth"   );
-  const double dimplerad = args.Arg<double>( "dimplerad"   );
-  const double dimpleind = args.Arg<double>( "dimpleind"   );
-  const int dimpletype   = args.Arg<int>( "dimpletype"  );
-  const double sipmwidth = args.Arg<double>( "sipmwidth"   );
-  const double sipmrim   = args.Arg<double>( "sipmrim"     );
-  const double sipmstand = args.Arg<double>( "sipmstand"   );
-  const double absmult   = args.Arg<double>( "absmult"     );
-  const double wrapref   = args.Arg<double>( "wrapreflect" );
-  const double tilealpha = args.Arg<double>( "tilealpha"   );
-  const double dimpalpha = args.Arg<double>( "dimplealpha" );
-  const double pcbref    = args.Arg<double>( "pcbreflect"  );
-  const double pcbrad    = args.Arg<double>( "pcbradius"   );
-  const unsigned N       = args.Arg<unsigned>( "NEvents" );
-  const bool useProton   = args.HasArg( "useProton" );
-  std::string filename   = args.Arg<std::string>( "output" );
+  const double x_center     = args.Arg<double>( "beamx"        );
+  const double y_center     = args.Arg<double>( "beamy"        );
+  const double tilewidth    = args.Arg<double>( "tilewidth"    );
+  const double cover_ref    = args.Arg<double>( "coverref"     );
+  const double width        = args.Arg<double>( "beamwidth"    );
+  const double dimplerad    = args.Arg<double>( "dimplerad"    );
+  const double dimpleind    = args.Arg<double>( "dimpleind"    );
+  const int dimpletype      = args.Arg<int>(    "dimpletype"   );
+  const double sipmrefalpha = args.Arg<double>( "sipmrefalpha" );
+  const double sipmrefmult  = args.Arg<double>( "sipmrefmult"  );
+  const double sipmsref     = args.Arg<double>( "sipmsref"     );
+  const double sipmwidth    = args.Arg<double>( "sipmwidth"    );
+  const double sipmrim      = args.Arg<double>( "sipmrim"      );
+  const double sipmstand    = args.Arg<double>( "sipmstand"    );
+  const double absmult      = args.Arg<double>( "absmult"      );
+  const double wrapref      = args.Arg<double>( "wrapreflect"  );
+  const double tilealpha    = args.Arg<double>( "tilealpha"    );
+  const double dimpalpha    = args.Arg<double>( "dimplealpha"  );
+  const double pcbref       = args.Arg<double>( "pcbreflect"   );
+  const double pcbrad       = args.Arg<double>( "pcbradius"    );
+  const unsigned N          = args.Arg<unsigned>( "NEvents"    );
+  const bool useProton      = args.CheckArg( "useProton" );
+  std::string filename      = args.Arg<std::string>( "output" );
   filename.insert( filename.length()-5, "_" + usr::RandomString( 6 ) );
+
 
   // Must initialize Run Manager first
   G4RunManager* runManager   = new G4RunManager;
@@ -71,12 +82,16 @@ main( int argc, char** argv )
   detector->SetDimpleRadius( dimplerad );
   detector->SetDimpleIndent( dimpleind );
   detector->SetDimpleType( dimpletype );
+  detector->SetCover( cover_ref );
   detector->SetTileX( tilewidth );
   detector->SetTileY( tilewidth );
   detector->SetTileAbsMult( absmult );
   detector->SetWrapReflect( wrapref );
   detector->SetTileAlpha( tilealpha );
   detector->SetDimpleAlpha( dimpalpha );
+  detector->SetSiPMReflectAlpha( sipmrefalpha );
+  detector->SetSiPMReflectMult( sipmrefmult );
+  detector->SetSiPMStandReflectivity( sipmsref );
   detector->SetSiPMX( sipmwidth );
   detector->SetSiPMY( sipmwidth );
   detector->SetSiPMRim( sipmrim );
@@ -102,14 +117,13 @@ main( int argc, char** argv )
     genaction->SetBeamX( x_center );
     genaction->SetBeamY( y_center );
     genaction->SetWidth( width );
-    LYSimAnalysis::GetInstance()->SetGeneratorAction( genaction );
+    LYSimAnalysis::GetInstance()->SetProtonGeneratorAction( genaction );
     runManager->SetUserAction( genaction );
   }
 
   // Construct LYSimAnalysis class
   LYSimAnalysis::GetInstance()->SetDetector( detector );
   LYSimAnalysis::GetInstance()->SetOutputFile( filename );
-
 
   runManager->SetUserAction( new LYSimAnalysis::RunAction() );
   runManager->SetUserAction( new LYSimAnalysis::EventAction() );
@@ -119,6 +133,13 @@ main( int argc, char** argv )
 
   // Preparing the LYSimAnalysis
   LYSimAnalysis::GetInstance()->PrepareExperiment();
+
+  std::cout << "##########################" << std::endl;
+  std::cout << cover_ref << std::endl;
+  std::cout << detector->GetCover() << std::endl;
+  std::cout << LYSimAnalysis::GetInstance()->runformat->cover_ref << std::endl;
+  std::cout << "##########################" << std::endl;
+
 
   // Initialize G4 kernel
   runManager->Initialize();

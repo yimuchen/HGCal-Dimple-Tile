@@ -300,7 +300,7 @@ MakeS_RoughMirror()
 }
 
 G4OpticalSurface*
-MakeS_SiPM()
+MakeS_SiPM( const double alpha )
 {
   // From Meeting on HB SiPM selection (James Hirschauer)
   const unsigned nentries = 51;
@@ -350,6 +350,8 @@ MakeS_SiPM()
   G4OpticalSurface* surface = new G4OpticalSurface( "SiPM_Surface" );
   surface->SetType( dielectric_metal );
   surface->SetModel( unified );
+  surface->SetFinish( ground );
+  surface->SetSigmaAlpha( alpha );
 
   G4MaterialPropertiesTable* table = new G4MaterialPropertiesTable();
 
@@ -377,3 +379,43 @@ MakeS_PCBSurface()
   surface->SetMaterialPropertiesTable( table );
   return surface;
 }
+
+void
+Update_SiPMSurfaceRef( G4OpticalSurface* s, const double x )
+{
+  static const unsigned ref_ent = 32;
+  static double phoE2[ref_ent]  = {
+    4.928613174*eV, 4.760932071*eV, 4.57675131 *eV, 4.416020551*eV,
+    4.27782469 *eV, 4.132944198*eV, 3.988297134*eV, 3.870877084*eV,
+    3.751866883*eV, 3.647774074*eV, 3.538260695*eV, 3.441997529*eV,
+    3.347666946*eV, 3.264460058*eV, 3.176475533*eV, 3.098752668*eV,
+    3.019365195*eV, 2.751902006*eV, 2.432636667*eV, 2.254544997*eV,
+    2.136148464*eV, 2.032627719*eV, 1.907273067*eV, 1.796976535*eV,
+    1.722050515*eV, 1.570692624*eV, 1.511965476*eV, 1.459049532*eV,
+    1.377862407*eV, 1.305495288*eV, 1.265726027*eV, 1.240350474*eV
+  };
+  static double default_reflectivity[ref_ent] = {
+    0.67091, 0.70309, 0.73346, 0.72132, 0.68334, 0.62105, 0.59036, 0.57232,
+    0.56450, 0.56008, 0.56441, 0.58236, 0.58280, 0.54482, 0.51025, 0.48443,
+    0.46541, 0.41855, 0.38169, 0.36570, 0.35705, 0.35096, 0.34397, 0.33772,
+    0.33321, 0.32645, 0.32498, 0.32241, 0.31988, 0.31625, 0.31417, 0.31323
+  };
+
+  double reflectivity[ref_ent];
+
+  for( unsigned i = 0; i < ref_ent; ++i ){
+    reflectivity[i ] = default_reflectivity[i] * x;
+  }
+
+  // Add entries into properties table
+  G4MaterialPropertiesTable* table = s->GetMaterialPropertiesTable();
+  table->RemoveProperty( "REFLECTIVITY" );
+  table->AddProperty( "REFLECTIVITY", phoE2, reflectivity, ref_ent );
+}
+
+void
+Update_SiPMSurfaceAlpha( G4OpticalSurface* s, const double alpha )
+{
+  s->SetSigmaAlpha( alpha );
+}
+

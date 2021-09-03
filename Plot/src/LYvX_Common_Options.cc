@@ -11,18 +11,22 @@ GeometryOptions()
     "If the input file only includes a entry for a certain parameter, it will "
     "automatically be determined" );
   desc.add_options()
-    ( "dimplerad,r",   po::value<double>(), "Dimple radius [mm]"                   )
-    ( "dimpleind,d",   po::value<double>(), "Dimple indent [mm]"                   )
-    ( "dimpletype,T",  po::value<double>(), "Dimple Type (0:Spherical, 1:Ellipsoid, 2:FlatDome, 3:Cylinder" )
-    ( "tilewidth,L",   po::value<double>(), "Tile width [mm]"                      )
-    ( "absmult,a",     po::value<double>(), "Multple of inbuilt absorption length" )
-    ( "wrapreflect,m", po::value<double>(), "Wrap reflectivity"                    )
-    ( "tilealpha,A",   po::value<double>(), "Tile surface alpha value" )
-    ( "dimplealpha,D", po::value<double>(), "Dimple surface alpha value" )
-    ( "sipmwidth,W",   po::value<double>(), "SiPM Width [mm]"                      )
-    ( "sipmstand,S",   po::value<double>(), "SiPM stand height [mm]"               )
-    ( "PCBRadius,b",   po::value<double>(), "PCB Radius"                           )
-    ( "PCBRef,P",      po::value<double>(), "PCB Reflectivity"                     )
+    ( "dimplerad,r",    po::value<double>(), "Dimple radius [mm]"                   )
+    ( "dimpleind,d",    po::value<double>(), "Dimple indent [mm]"                   )
+    ( "dimpletype,T",   po::value<double>(), "Dimple Type (0:Spherical, 1:Ellipsoid, 2:FlatDome, 3:Cylinder" )
+    ( "tilewidth,L",    po::value<double>(), "Tile width [mm]"                      )
+    ( "absmult,a",      po::value<double>(), "Multple of inbuilt absorption length" )
+    ( "wrapreflect,m",  po::value<double>(), "Wrap reflectivity"                    )
+    ( "tilealpha,A",    po::value<double>(), "Tile surface alpha value"             )
+    ( "dimplealpha,D",  po::value<double>(), "Dimple surface alpha value"           )
+    ( "coverref,c",     po::value<double>(), "Index of refraction of the resin"     )
+    ( "sipmrefalpha,F", po::value<double>(), "SiPM area roughness measure"          )
+    ( "sipmrefmult,M",  po::value<double>(), "SiPM reflectivity multiplicity"       )
+    ( "sipmstandref,s", po::value<double>(), "SiPM stand reflectivity"              )
+    ( "sipmwidth,W",    po::value<double>(), "SiPM Width [mm]"                      )
+    ( "sipmstand,S",    po::value<double>(), "SiPM stand height [mm]"               )
+    ( "PCBRadius,b",    po::value<double>(), "PCB Radius"                           )
+    ( "PCBRef,P",       po::value<double>(), "PCB Reflectivity"                     )
   ;
 
   return desc;
@@ -32,19 +36,25 @@ GeometryOptions()
 double
 FormatOpt( const LYSimRunFormat& fmt, const std::string& opt )
 {
-  return opt == "dimplerad"   ? fmt.dimple_rad   :
-         opt == "dimpleind"   ? fmt.dimple_ind   :
-         opt == "tilewidth"   ? fmt.tile_x       :
-         opt == "absmult"     ? fmt.abs_mult     :
-         opt == "wrapreflect" ? fmt.wrap_ref     :
-         opt == "sipmwidth"   ? fmt.sipm_width   :
-         opt == "sipmstand"   ? fmt.sipm_stand   :
-         opt == "PCBRadius"   ? fmt.pcb_rad      :
-         opt == "PCBRef"      ? fmt.pcb_ref      :
-         opt == "dimpletype"  ? fmt.dimple_type  :
-         opt == "tilealpha"   ? fmt.tile_alpha   :
-         opt == "dimplealpha" ? fmt.dimple_alpha :
-         0.0;
+  double ans = opt == "dimplerad"    ? fmt.dimple_rad     :
+               opt == "dimpleind"    ? fmt.dimple_ind     :
+               opt == "tilewidth"    ? fmt.tile_x         :
+               opt == "absmult"      ? fmt.abs_mult       :
+               opt == "wrapreflect"  ? fmt.wrap_ref       :
+               opt == "coverref"     ? fmt.cover_ref      :
+               opt == "sipmrefalpha" ? fmt.sipm_refalpha  :
+               opt == "sipmrefmult"  ? fmt.sipm_refmult   :
+               opt == "sipmstandref" ? fmt.sipm_stand_ref :
+               opt == "sipmwidth"    ? fmt.sipm_width     :
+               opt == "sipmstand"    ? fmt.sipm_stand     :
+               opt == "PCBRadius"    ? fmt.pcb_rad        :
+               opt == "PCBRef"       ? fmt.pcb_ref        :
+               opt == "dimpletype"   ? fmt.dimple_type    :
+               opt == "tilealpha"    ? fmt.tile_alpha     :
+               opt == "dimplealpha"  ? fmt.dimple_alpha   :
+               0.0;
+  // std::cout << opt << " " << ans << std::endl;
+  return ans ;
 }
 
 std::string
@@ -67,6 +77,12 @@ FormatOptString( const LYSimRunFormat& fmt, const std::string& opt )
     return usr::fstr( "Abs. =%.1lf[cm]", fmt.abs_mult*380 );
   } else if( opt == "wrapreflect" ){
     return usr::fstr( "Wrap Ref. =%.1lf[%%]", fmt.wrap_ref *100 );
+  } else if( opt == "sipmrefalpha"  ){
+    return usr::fstr( "SiPM roughness. = %.3f[rad]", fmt.sipm_refalpha );
+  } else if( opt == "sipmrefmult"  ){
+    return usr::fstr( "SiPM ref. = %.1f[%%]", 45 * fmt.sipm_refmult );
+  } else if( opt == "sipmstandref" ){
+    return usr::fstr( "SiPM package ref =%.1lf[%%]", fmt.sipm_stand_ref *100 );
   } else if( opt == "sipmwidth" ){
     return usr::fstr( "SiPM Width =%.1lf[mm]", fmt.sipm_width   );
   } else if( opt ==  "sipmstand" ){
@@ -79,6 +95,8 @@ FormatOptString( const LYSimRunFormat& fmt, const std::string& opt )
     return usr::fstr( "Tile #alpha = %.2f[rad]", fmt.tile_alpha );
   } else if( opt == "dimplealpha" ){
     return usr::fstr( "Dimp. #alpha = %.2f[rad]", fmt.dimple_alpha );
+  } else if( opt == "coverref" ){
+    return usr::fstr( "Cover I.o.R = %.2f", fmt.cover_ref );
   } else {
     return "";
   }

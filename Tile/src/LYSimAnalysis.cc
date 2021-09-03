@@ -85,6 +85,16 @@ LYSimAnalysis::PrepareNewRun( const G4Run* )
   runformat->tile_y = DetectorConstruction->GetTileY();
   runformat->tile_z = DetectorConstruction->GetTileZ();
 
+  runformat->cover_ref = DetectorConstruction->GetCover();
+
+  std::cout << "#################################" << std::endl;
+  std::cout << runformat->cover_ref << std::endl;
+  std::cout << "#################################" << std::endl;
+
+  runformat->sipm_refalpha  = DetectorConstruction->GetSiPMReflectAlpha();
+  runformat->sipm_refmult   = DetectorConstruction->GetSiPMReflectMult();
+  runformat->sipm_stand_ref = DetectorConstruction->GetSiPMStandReflectivity();
+
   runformat->sipm_width = DetectorConstruction->GetSiPMX();
   runformat->sipm_rim   = DetectorConstruction->GetSiPMRim();
   runformat->sipm_stand = DetectorConstruction->GetSiPMStand();

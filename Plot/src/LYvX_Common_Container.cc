@@ -15,9 +15,13 @@ LYvXGraphContainer::operator()( const LYSimRunFormat& x,
   COMPARE_MEMBER( tile_y );
   COMPARE_MEMBER( tile_z );
 
-  COMPARE_MEMBER( sipm_width );
-  COMPARE_MEMBER( sipm_rim );
-  COMPARE_MEMBER( sipm_stand );
+  COMPARE_MEMBER( cover_ref      );
+  COMPARE_MEMBER( sipm_refalpha  );
+  COMPARE_MEMBER( sipm_refmult   );
+  COMPARE_MEMBER( sipm_stand_ref );
+  COMPARE_MEMBER( sipm_width     );
+  COMPARE_MEMBER( sipm_rim       );
+  COMPARE_MEMBER( sipm_stand     );
 
   COMPARE_MEMBER( dimple_type );
   COMPARE_MEMBER( dimple_rad );
@@ -53,10 +57,12 @@ LYvXGraphContainer::LYvXGraphContainer() :
   NumWrapReflection_Detected(  new TH1D( HIST1D( 100, 0, 200 ) ) ),
   NumPCBReflection(  new TH1D( HIST1D( 25, 0, 25 ) ) ),
   NumPCBReflection_Detected(  new TH1D( HIST1D( 25, 0, 25 ) ) ),
-  FinalPosition( new TH2D( HIST2D( 100, -50.0, +50.0, 100, -50.0, +50.0 ) ) ),
+  FinalPosition( new TH2D( HIST2D( 150, -15.0, +15.0, 150, -15.0, +15.0 ) ) ),
   FinalPosition_Detected( new TH2D( HIST2D( 70, -3.5, +3.5, 70, -3.5, 3.5 ) ) ),
-  FinalPositionX_Detected( new TH1D( HIST1D( 60, -1.5, +1.5 ) ) )
+  FinalPositionX_Detected( new TH1D( HIST1D( 60, -1.5, +1.5 ) ) ),
+  FinalPositionR_Detected( new TH1D( HIST1D( 60,  0.0, +2.2 ) ) )
 {
+
 }
 #undef HIST1D
 #undef HIST2D
@@ -81,6 +87,7 @@ LYvXGraphContainer::Fill( const LYSimRunFormat& run,
       NumPCBReflection_Detected->Fill( evt.NumPCBReflection[i] );
       FinalPosition_Detected->Fill( x, y );
       FinalPositionX_Detected->Fill( x );
+      FinalPositionR_Detected->Fill( sqrt(x*x+y*y) );
     }
   }
 
@@ -112,6 +119,7 @@ LYvXGraphContainer::AddToTree( TTree* tree )
   tree->Branch( "FinalPosition",              "TH2D",     &FinalPosition );
   tree->Branch( "FinalPosition_Detected",     "TH2D",     &FinalPosition_Detected );
   tree->Branch( "FinalPositionX_Detected",    "TH1D",     &FinalPositionX_Detected );
+  tree->Branch( "FinalPositionR_Detected",    "TH1D",     &FinalPositionR_Detected );
 }
 
 void
@@ -130,4 +138,5 @@ LYvXGraphContainer::LoadBranches( TTree* tree )
   tree->SetBranchAddress( "FinalPosition",              &FinalPosition );
   tree->SetBranchAddress( "FinalPosition_Detected",     &FinalPosition_Detected );
   tree->SetBranchAddress( "FinalPositionX_Detected",    &FinalPositionX_Detected );
+  tree->SetBranchAddress( "FinalPositionR_Detected",    &FinalPositionR_Detected );
 }

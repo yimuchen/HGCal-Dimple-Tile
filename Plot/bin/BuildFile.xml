@@ -6,8 +6,9 @@
 
 <flags CXXFLAGS="-g"/>
 <!--bin name="LYSim_MergeRoot"      file="MergeRoot.cc"/-->
-<bin name="LYSim_MakeLYvXGraph"  file="MakeLYvXGraph.cc"/>
-<bin name="LYSim_PlotLYvXGraph"  file="PlotLYvXGraph.cc"/>
-<bin name="LYSim_PlotMaterial"   file="PlotMaterialProperties.cc"/>
-<bin name="LYSim_ComparePhoton"  file="ComparePhoton.cc"/>
-<bin name="LYSim_FinalPosition"  file="FinalPosition.cc"/>
+<bin name="LYSim_MakeLYvXGraph"   file="MakeLYvXGraph.cc"         />
+<bin name="LYSim_PlotLYvXGraph"   file="PlotLYvXGraph.cc"         />
+<bin name="LYSim_PlotMaterial"    file="PlotMaterialProperties.cc"/>
+<bin name="LYSim_ComparePhoton"   file="ComparePhoton.cc"         />
+<bin name="LYSim_FinalPosition"   file="FinalPosition.cc"         />
+<bin name="LYSim_FinalPosition2D" file="FinalPosition2D.cc"       />

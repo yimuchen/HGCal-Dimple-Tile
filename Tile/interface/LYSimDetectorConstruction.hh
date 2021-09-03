@@ -41,6 +41,13 @@ public:
   inline G4double
   GetTileY() const {return _tiley;}
 
+  void SetCover( const double );
+  inline double
+  GetCover() const { return _cover_ref; }
+
+  void SetSiPMReflectAlpha( const double );
+  inline double GetSiPMReflectAlpha() const { return _sipm_refalpha; }
+
   // Get/Set functions of dimple geometry parameters
   inline double
   GetDimpleRadius() const { return _dimple_radius; }
@@ -56,6 +63,13 @@ public:
   SetDimpleType( const int x ){ _dimple_type = x; }
 
   // Get/Set functions for SiPM geometry parameters
+  inline double
+  GetSiPMReflectMult() const { return _sipm_refmult; }
+  inline double
+       GetSiPMStandReflectivity() const { return _sipm_stand_ref; }
+  void SetSiPMReflectMult( const double );
+  void SetSiPMStandReflectivity( const double );
+
   inline double
   GetSiPMX() const {return _sipm_x; }
   inline void
@@ -195,6 +209,11 @@ private:
   // Parameters for plate behind SiPM
   double _pcb_radius;
   double _pcb_reflectivity;
+
+  double _cover_ref;
+  double _sipm_refmult;// SiPM active area reflectivity multiplier
+  double _sipm_refalpha; // SiPM active area roughness
+  double _sipm_stand_ref;// SiPM stand reflectivity multipler
 
   double _sipm_deadwidth;
   double _sipm_x;

@@ -37,9 +37,17 @@ TH1D*
 MakeDetXHist( const LYSimRunFormat&     fmt,
               const LYvXGraphContainer& cont )
 {
-  TH1D* ans = (TH1D*)(cont.FinalPositionX_Detected->Clone());
-  ans->Rebin(2);
-  ans->Scale(100.0/ans->Integral());
+  TH1D* ans = (TH1D*)( cont.FinalPositionX_Detected->Clone() );
+  // ans->Rebin(2);
+  // ans->Scale(100.0/ans->Integral());
+
+  return ans;
+}
+TH1D*
+MakeDetRHist( const LYSimRunFormat&     fmt,
+              const LYvXGraphContainer& cont )
+{
+  TH1D* ans = (TH1D*)( cont.FinalPositionR_Detected->Clone() );
 
   return ans;
 }
@@ -51,12 +59,13 @@ MakePhotonHist( const LYSimRunFormat&     fmt,
                 const std::string&        name
                 )
 {
-  TH1D* orig = name == "OpticalLength" ? cont.OpticalLength :
-               name == "OpticalLength_Detected" ? cont.OpticalLength_Detected :
-               name == "NumWrapReflection" ? cont.NumWrapReflection :
-               name == "NumWrapReflection_Detected" ? cont.NumWrapReflection_Detected :
-               name == "NumPCBReflection" ? cont.NumPCBReflection :
-               cont.NumPCBReflection_Detected;
+  TH1D* orig =
+    name == "OpticalLength" ? cont.OpticalLength :
+    name == "OpticalLength_Detected" ? cont.OpticalLength_Detected :
+    name == "NumWrapReflection" ? cont.NumWrapReflection :
+    name == "NumWrapReflection_Detected" ? cont.NumWrapReflection_Detected :
+    name == "NumPCBReflection" ? cont.NumPCBReflection :
+    cont.NumPCBReflection_Detected;
 
   TH1D* newhist = name.find( "OpticalLength" ) != std::string::npos ?
                   (TH1D*)( orig->Rebin( 5 ) ) : (TH1D*)orig->Clone();

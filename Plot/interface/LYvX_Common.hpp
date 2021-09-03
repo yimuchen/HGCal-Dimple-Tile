@@ -29,6 +29,7 @@ public:
   TH2D* FinalPosition;
   TH2D* FinalPosition_Detected;
   TH1D* FinalPositionX_Detected;
+  TH1D* FinalPositionR_Detected;
 
   void AddToTree( TTree* );
   void LoadBranches( TTree* );
@@ -48,6 +49,8 @@ extern TGraph* MakeGraph( const LYSimRunFormat&,
                           const LYvXGraphContainer&,
                           const std::string& );
 extern TH1D* MakeDetXHist( const LYSimRunFormat&,
+                           const LYvXGraphContainer& );
+extern TH1D* MakeDetRHist( const LYSimRunFormat&,
                            const LYvXGraphContainer& );
 extern TH1D* MakePhotonHist( const LYSimRunFormat&,
                         const LYvXGraphContainer&,
